@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'features/app/presentation/pages/app.dart';
+import 'package:jaidem/core/data/injection.dart';
+import 'core/app/app.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  await initInjections();
+
+  runApp(const App());
 }

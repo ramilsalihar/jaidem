@@ -1,67 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:jaidem/core/utils/constants/app_font_size.dart';
 import 'app_colors.dart';
 
 class AppTextTheme extends TextTheme {
   AppTextTheme()
       : super(
           displayLarge: GoogleFonts.inter(
-            fontSize: 32,
+            fontSize: AppFontSize.displayLarge,
             fontWeight: FontWeight.w700,
             color: Colors.black87,
           ),
           displayMedium: GoogleFonts.inter(
-            fontSize: 24,
+            fontSize: AppFontSize.displayMedium,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
           displaySmall: GoogleFonts.inter(
-            fontSize: 20,
+            fontSize: AppFontSize.displaySmall,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
           headlineLarge: GoogleFonts.inter(
-            fontSize: 18,
+            fontSize: AppFontSize.headlineLarge,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
           ),
           headlineMedium: GoogleFonts.inter(
-            fontSize: 16,
+            fontSize: AppFontSize.headlineMedium,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
           headlineSmall: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: AppFontSize.headlineSmall,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
           bodyLarge: GoogleFonts.inter(
-            fontSize: 16,
+            fontSize: AppFontSize.bodyLarge,
             fontWeight: FontWeight.w400,
             color: Colors.black87,
           ),
           bodyMedium: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: AppFontSize.bodyMedium,
             fontWeight: FontWeight.w400,
             color: Colors.black87,
           ),
           bodySmall: GoogleFonts.inter(
-            fontSize: 12,
+            fontSize: AppFontSize.bodySmall,
             fontWeight: FontWeight.w400,
             color: Colors.black87,
           ),
           labelLarge: GoogleFonts.inter(
-            fontSize: 14,
+            fontSize: AppFontSize.labelLarge,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
           labelMedium: GoogleFonts.inter(
-            fontSize: 12,
+            fontSize: AppFontSize.labelMedium,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
           labelSmall: GoogleFonts.inter(
-            fontSize: 10,
+            fontSize: AppFontSize.labelSmall,
             fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
@@ -85,38 +86,25 @@ class AppTextTheme extends TextTheme {
     );
   }
 
-  AppTextTheme._internal({
-    TextStyle? displayLarge,
-    TextStyle? displayMedium,
-    TextStyle? displaySmall,
-    TextStyle? headlineLarge,
-    TextStyle? headlineMedium,
-    TextStyle? headlineSmall,
-    TextStyle? bodyLarge,
-    TextStyle? bodyMedium,
-    TextStyle? bodySmall,
-    TextStyle? labelLarge,
-    TextStyle? labelMedium,
-    TextStyle? labelSmall,
-  }) : super(
-          displayLarge: displayLarge,
-          displayMedium: displayMedium,
-          displaySmall: displaySmall,
-          headlineLarge: headlineLarge,
-          headlineMedium: headlineMedium,
-          headlineSmall: headlineSmall,
-          bodyLarge: bodyLarge,
-          bodyMedium: bodyMedium,
-          bodySmall: bodySmall,
-          labelLarge: labelLarge,
-          labelMedium: labelMedium,
-          labelSmall: labelSmall,
-        );
+  const AppTextTheme._internal({
+    super.displayLarge,
+    super.displayMedium,
+    super.displaySmall,
+    super.headlineLarge,
+    super.headlineMedium,
+    super.headlineSmall,
+    super.bodyLarge,
+    super.bodyMedium,
+    super.bodySmall,
+    super.labelLarge,
+    super.labelMedium,
+    super.labelSmall,
+  });
 
   // Custom helper method
-  TextStyle customSubtitle({Color? color, FontWeight? fontWeight}) {
+  TextStyle customSubtitle({Color? color, FontWeight? fontWeight, double? fontSize}) {
     return GoogleFonts.inter(
-      fontSize: 14,
+      fontSize: fontSize ?? AppFontSize.bodyMedium,
       fontWeight: fontWeight ?? FontWeight.w400,
       color: color ?? AppColors.grey,
     );

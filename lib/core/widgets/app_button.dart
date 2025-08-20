@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../utils/style/app_colors.dart';
+import 'package:jaidem/core/utils/extensions/theme_extension.dart';
+import 'package:jaidem/core/utils/style/app_colors.dart';
 
 class AppButton extends StatelessWidget {
   final String text;
@@ -10,6 +11,7 @@ class AppButton extends StatelessWidget {
   final Color? textColor;
   final Size? minimumSize;
   final EdgeInsetsGeometry? padding;
+  final double borderRadius;
 
   const AppButton({
     super.key,
@@ -21,6 +23,7 @@ class AppButton extends StatelessWidget {
     this.textColor,
     this.minimumSize,
     this.padding,
+    this.borderRadius = 60.0,
   });
 
   @override
@@ -35,7 +38,7 @@ class AppButton extends StatelessWidget {
           minimumSize: minimumSize ?? const Size(double.infinity, 50),
           padding: padding ?? const EdgeInsets.symmetric(vertical: 12),
         ),
-        child: _buildChild(),
+        child: _buildChild(context),
       );
     }
 
@@ -45,16 +48,16 @@ class AppButton extends StatelessWidget {
         backgroundColor: backgroundColor ?? AppColors.primary,
         foregroundColor: textColor ?? Colors.white,
         minimumSize: minimumSize ?? const Size(double.infinity, 50),
-        padding: padding ?? const EdgeInsets.symmetric(vertical: 12),
+        padding: padding ?? const EdgeInsets.symmetric(vertical: 20),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
-      child: _buildChild(),
+      child: _buildChild(context),
     );
   }
 
-  Widget _buildChild() {
+  Widget _buildChild(BuildContext context) {
     if (isLoading) {
       return const SizedBox(
         height: 20,
@@ -68,12 +71,8 @@ class AppButton extends StatelessWidget {
 
     return Text(
       text,
-      style: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-        color: isOutlined 
-          ? (backgroundColor ?? AppColors.primary)
-          : (textColor ?? Colors.white),
+      style: context.textTheme.headlineMedium?.copyWith(
+        color: textColor ?? Colors.white,
       ),
     );
   }
