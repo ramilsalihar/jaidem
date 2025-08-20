@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:jaidem/features/app/presentation/pages/bottom_bar_page.dart';
 import 'package:jaidem/features/app/presentation/pages/splash_screen.dart';
 import 'package:jaidem/features/auth/presentation/pages/login_page.dart';
 
@@ -15,6 +16,14 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: LoginRoute.page,
           path: '/login',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+        CustomRoute(
+          page: BottomBarRoute.page,
+          path: '/main',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
         ),
       ];
 }

@@ -11,6 +11,22 @@
 part of 'app_router.dart';
 
 /// generated route for
+/// [BottomBarPage]
+class BottomBarRoute extends PageRouteInfo<void> {
+  const BottomBarRoute({List<PageRouteInfo>? children})
+      : super(BottomBarRoute.name, initialChildren: children);
+
+  static const String name = 'BottomBarRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const BottomBarPage();
+    },
+  );
+}
+
+/// generated route for
 /// [LoginPage]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})

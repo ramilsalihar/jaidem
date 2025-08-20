@@ -29,7 +29,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<Either<String, TokensModel>> login(
-      String username, String password) async {
+    String username,
+    String password,
+  ) async {
     return _makeNetworkCall<TokensModel>(() async {
       final response = await dio.post(
         ApiConst.login,

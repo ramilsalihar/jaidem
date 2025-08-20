@@ -7,6 +7,9 @@ import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
 
 final appRouter = sl<AppRouter>();
 
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class App extends StatelessWidget {
   const App({super.key});
 

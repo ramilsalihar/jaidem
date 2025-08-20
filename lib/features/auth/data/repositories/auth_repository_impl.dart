@@ -48,7 +48,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<String, TokensModel>> login(
-      String username, String password) async {
+    String username,
+    String password,
+  ) async {
     return remoteDataSource.login(username, password).then((result) {
       return result.fold(
         (failure) => Left(failure),
