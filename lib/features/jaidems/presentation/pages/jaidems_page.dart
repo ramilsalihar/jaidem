@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/app_search_field.dart';
+import 'package:jaidem/features/jaidems/data/datasources/dummy_data.dart';
+import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
 
 class JaidemsPage extends StatelessWidget {
   const JaidemsPage({super.key});
@@ -58,8 +60,42 @@ class JaidemsPage extends StatelessWidget {
           ),
         ),
       ),
-      body: const Center(
-        child: Text('Welcome to the Home Page!'),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  // Create rows of 2 items each
+                  if (index.isEven) {
+                    final leftIndex = index ~/ 2 * 2;
+                    final rightIndex = leftIndex + 1;
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 15),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: JaidemCard(person: jaidemList[leftIndex]),
+                          ),
+                          if (rightIndex < jaidemList.length) ...[
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: JaidemCard(person: jaidemList[rightIndex]),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+                childCount: (jaidemList.length / 2).ceil(),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
