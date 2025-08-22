@@ -1,4 +1,4 @@
-part of 'home_cubit.dart';
+part of 'forum_cubit.dart';
 
 abstract class HomeState extends Equatable {
   const HomeState();

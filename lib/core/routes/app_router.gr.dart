@@ -27,17 +27,17 @@ class BottomBarRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [HomePage]
-class HomeRoute extends PageRouteInfo<void> {
-  const HomeRoute({List<PageRouteInfo>? children})
-      : super(HomeRoute.name, initialChildren: children);
+/// [ForumPage]
+class ForumRoute extends PageRouteInfo<void> {
+  const ForumRoute({List<PageRouteInfo>? children})
+      : super(ForumRoute.name, initialChildren: children);
 
-  static const String name = 'HomeRoute';
+  static const String name = 'ForumRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const HomePage();
+      return const ForumPage();
     },
   );
 }

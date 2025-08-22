@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:jaidem/features/app/presentation/pages/bottom_bar_page.dart';
 import 'package:jaidem/features/app/presentation/pages/splash_screen.dart';
 import 'package:jaidem/features/auth/presentation/pages/login_page.dart';
-import 'package:jaidem/features/home/presentation/pages/home_page.dart';
+import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
 
 part 'package:jaidem/core/routes/app_router.gr.dart';
 
