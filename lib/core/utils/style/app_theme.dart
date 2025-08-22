@@ -89,5 +89,6 @@ class AppTheme {
         borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
     ),
+    scaffoldBackgroundColor: AppColors.backgroundColor
   );
 }

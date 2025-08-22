@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  static const Color primary = Color(0xFF3C2A98);
   static const Color secondary = Color(0xFFFF854A);
 
   // Base Colors
@@ -21,29 +20,23 @@ class AppColors {
   // Additional Colors
   static const Color barColor = Color(0xFFF0F0F0);
   static const Color backgroundColor = Color(0xFFFAFAFA);
+  static const Color cardColor = Color(0xFFF4F0FA);
 
-  // Generate Material Color from primary
-  static MaterialColor get primarySwatch => _generateMaterialColor(primary);
-  static MaterialColor get secondarySwatch => _generateMaterialColor(secondary);
+  static const int _primaryValue = 0xFF3C2A98;
 
-  static MaterialColor _generateMaterialColor(Color color) {
-    final int red = color.red;
-    final int green = color.green;
-    final int blue = color.blue;
-
-    final Map<int, Color> shades = {
-      50: Color.fromRGBO(red, green, blue, .1),
-      100: Color.fromRGBO(red, green, blue, .2),
-      200: Color.fromRGBO(red, green, blue, .3),
-      300: Color.fromRGBO(red, green, blue, .4),
-      400: Color.fromRGBO(red, green, blue, .5),
-      500: Color.fromRGBO(red, green, blue, .6),
-      600: Color.fromRGBO(red, green, blue, .7),
-      700: Color.fromRGBO(red, green, blue, .8),
-      800: Color.fromRGBO(red, green, blue, .9),
-      900: Color.fromRGBO(red, green, blue, 1),
-    };
-
-    return MaterialColor(color.value, shades);
-  }
+  static const MaterialColor primary = MaterialColor(
+    _primaryValue,
+    <int, Color>{
+      50: Color(0xFFECEAF6),
+      100: Color(0xFFC5BFE8),
+      200: Color(0xFF9D93D9),
+      300: Color(0xFF7567CA),
+      400: Color(0xFF5746BE),
+      500: Color(_primaryValue),
+      600: Color(0xFF36268A),
+      700: Color(0xFF2E1F79),
+      800: Color(0xFF271967),
+      900: Color(0xFF1A0F4B),
+    },
+  );
 }

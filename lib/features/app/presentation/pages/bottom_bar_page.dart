@@ -2,6 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/app/presentation/widgets/buttons/bottom_bar_button.dart';
+import 'package:jaidem/features/home/presentation/pages/home_page.dart';
+import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 
 @RoutePage()
 class BottomBarPage extends StatefulWidget {
@@ -49,8 +51,8 @@ class _BottomBarPageState extends State<BottomBarPage> {
           });
         },
         children: const [
-          Center(child: Text('Каталог')),
-          Center(child: Text('Карта')),
+          HomePage(),
+          JaidemsPage(),
           Center(child: Text('Ассистент')),
           Center(child: Text('Избранное')),
           Center(child: Text('Профиль')),
