@@ -1,5 +1,6 @@
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/features/auth/data/datasources/local/auth_local_data_source.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
@@ -34,7 +35,26 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<void> saveToken(String? accessToken, String? refreshToken) async {
     if (accessToken != null) {
       await prefs.setString(AppConstants.accessToken, accessToken);
+
+      try {
+        if (!JwtDecoder.isExpired(accessToken)) {
+          Map<String, dynamic> decodedToken = JwtDecoder.decode(accessToken);
+
+          // Extract user ID safely
+          var rawUserId = decodedToken['sub'] ??
+              decodedToken['user_id'] ??
+              decodedToken['id'] ??
+              decodedToken['userId'];
+
+          if (rawUserId != null) {
+            await saveUserId(rawUserId.toString());
+          }
+        }
+      } catch (e) {
+        print('Error decoding JWT token: $e');
+      }
     }
+
     if (refreshToken != null) {
       await prefs.setString(AppConstants.refreshToken, refreshToken);
     }

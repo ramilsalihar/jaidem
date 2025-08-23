@@ -1,7 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/presentation/cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/buttons/menu_button.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -81,7 +85,6 @@ class AppDrawer extends StatelessWidget {
                                 color: AppColors.primary,
                               ),
                             ),
-                            const Spacer(),
                           ],
                         ),
                       ),
@@ -161,28 +164,91 @@ class AppDrawer extends StatelessWidget {
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
-              child: Row(
-                children: [
-                  Image.asset(
-                    'assets/icons/exit.png',
-                    color: AppColors.white,
-                    height: 24,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Выйти',
-                    style: context.textTheme.displaySmall?.copyWith(
-                      color: AppColors.white,
+            BlocListener<MenuCubit, MenuState>(
+              listener: (context, state) {
+                if (state is MenuSignOutSuccess) {
+                  context.router.replaceAll([LoginRoute()]);
+                } else if (state is MenuError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Sign out failed: ${state.message}'),
+                      backgroundColor: Colors.red,
                     ),
-                  ),
-                ],
+                  );
+                }
+              },
+              child: BlocBuilder<MenuCubit, MenuState>(
+                builder: (context, state) {
+                  final isLoading = state is MenuLoading;
+                  
+                  return GestureDetector(
+                    onTap: isLoading ? null : () {
+                      _showSignOutDialog(context);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                      child: Row(
+                        children: [
+                          if (isLoading)
+                            const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          else
+                            Image.asset(
+                              'assets/icons/exit.png',
+                              color: AppColors.white,
+                              height: 24,
+                            ),
+                          const SizedBox(width: 8),
+                          Text(
+                            isLoading ? 'Выходим...' : 'Выйти',
+                            style: context.textTheme.displaySmall?.copyWith(
+                              color: AppColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Выйти из аккаунта'),
+          content: const Text('Вы уверены, что хотите выйти?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<MenuCubit>().signOut();
+              },
+              child: const Text(
+                'Выйти',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
