@@ -3,9 +3,14 @@ import 'package:flutter/material.dart';
 const int maxCounter = 3;
 
 class RatingField extends StatelessWidget {
-  const RatingField({super.key, required this.rating});
+  const RatingField({
+    super.key,
+    required this.rating,
+    this.iconSize = 20.0,
+  });
 
   final int rating;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +24,8 @@ class RatingField extends StatelessWidget {
                   ? 'assets/icons/star_filled.png'
                   : 'assets/icons/star_outlined.png',
               color: const Color(0xFFFF9500),
-              width: 20,
-              height: 20,
+              width: iconSize,
+              height: iconSize,
             ),
           ),
       ],

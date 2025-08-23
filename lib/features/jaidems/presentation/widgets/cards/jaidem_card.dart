@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:jaidem/core/utils/extensions/theme_extension.dart';
-import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/core/widgets/fields/user_name_field.dart';
 import 'package:jaidem/features/jaidems/domain/entities/jaidem_entity.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_pop_up.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
-import 'package:jaidem/features/jaidems/presentation/widgets/fields/rating_field.dart';
+import 'package:jaidem/core/widgets/fields/rating_field.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/layouts/jaidem_details.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/layouts/jaidem_image_viewer.dart';
 
@@ -51,7 +50,7 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Name and Rating Row
-                  _buildNameAndRating(widget.person, context),
+                  UserNameField(fullname: widget.person.fullname ?? ''),
 
                   const SizedBox(height: 10),
 
@@ -79,53 +78,6 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNameAndRating(JaidemEntity model, BuildContext context) {
-    return Row(
-      children: [
-        // Online indicator dot
-        Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: Colors.green,
-            shape: BoxShape.circle,
-          ),
-        ),
-
-        const SizedBox(width: 8),
-
-        // Name
-        Expanded(
-          child: Text(
-            model.fullname ?? '',
-            style: context.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-
-        // Rating badge
-        if (true)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-            decoration: BoxDecoration(
-              color: AppColors.primary.shade200,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              '1.7',
-              style: context.textTheme.labelMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-      ],
     );
   }
 }

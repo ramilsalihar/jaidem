@@ -4,7 +4,7 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/jaidems/domain/entities/jaidem_entity.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/fields/jaidem_text_field.dart';
-import 'package:jaidem/features/jaidems/presentation/widgets/fields/rating_field.dart';
+import 'package:jaidem/core/widgets/fields/rating_field.dart';
 
 mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
   void showJaidemDetails(JaidemEntity person) {

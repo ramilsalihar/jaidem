@@ -49,21 +49,10 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
       body: BlocConsumer<ProfileCubit, ProfileState>(
-        listener: (context, state) {
-          if (state is ProfileError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } else if (state is ProfileSignedOut) {
-            // Navigate to login screen or handle sign out
-            Navigator.of(context).pushReplacementNamed('/login');
-          }
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
                 if (state is ProfileLoading)
@@ -78,45 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       ProfileHeader(person: state.user),
                       const SizedBox(height: 16),
-                      // Add more profile widgets here
-                      _buildProfileActions(),
                     ],
                   )
-                else if (state is ProfileError)
-                  Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Failed to load profile',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          state.message,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: _loadUserProfile,
-                          child: const Text('Retry'),
-                        ),
-                      ],
-                    ),
-                  )
                 else
-                  // Initial state or other states
                   const Padding(
                     padding: EdgeInsets.all(32.0),
                     child: Center(
@@ -128,60 +81,6 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildProfileActions() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          // Refresh button
-          ListTile(
-            leading: const Icon(Icons.refresh),
-            title: const Text('Refresh Profile'),
-            onTap: _loadUserProfile,
-          ),
-          
-          // Sign out button
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              'Sign Out',
-              style: TextStyle(color: Colors.red),
-            ),
-            onTap: () => _showSignOutDialog(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSignOutDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                context.read<ProfileCubit>().signOut();
-              },
-              child: const Text(
-                'Sign Out',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }

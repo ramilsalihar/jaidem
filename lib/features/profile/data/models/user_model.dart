@@ -49,7 +49,7 @@ class UserModel {
       age: json['age'] as int,
       university: json['university'] as String?,
       login: json['login'] as String,
-      password: json['password'] as String,
+      password: '',
       courseYear: json['course_year'] as int,
       speciality: json['speciality'] as String?,
       email: json['email'] as String?,

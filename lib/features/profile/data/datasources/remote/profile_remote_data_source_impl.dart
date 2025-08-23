@@ -20,6 +20,8 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final response = await dio.get('${ApiConst.profile}$userId/');
       if (response.statusCode == 200) {
         final userModel = UserModel.fromJson(response.data);
+
+        
         return Right(userModel);
       } else {
         return Left('Failed to load user profile');
