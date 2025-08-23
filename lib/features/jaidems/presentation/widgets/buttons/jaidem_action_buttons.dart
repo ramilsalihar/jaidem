@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
-const _iconSize = 25.0;
 
 class JaidemActionButtons extends StatelessWidget {
-  const JaidemActionButtons({super.key});
+  const JaidemActionButtons({
+    super.key,
+    this.iconSize = 25.0,
+    this.spaceBetweenIcons = 5.0,
+    this.isButtonExtended = false,
+  });
+
+  final double iconSize;
+  final double spaceBetweenIcons;
+  final bool isButtonExtended;
 
   @override
   Widget build(BuildContext context) {
@@ -14,41 +22,54 @@ class JaidemActionButtons extends StatelessWidget {
         // Social Media Icons
         Image.asset(
           'assets/icons/whatsapp.png',
-          width: _iconSize,
-          height: _iconSize,
+          width: iconSize,
+          height: iconSize,
         ),
-        const SizedBox(width: 5),
+        SizedBox(width: spaceBetweenIcons),
         Image.asset(
           'assets/icons/chat_colored.png',
-          width: _iconSize,
-          height: _iconSize,
+          width: iconSize,
+          height: iconSize,
         ),
-        const SizedBox(width: 5),
+        SizedBox(width: spaceBetweenIcons),
         Image.asset(
           'assets/icons/insta.png',
-          width: _iconSize,
-          height: _iconSize,
+          width: iconSize,
+          height: iconSize,
         ),
 
-        const Spacer(),
+        SizedBox(width: spaceBetweenIcons * 2),
 
         // Profile Button
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-              colors: [AppColors.primary, AppColors.primary.shade200],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        Expanded(
+          flex: isButtonExtended ? 3 : 0, // Takes more space when extended
+          child: GestureDetector(
+            onTap: () {},
+            child: Container(
+              width: isButtonExtended ? double.infinity : null,
+              padding: EdgeInsets.symmetric(
+                horizontal: isButtonExtended ? 16 : 8,
+                vertical: isButtonExtended ? 8 : 5,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Text(
+                'Профиль',
+                style: context.textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: isButtonExtended ? FontWeight.w600 : FontWeight.normal,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-          child: Text(
-            'Профиль',
-            style: context.textTheme.labelMedium?.copyWith(color: Colors.white),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         )
       ],
