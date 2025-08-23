@@ -27,22 +27,6 @@ class BottomBarRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [ForumPage]
-class ForumRoute extends PageRouteInfo<void> {
-  const ForumRoute({List<PageRouteInfo>? children})
-      : super(ForumRoute.name, initialChildren: children);
-
-  static const String name = 'ForumRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const ForumPage();
-    },
-  );
-}
-
-/// generated route for
 /// [LoginPage]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -54,6 +38,22 @@ class LoginRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const LoginPage();
+    },
+  );
+}
+
+/// generated route for
+/// [ProfileEditFormPage]
+class ProfileEditFormRoute extends PageRouteInfo<void> {
+  const ProfileEditFormRoute({List<PageRouteInfo>? children})
+      : super(ProfileEditFormRoute.name, initialChildren: children);
+
+  static const String name = 'ProfileEditFormRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ProfileEditFormPage();
     },
   );
 }

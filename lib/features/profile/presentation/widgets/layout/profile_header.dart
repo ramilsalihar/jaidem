@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -205,7 +206,9 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            context.router.pushPath('/profile/edit');
+          },
           child: Container(
             width: 200,
             padding: const EdgeInsets.symmetric(
