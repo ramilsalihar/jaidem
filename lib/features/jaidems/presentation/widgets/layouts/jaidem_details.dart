@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/widgets/fields/details_text_field.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/fields/jaidem_text_field.dart';
 
 class JaidemDetails extends StatelessWidget {
@@ -22,23 +23,23 @@ class JaidemDetails extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        JaidemTextField(
+        DetailsTextField(
           label: 'Спец/профессия/должность:',
           value: speciality,
         ),
-        JaidemTextField(
+        DetailsTextField(
           label: 'Интересы/Навыки/Хобби:',
           value: interest,
         ),
-        JaidemTextField(
+        DetailsTextField(
           label: 'Телефон:',
           value: phone,
         ),
-        JaidemTextField(
+        DetailsTextField(
           label: 'Email:',
           value: email,
         ),
-        JaidemTextField(
+        DetailsTextField(
           label: 'Университет:',
           value: university,
         ),

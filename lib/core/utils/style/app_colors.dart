@@ -22,6 +22,10 @@ class AppColors {
   static const Color backgroundColor = Color(0xFFFAFAFA);
   static const Color cardColor = Color(0xFFF4F0FA);
 
+  static const Color green = Color(0xFF589E67);
+  static const Color orange = Color(0xFFFD7F00);
+  static const Color red = Color(0xFFAF4B4B);
+
   static const int _primaryValue = 0xFF3C2A98;
 
   static const MaterialColor primary = MaterialColor(

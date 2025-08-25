@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/app/presentation/widgets/buttons/bottom_bar_button.dart';
+import 'package:jaidem/features/events/presentation/pages/events_page.dart';
 import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
@@ -55,7 +56,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
           ForumPage(),
           JaidemsPage(),
           Center(child: Text('Ассистент')),
-          Center(child: Text('Избранное')),
+          EventsPage(),
           ProfilePage()
         ],
       ),

@@ -14,6 +14,7 @@ class AppButton extends StatelessWidget {
   final Size? minimumSize;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
+  final double? height;
 
   const AppButton({
     super.key,
@@ -28,6 +29,7 @@ class AppButton extends StatelessWidget {
     this.minimumSize,
     this.padding,
     this.borderRadius = 60.0,
+    this.height,
   });
 
   @override
@@ -35,7 +37,7 @@ class AppButton extends StatelessWidget {
     final bool isButtonDisabled = isDisabled || isLoading;
     
     // Ensure consistent sizing for both button types
-    final Size buttonSize = minimumSize ?? const Size(double.infinity, 50);
+    final Size buttonSize = minimumSize ?? Size(double.infinity, height ?? 50);
     final EdgeInsetsGeometry buttonPadding = padding ?? const EdgeInsets.symmetric(vertical: 20);
     
     if (isOutlined) {

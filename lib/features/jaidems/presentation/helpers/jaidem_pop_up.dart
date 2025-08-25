@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/core/widgets/fields/details_text_field.dart';
 import 'package:jaidem/features/jaidems/domain/entities/jaidem_entity.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
-import 'package:jaidem/features/jaidems/presentation/widgets/fields/jaidem_text_field.dart';
 import 'package:jaidem/core/widgets/fields/rating_field.dart';
 
 mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
@@ -76,7 +76,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     const SizedBox(height: 20),
 
                     // Profile details
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Возраст:',
                       value: person.age.toString(),
                       hasSpace: true,
@@ -85,7 +85,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Университет:',
                       value: person.university,
                       hasSpace: true,
@@ -94,7 +94,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Курс:',
                       value: person.courseYear.toString(),
                       hasSpace: true,
@@ -103,7 +103,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Специальность:',
                       value: person.speciality,
                       hasSpace: true,
@@ -112,7 +112,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Регион:',
                       value: 'person.region',
                       hasSpace: true,
@@ -121,7 +121,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Село/город:',
                       value: person.state.toString(),
                       hasSpace: true,
@@ -130,7 +130,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Интересы:',
                       value: person.interest,
                       hasSpace: true,
@@ -139,7 +139,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Телефон:',
                       value: person.phone ?? '0556 789 123',
                       hasSpace: true,
@@ -148,7 +148,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Email:',
                       value: person.email ?? 'asel.amanova@gmail.com',
                       hasSpace: true,

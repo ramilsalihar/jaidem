@@ -2,11 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
-import 'package:jaidem/core/widgets/buttons/app_button.dart';
+import 'package:jaidem/core/widgets/fields/details_text_field.dart';
 import 'package:jaidem/core/widgets/fields/rating_field.dart';
 import 'package:jaidem/core/widgets/fields/user_name_field.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
-import 'package:jaidem/features/jaidems/presentation/widgets/fields/jaidem_text_field.dart';
 import 'package:jaidem/features/profile/domain/entities/user_entity.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -58,7 +57,7 @@ class ProfileHeader extends StatelessWidget {
                       iconSize: 15,
                     ),
                     const SizedBox(height: 5),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Спец/профессия: ',
                       value: person.speciality ?? '',
                       labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -68,7 +67,7 @@ class ProfileHeader extends StatelessWidget {
                         color: AppColors.black,
                       ),
                     ),
-                    JaidemTextField(
+                    DetailsTextField(
                       label: 'Униерситет: ',
                       value: person.university ?? '',
                       labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -105,7 +104,7 @@ class ProfileHeader extends StatelessWidget {
           ),
           child: Column(
             children: [
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Возраст:',
                 value: person.age.toString(),
                 hasSpace: true,
@@ -117,7 +116,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Курс:',
                 value: person.courseYear.toString(),
                 hasSpace: true,
@@ -129,7 +128,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Специальность:',
                 value: person.speciality ?? '',
                 hasSpace: true,
@@ -141,7 +140,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Регион:',
                 value: 'person.region' ?? '',
                 hasSpace: true,
@@ -153,7 +152,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Село/город:',
                 value: 'person.city' ?? '',
                 hasSpace: true,
@@ -165,7 +164,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Интересы/навыки:',
                 value: person.interest ?? '',
                 hasSpace: true,
@@ -177,7 +176,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Телефон:',
                 value: person.phone ?? '',
                 hasSpace: true,
@@ -189,7 +188,7 @@ class ProfileHeader extends StatelessWidget {
                   color: AppColors.black,
                 ),
               ),
-              JaidemTextField(
+              DetailsTextField(
                 label: 'Email:',
                 value: person.email ?? '',
                 hasSpace: true,
