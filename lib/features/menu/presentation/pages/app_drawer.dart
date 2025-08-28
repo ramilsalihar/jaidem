@@ -103,7 +103,7 @@ class AppDrawer extends StatelessWidget {
                             MenuButton(
                               title: 'Чат',
                               onTap: () {
-                                Navigator.pop(context);
+                                context.router.push(ChatListRoute());
                               },
                               leadingIcon: 'assets/icons/chat.png',
                             ),
