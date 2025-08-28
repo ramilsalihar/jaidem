@@ -59,6 +59,88 @@ class ChatListRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [ChatPage]
+class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
+  ChatRoute({
+    Key? key,
+    required String contactName,
+    required String contactStatus,
+    String? contactAvatarUrl,
+    List<Message>? initialMessages,
+    dynamic Function(String)? onSendMessage,
+    VoidCallback? onBackPressed,
+    VoidCallback? onAttachmentPressed,
+    List<PageRouteInfo>? children,
+  }) : super(
+          ChatRoute.name,
+          args: ChatRouteArgs(
+            key: key,
+            contactName: contactName,
+            contactStatus: contactStatus,
+            contactAvatarUrl: contactAvatarUrl,
+            initialMessages: initialMessages,
+            onSendMessage: onSendMessage,
+            onBackPressed: onBackPressed,
+            onAttachmentPressed: onAttachmentPressed,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'ChatRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ChatRouteArgs>();
+      return ChatPage(
+        key: args.key,
+        contactName: args.contactName,
+        contactStatus: args.contactStatus,
+        contactAvatarUrl: args.contactAvatarUrl,
+        initialMessages: args.initialMessages,
+        onSendMessage: args.onSendMessage,
+        onBackPressed: args.onBackPressed,
+        onAttachmentPressed: args.onAttachmentPressed,
+      );
+    },
+  );
+}
+
+class ChatRouteArgs {
+  const ChatRouteArgs({
+    this.key,
+    required this.contactName,
+    required this.contactStatus,
+    this.contactAvatarUrl,
+    this.initialMessages,
+    this.onSendMessage,
+    this.onBackPressed,
+    this.onAttachmentPressed,
+  });
+
+  final Key? key;
+
+  final String contactName;
+
+  final String contactStatus;
+
+  final String? contactAvatarUrl;
+
+  final List<Message>? initialMessages;
+
+  final dynamic Function(String)? onSendMessage;
+
+  final VoidCallback? onBackPressed;
+
+  final VoidCallback? onAttachmentPressed;
+
+  @override
+  String toString() {
+    return 'ChatRouteArgs{key: $key, contactName: $contactName, contactStatus: $contactStatus, contactAvatarUrl: $contactAvatarUrl, initialMessages: $initialMessages, onSendMessage: $onSendMessage, onBackPressed: $onBackPressed, onAttachmentPressed: $onAttachmentPressed}';
+  }
+}
+
+/// generated route for
 /// [LoginPage]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})

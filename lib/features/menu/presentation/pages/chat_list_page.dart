@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/presentation/pages/chat_page.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/chat_over_view_card.dart';
 
 @RoutePage()
@@ -37,6 +39,15 @@ class ChatListPage extends StatelessWidget {
               date: '12:34',
               messagePreview:
                   'Последнее сообщение от пользователя ${index + 1}',
+              onTap: () {
+                context.router.push(
+                  ChatRoute(
+                    contactName: 'Пользователь ${index + 1}',
+                    contactStatus: 'Онлайн',
+                    initialMessages: messages,
+                  ),
+                );
+              },
             );
           },
         ),
