@@ -11,6 +11,22 @@
 part of 'app_router.dart';
 
 /// generated route for
+/// [AddGoalPage]
+class AddGoalRoute extends PageRouteInfo<void> {
+  const AddGoalRoute({List<PageRouteInfo>? children})
+      : super(AddGoalRoute.name, initialChildren: children);
+
+  static const String name = 'AddGoalRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AddGoalPage();
+    },
+  );
+}
+
+/// generated route for
 /// [BottomBarPage]
 class BottomBarRoute extends PageRouteInfo<void> {
   const BottomBarRoute({List<PageRouteInfo>? children})
@@ -138,6 +154,22 @@ class ChatRouteArgs {
   String toString() {
     return 'ChatRouteArgs{key: $key, contactName: $contactName, contactStatus: $contactStatus, contactAvatarUrl: $contactAvatarUrl, initialMessages: $initialMessages, onSendMessage: $onSendMessage, onBackPressed: $onBackPressed, onAttachmentPressed: $onAttachmentPressed}';
   }
+}
+
+/// generated route for
+/// [GoalsPage]
+class GoalsRoute extends PageRouteInfo<void> {
+  const GoalsRoute({List<PageRouteInfo>? children})
+      : super(GoalsRoute.name, initialChildren: children);
+
+  static const String name = 'GoalsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const GoalsPage();
+    },
+  );
 }
 
 /// generated route for

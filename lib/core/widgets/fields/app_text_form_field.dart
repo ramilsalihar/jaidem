@@ -9,12 +9,16 @@ class AppTextFormField extends StatelessWidget {
     required this.hintText,
     required this.controller,
     this.textStyle,
+    this.readOnly,
+    this.trailing,
   });
 
   final String label;
   final String hintText;
   final TextEditingController controller;
   final TextStyle? textStyle;
+  final bool? readOnly;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +34,7 @@ class AppTextFormField extends StatelessWidget {
         const SizedBox(height: 10),
         TextFormField(
           controller: controller,
+          readOnly: readOnly ?? false,
           style: context.textTheme.bodyMedium?.copyWith(
             color: Colors.black87,
           ),
@@ -39,6 +44,7 @@ class AppTextFormField extends StatelessWidget {
             hintStyle: context.textTheme.bodyMedium?.copyWith(
               color: Colors.grey,
             ),
+            suffixIcon: trailing,
             border: _buildBorder(),
             focusedBorder: _buildBorder(),
             enabledBorder: _buildBorder(),

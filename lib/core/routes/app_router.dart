@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:jaidem/features/app/presentation/pages/bottom_bar_page.dart';
 import 'package:jaidem/features/app/presentation/pages/splash_screen.dart';
 import 'package:jaidem/features/auth/presentation/pages/login_page.dart';
+import 'package:jaidem/features/goals/presentation/pages/add_goal_page.dart';
+import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/change_password_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chat_list_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chat_page.dart';
@@ -53,6 +55,20 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: ChatRoute.page,
           path: '/personal-chat',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // goals
+        CustomRoute(
+          page: GoalsRoute.page,
+          path: '/goals',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+        CustomRoute(
+          page: AddGoalRoute.page,
+          path: '/add-goal',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),
