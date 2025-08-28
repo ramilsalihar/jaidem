@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/widgets/buttons/app_button.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/events/presentation/helpers/event_dialogs.dart';
 
 enum EventCardState {
   review,
@@ -11,7 +12,7 @@ enum EventCardState {
 const double buttonHeight = 30.0;
 const double buttonRadius = 10.0;
 
-class EventActionButtons extends StatelessWidget {
+class EventActionButtons extends StatelessWidget with EventDialogs{
   final EventCardState status;
   final VoidCallback? primaryButtonAction;
   final String? secondaryButtonText;
@@ -122,7 +123,9 @@ class EventActionButtons extends StatelessWidget {
                 height: buttonHeight,
                 borderRadius: buttonRadius,
                 padding: const EdgeInsets.symmetric(vertical: 10),
-                onPressed: secondaryButtonAction ?? () {},
+                onPressed: secondaryButtonAction ?? () {
+                  showSkipEvent(context);
+                },
                 backgroundColor: AppColors.red,
                 text: 'Не пойду',
               ),

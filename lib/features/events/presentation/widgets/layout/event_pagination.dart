@@ -30,9 +30,10 @@ class _EventPaginationState extends State<EventPagination> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return SizedBox(
-      height: 300,
+      height: 310,
       width: size.width,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
@@ -139,6 +140,7 @@ class _EventPaginationState extends State<EventPagination> {
                               color: Colors.black,
                             ),
                           ),
+                          const SizedBox(height: 10),
                           EventActionButtons(
                             status: EventCardState.decision,
                             primaryButtonAction: () {},
