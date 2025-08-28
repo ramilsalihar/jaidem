@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/widgets/buttons/app_button.dart';
-import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
+import 'package:jaidem/core/widgets/fields/auth_text_form_field.dart';
 import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
 
 @RoutePage()
@@ -56,13 +56,13 @@ class _LoginPageState extends State<LoginPage> with Show {
                 style: theme.textTheme.displayMedium,
               ),
               const SizedBox(height: 30),
-              AppTextFormField(
+              AuthTextFormField(
                 labelText: 'Телефон или Email',
                 keyboardType: TextInputType.emailAddress,
                 controller: loginController,
               ),
               const SizedBox(height: 16),
-              AppTextFormField(
+              AuthTextFormField(
                 labelText: 'Пароль',
                 obscureText: true,
                 controller: passwordController,

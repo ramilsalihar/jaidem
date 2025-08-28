@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/buttons/app_button.dart';
-import 'package:jaidem/features/profile/presentation/widgets/fields/profile_text_field.dart';
+import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
 
 @RoutePage()
 class ProfileEditFormPage extends StatelessWidget {
@@ -36,55 +36,55 @@ class ProfileEditFormPage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            ProfileTextField(
+            AppTextFormField(
               label: 'Дата рождения',
               hintText: 'Введите дату рождения',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Университет',
               hintText: 'Манас',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Курс',
               hintText: '2',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Специальность',
               hintText: 'Экономика и менеджмент',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Регион',
               hintText: 'Нарын',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Село/город',
               hintText: 'Кайырма',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Интересы',
               hintText: 'Футбол, Чтение, Програ...',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Телефон',
               hintText: 'Введите номер телефона',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
-            ProfileTextField(
+            AppTextFormField(
               label: 'Соц сети',
               hintText: 'Инстаграм',
               controller: TextEditingController(),

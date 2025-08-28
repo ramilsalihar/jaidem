@@ -20,8 +20,6 @@ class ProfileCubit extends Cubit<ProfileState> {
       
       final result = await getProfileUsecase.call();
 
-      print('ProfileCubit - getUser - result: $result');
-
       result.fold(
         (failure) {
           emit(ProfileError(message: failure.toString()));

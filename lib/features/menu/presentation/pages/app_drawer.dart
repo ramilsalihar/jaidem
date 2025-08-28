@@ -151,7 +151,7 @@ class AppDrawer extends StatelessWidget {
                             MenuButton(
                               title: 'Смена пароля',
                               onTap: () {
-                                Navigator.pop(context);
+                                context.router.push(ChangePasswordRoute());
                               },
                               leadingIcon: 'assets/icons/password.png',
                             ),
