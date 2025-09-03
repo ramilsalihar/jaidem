@@ -4,11 +4,10 @@ import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/buttons/app_button.dart';
 import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
-import 'package:jaidem/features/goals/presentation/widgets/buttons/task_add_button.dart';
 
 @RoutePage()
-class AddGoalPage extends StatelessWidget {
-  const AddGoalPage({super.key});
+class AddTaskPage extends StatelessWidget {
+  const AddTaskPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,94 +16,60 @@ class AddGoalPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         title: Text(
-          'Добавить цель',
+          'Новая задача',
           style: context.textTheme.headlineMedium,
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Divider(
               height: 50,
               color: AppColors.grey,
             ),
             AppTextFormField(
-              label: 'Название цели',
-              hintText: 'Улучшить грамматику английского языка',
+              label: 'Название задачи',
+              hintText: 'Выучить 20 слов',
               controller: TextEditingController(),
             ),
             const SizedBox(height: 16),
             AppTextFormField(
-              label: 'Описание (опционально)',
-              hintText: 'Описание',
-              controller: TextEditingController(),
-            ),
-            const SizedBox(height: 16),
-            AppTextFormField(
-              label: 'Категория',
+              label: 'Время с',
               hintText: '',
               readOnly: true,
               trailing: IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                icon: const Icon(Icons.access_time),
               ),
-              controller: TextEditingController(text: 'Учеба'),
+              controller: TextEditingController(text: '15:00'),
             ),
             const SizedBox(height: 16),
             AppTextFormField(
-              label: 'Срок цели',
+              label: 'Время до',
               hintText: '',
               readOnly: true,
               trailing: IconButton(
                 onPressed: () {},
-                icon: const Icon(
-                  Icons.calendar_month_rounded,
-                  color: Colors.grey,
-                ),
+                icon: const Icon(Icons.access_time),
               ),
-              controller: TextEditingController(text: '31.12.2025'),
+              controller: TextEditingController(text: '16:00'),
             ),
-            const SizedBox(height: 16),
-            AppTextFormField(
-              label: 'Частота',
-              hintText: '',
-              readOnly: true,
-              trailing: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              ),
-              controller: TextEditingController(text: 'Каждый день'),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Индикаторы',
-              style: context.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TaskAddButton(),
             const SizedBox(height: 16),
             AppTextFormField(
               label: 'Напоминание',
-              hintText: '',
-              readOnly: true,
-              trailing: IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              ),
-              controller: TextEditingController(text: 'Утром 09:00'),
+              hintText: 'Утром 09:00',
+              controller: TextEditingController(),
             ),
             const SizedBox(height: 20),
-            Row(
+             Row(
               children: [
                 Expanded(
                   child: AppButton(
                     text: 'Сохранить',
                     borderRadius: 10,
                     padding: EdgeInsets.zero,
-                    onPressed: () {},
+                    onPressed: (){},
                   ),
                 ),
                 const SizedBox(width: 10),

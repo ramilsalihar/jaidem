@@ -27,6 +27,22 @@ class AddGoalRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [AddTaskPage]
+class AddTaskRoute extends PageRouteInfo<void> {
+  const AddTaskRoute({List<PageRouteInfo>? children})
+      : super(AddTaskRoute.name, initialChildren: children);
+
+  static const String name = 'AddTaskRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AddTaskPage();
+    },
+  );
+}
+
+/// generated route for
 /// [BottomBarPage]
 class BottomBarRoute extends PageRouteInfo<void> {
   const BottomBarRoute({List<PageRouteInfo>? children})

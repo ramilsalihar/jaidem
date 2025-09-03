@@ -39,7 +39,9 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         actions: [
           GestureDetector(
             onTap: () {
-              showNotificationPopup(dummyNotifications);
+              if (dummyNotifications.isNotEmpty) {
+                showNotificationPopup(dummyNotifications);
+              }
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 15),
