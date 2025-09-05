@@ -7,6 +7,7 @@ import 'package:jaidem/core/network/network_info.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_theme.dart';
 import 'package:jaidem/features/auth/auth_injection.dart';
+import 'package:jaidem/features/forum/forum_injection.dart';
 import 'package:jaidem/features/goals/goal_injection.dart';
 import 'package:jaidem/features/menu/manu_injection.dart';
 import 'package:jaidem/features/profile/profile_injection.dart';
@@ -32,6 +33,8 @@ Future<void> initInjections() async {
   profileInjection();
 
   goalInjection();
+
+  forumInjection();
 }
 
 Future<void> setupServices() async {

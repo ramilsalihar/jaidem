@@ -5,6 +5,8 @@ import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/data/models/dummy_data.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 
 class ForumPage extends StatefulWidget {
   const ForumPage({super.key});
@@ -15,6 +17,13 @@ class ForumPage extends StatefulWidget {
 
 class _ForumPageState extends State<ForumPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch forums when the page is first built
+    Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +79,22 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           ),
         ),
       ),
-      body: ListView.builder(
-        shrinkWrap: true,
-        itemCount: 2,
-        itemBuilder: (context, index) {
-          return const ForumCard();
+      body: BlocBuilder<ForumCubit, ForumState>(
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state.error != null) {
+            return Center(child: Text('Error: \\${state.error}'));
+          } else if (state.forums.isEmpty) {
+            return const Center(child: Text('No forums found.'));
+          }
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: state.forums.length,
+            itemBuilder: (context, index) {
+              return ForumCard(forum: state.forums[index]);
+            },
+          );
         },
       ),
       drawer: const AppDrawer(),

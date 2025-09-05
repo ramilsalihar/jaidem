@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
+import 'package:jaidem/features/forum/domain/entities/forum_entity.dart';
 import 'package:jaidem/features/forum/presentation/widgets/utils/forum_details.dart';
 
 class ForumCard extends StatelessWidget {
-  const ForumCard({super.key});
+  const ForumCard({super.key, required this.forum});
+
+  final ForumEntity forum;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +20,7 @@ class ForumCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '15 июня прошел турнир между потоками 5-6-7-8-9-10',
+            forum.content,
             style: context.textTheme.headlineMedium,
             overflow: TextOverflow.ellipsis,
           ),

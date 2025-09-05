@@ -74,7 +74,13 @@ class AuthCubit extends Cubit<AuthState> {
     final result = await isUserLoggedInUsecase.call();
     return result.fold(
       (failure) => emit(AuthUnauthenticated()),
-      (isLoggedIn) => emit(AuthAuthenticated()),
+      (isLoggedIn) {
+        if (isLoggedIn) {
+          emit(AuthAuthenticated());
+        } else {
+          emit(AuthUnauthenticated());
+        }
+      },
     );
   }
 }

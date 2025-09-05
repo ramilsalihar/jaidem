@@ -1,36 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/comment_card.dart';
+
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/widgets/fields/comment_chat_field.dart';
-
-class Comment {
-  final String id;
-  final String authorName;
-  final String authorAvatar;
-  final String message;
-  final DateTime timestamp;
-  final bool isOnline;
-
-  Comment({
-    required this.id,
-    required this.authorName,
-    required this.authorAvatar,
-    required this.message,
-    required this.timestamp,
-    this.isOnline = false,
-  });
-}
 
 mixin CommentDialog<T extends StatefulWidget> on State<T> {
   final ScrollController _scrollController = ScrollController();
 
-  List<Comment> getComments();
-
   void showCommentBottomSheet({
+    required int forumId,
     double initialChildSize = 0.7,
     double minChildSize = 0.3,
     double maxChildSize = 0.95,
   }) {
+    // Trigger fetch comments before showing
+    context.read<ForumCubit>().fetchForumComments(forumId);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -61,19 +47,32 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
 
               // Comments list
               Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: getComments().length,
-                  itemBuilder: (context, index) {
-                    final comment = getComments()[index];
-                    return CommentCard(comment: comment);
+                child: BlocBuilder<ForumCubit, ForumState>(
+                  builder: (context, state) {
+                    if (state.isCommentsLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (state.commentsError != null) {
+                      return Center(child: Text('Error: \\${state.commentsError}'));
+                    } else if (state.comments.isEmpty) {
+                      return const Center(child: Text('No comments yet.'));
+                    }
+                    return ListView.builder(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: state.comments.length,
+                      itemBuilder: (context, index) {
+                        final comment = state.comments[index];
+                        return CommentCard(comment: comment);
+                      },
+                    );
                   },
                 ),
               ),
 
               // Comment input
-              CommentChatField()
+              CommentChatField(
+                forumId: forumId,
+              )
             ],
           ),
         ),

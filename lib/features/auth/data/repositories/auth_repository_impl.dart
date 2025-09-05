@@ -60,7 +60,6 @@ class AuthRepositoryImpl implements AuthRepository {
             tokensModel.refreshToken,
           );
 
-          
           return Right(tokensModel);
         },
       );

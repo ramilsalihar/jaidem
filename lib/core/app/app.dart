@@ -4,6 +4,7 @@ import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_theme.dart';
 import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
 
@@ -27,6 +28,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<ProfileCubit>(
           create: (context) => sl<ProfileCubit>(),
+        ),
+        BlocProvider<ForumCubit>(
+          create: (context) => sl<ForumCubit>(),
         ),
       ],
       child: MaterialApp.router(

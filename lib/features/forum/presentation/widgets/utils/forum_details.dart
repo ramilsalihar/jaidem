@@ -12,7 +12,7 @@ class ForumDetails extends StatefulWidget {
   State<ForumDetails> createState() => _ForumDetailsState();
 }
 
-class _ForumDetailsState extends State<ForumDetails> with CommentDialog{
+class _ForumDetailsState extends State<ForumDetails> with CommentDialog {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -26,42 +26,16 @@ class _ForumDetailsState extends State<ForumDetails> with CommentDialog{
         children: [
           ForumButton(icon: 'assets/icons/heart.png', count: 24),
           const SizedBox(width: spaceBetweenButtons),
-          ForumButton(icon: 'assets/icons/chat.png', count: 120, onTap: () {
-            showCommentBottomSheet();
-          }),
+          ForumButton(
+              icon: 'assets/icons/chat.png',
+              count: 120,
+              onTap: () {
+                showCommentBottomSheet(forumId: 1);
+              }),
           const SizedBox(width: spaceBetweenButtons),
           ForumButton(icon: 'assets/icons/share.png', count: 120),
         ],
       ),
     );
-  }
-  
-  @override
-  List<Comment> getComments() {
-    return [
-      Comment(
-        id: '1',
-        authorName: 'User 1',
-        authorAvatar: 'https://example.com/avatar1.png',
-        message: 'This is a comment from User 1',
-        timestamp: DateTime.now().subtract(Duration(minutes: 5)),
-        isOnline: true,
-      ),
-      Comment(
-        id: '2',
-        authorName: 'User 2',
-        authorAvatar: 'https://example.com/avatar2.png',
-        message: 'This is a comment from User 2',
-        timestamp: DateTime.now().subtract(Duration(minutes: 10)),
-      ),
-      Comment(
-        id: '3',
-        authorName: 'User 3',
-        authorAvatar: 'https://example.com/avatar3.png',
-        message: 'This is a comment from User 3',
-        timestamp: DateTime.now().subtract(Duration(minutes: 15)),
-        isOnline: true,
-      ),
-    ];
   }
 }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
-import 'package:jaidem/features/forum/presentation/dialogs/comment_dialog.dart';
+import 'package:jaidem/features/forum/domain/entities/comment_entity.dart';
 
 class CommentCard extends StatelessWidget {
   const CommentCard({super.key, required this.comment});
 
-  final Comment comment;
+  final CommentEntity comment;
 
   @override
   Widget build(BuildContext context) {
@@ -25,33 +25,22 @@ class CommentCard extends StatelessWidget {
               CircleAvatar(
                 radius: 20,
                 backgroundColor: Colors.grey[300],
-                child: comment.authorAvatar.isNotEmpty
-                    ? ClipOval(
-                        child: Image.network(
-                          comment.authorAvatar,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Icon(Icons.person, color: Colors.grey[600]),
-                        ),
-                      )
-                    : Icon(Icons.person, color: Colors.grey[600]),
+                // child: (comment.author != null &&
+                //         comment.author!.avatar != null &&
+                //         (comment.author!.avatar as String).isNotEmpty)
+                //     ? ClipOval(
+                //         child: Image.network(
+                //           comment.author!.avatar,
+                //           width: 40,
+                //           height: 40,
+                //           fit: BoxFit.cover,
+                //           errorBuilder: (context, error, stackTrace) =>
+                //               Icon(Icons.person, color: Colors.grey[600]),
+                //         ),
+                //       )
+                //     : Icon(Icons.person, color: Colors.grey[600]),
+                child: Icon(Icons.person, color: Colors.grey[600]),
               ),
-              if (comment.isOnline)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
             ],
           ),
 
@@ -62,14 +51,14 @@ class CommentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  comment.authorName,
+                  comment.author  != null ? 'Матвей' : 'Аноним',
                   style: context.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  comment.message,
+                  comment.content,
                   style: context.textTheme.bodyMedium?.copyWith(
                     fontSize: 14,
                   ),
