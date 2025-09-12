@@ -3,7 +3,6 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/app_search_field.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
-import 'package:jaidem/features/notifications/data/models/dummy_data.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
@@ -48,9 +47,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         actions: [
           GestureDetector(
             onTap: () {
-              if (dummyNotifications.isNotEmpty) {
-                showNotificationPopup(dummyNotifications);
-              }
+              showNotificationPopup();
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 15),

@@ -8,3 +8,23 @@ abstract class NotificationsState extends Equatable {
 }
 
 class NotificationsInitial extends NotificationsState {}
+
+class NotificationsLoading extends NotificationsState {}
+
+class NotificationsLoaded extends NotificationsState {
+  final List<NotificationModel> notifications;
+
+  const NotificationsLoaded({required this.notifications});
+
+  @override
+  List<Object> get props => [notifications];
+}
+
+class NotificationsError extends NotificationsState {
+  final String message;
+
+  const NotificationsError({required this.message});
+
+  @override
+  List<Object> get props => [message];
+}

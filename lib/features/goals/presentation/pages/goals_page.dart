@@ -40,7 +40,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
         ),
         actions: [
           GestureDetector(
-            onTap: () => showNotificationPopup([]),
+            onTap: () => showNotificationPopup(),
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Image.asset(

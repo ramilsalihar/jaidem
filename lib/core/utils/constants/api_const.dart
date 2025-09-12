@@ -6,10 +6,11 @@ abstract class ApiConst {
   // Profile
   static const String profile = '/user/user/';
 
-
   // Forum
   static const String forum = '/core/forum_post/';
 
   static const String comments = '/core/forum_comment/';
 
+  // Notifications
+  static const String notifications = 'notifications';
 }

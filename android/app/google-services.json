@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "827371171534",
+    "project_id": "jaidem-60d24",
+    "storage_bucket": "jaidem-60d24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827371171534:android:793b4a855894e458a6aa9f",
+        "android_client_info": {
+          "package_name": "com.helloIt.jaidem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiBiCggDRYqA-Zs83mdVB0NWH8eoz72rc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

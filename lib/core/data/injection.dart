@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -10,6 +11,7 @@ import 'package:jaidem/features/auth/auth_injection.dart';
 import 'package:jaidem/features/forum/forum_injection.dart';
 import 'package:jaidem/features/goals/goal_injection.dart';
 import 'package:jaidem/features/menu/manu_injection.dart';
+import 'package:jaidem/features/notifications/notification_injection.dart';
 import 'package:jaidem/features/profile/profile_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,6 +37,8 @@ Future<void> initInjections() async {
   goalInjection();
 
   forumInjection();
+
+  notificationInjection();
 }
 
 Future<void> setupServices() async {
@@ -50,9 +54,9 @@ Future<void> setupServices() async {
   // final appInfo = await AppInfo.init();
   // sl.registerSingleton<AppInfo>(appInfo);
 
-  // sl.registerLazySingleton<FirebaseFirestore>(
-  //   () => FirebaseFirestore.instance,
-  // );
+  sl.registerLazySingleton<FirebaseFirestore>(
+    () => FirebaseFirestore.instance,
+  );
 
   sl.registerLazySingleton<InternetConnectionChecker>(
     () => InternetConnectionChecker.createInstance(),

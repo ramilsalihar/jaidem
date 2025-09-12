@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:jaidem/features/profile/presentation/widgets/layout/profile_header.dart';
 
@@ -11,7 +12,7 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
   @override
   void initState() {
     super.initState();
@@ -34,10 +35,13 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Image.asset('assets/images/profile_logo.png'),
         ),
         actions: [
-          Image.asset(
-            'assets/icons/notification.png',
-            color: Colors.black,
-            height: 24,
+          GestureDetector(
+            onTap: () => showNotificationPopup(),
+            child: Image.asset(
+              'assets/icons/notification.png',
+              color: Colors.black,
+              height: 24,
+            ),
           ),
           const SizedBox(width: 20),
           Image.asset(

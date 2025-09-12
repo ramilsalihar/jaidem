@@ -40,7 +40,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
         ),
         actions: [
           GestureDetector(
-            onTap: () => showNotificationPopup([]),
+            onTap: () => showNotificationPopup(),
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: Image.asset(

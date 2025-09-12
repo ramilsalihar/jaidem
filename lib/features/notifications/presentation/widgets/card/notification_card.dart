@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/notifications/data/models/notification_model.dart';
+import 'package:jaidem/features/notifications/data/services/notification_helper.dart';
 
 class NotificationCard extends StatelessWidget {
   const NotificationCard({super.key, required this.item});
 
-   final NotificationModel item;
+  final NotificationModel item;
 
   @override
   Widget build(BuildContext context) {
-      if (item.isHighlighted) {
+    if (item.isRead) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -20,7 +21,7 @@ class NotificationCard extends StatelessWidget {
         child: Row(
           children: [
             Text(
-              item.time,
+              NotificationLocalHelper.dateFormat(item.createdAt),
               style: context.textTheme.headlineMedium!.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -47,7 +48,7 @@ class NotificationCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            item.time,
+            NotificationLocalHelper.dateFormat(item.createdAt),
             style: context.textTheme.bodyMedium!.copyWith(
               color: const Color(0xFF7E57C2),
               fontWeight: FontWeight.w600,
@@ -66,6 +67,5 @@ class NotificationCard extends StatelessWidget {
         ],
       ),
     );
-  
   }
 }

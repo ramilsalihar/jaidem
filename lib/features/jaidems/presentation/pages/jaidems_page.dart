@@ -3,10 +3,16 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/app_search_field.dart';
 import 'package:jaidem/features/jaidems/data/datasources/dummy_data.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
+import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 
-class JaidemsPage extends StatelessWidget {
+class JaidemsPage extends StatefulWidget {
   const JaidemsPage({super.key});
 
+  @override
+  State<JaidemsPage> createState() => _JaidemsPageState();
+}
+
+class _JaidemsPageState extends State<JaidemsPage> with NotificationMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,7 +36,7 @@ class JaidemsPage extends StatelessWidget {
         actions: [
           GestureDetector(
             onTap: () {
-              // Handle search action
+              showNotificationPopup();
             },
             child: Padding(
               padding: const EdgeInsets.only(right: 15),
@@ -71,7 +77,7 @@ class JaidemsPage extends StatelessWidget {
                   if (index.isEven) {
                     final leftIndex = index ~/ 2 * 2;
                     final rightIndex = leftIndex + 1;
-                    
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 15),
                       child: Row(
