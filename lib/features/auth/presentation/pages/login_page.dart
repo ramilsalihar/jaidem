@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPage> with Show {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    return BlocListener<AuthCubit, AuthState>(
+    return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           context.router.replacePath('/main');
@@ -40,54 +40,53 @@ class _LoginPageState extends State<LoginPage> with Show {
           );
         }
       },
-      child: Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              SizedBox(height: size.height * 0.2),
-              Image.asset(
-                'assets/images/app_icon.png',
-                width: 100,
-              ),
-              const SizedBox(height: 30),
-              Text(
-                'Вход на Жайдемчи',
-                style: theme.textTheme.displayMedium,
-              ),
-              const SizedBox(height: 30),
-              AuthTextFormField(
-                labelText: 'Телефон или Email',
-                keyboardType: TextInputType.emailAddress,
-                controller: loginController,
-              ),
-              const SizedBox(height: 16),
-              AuthTextFormField(
-                labelText: 'Пароль',
-                obscureText: true,
-                controller: passwordController,
-              ),
-              const SizedBox(height: 30),
-              BlocBuilder<AuthCubit, AuthState>(
-                builder: (context, state) {
-                  return AppButton(
-                    text: 'Войти',
-                    isLoading: state is AuthLoading,
-                    onPressed: () {
-                      final username = loginController.text.trim();
-                      final password = passwordController.text.trim();
+      builder: (context, state) {
+        print('Auth State: $state');
+        return Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              children: [
+                SizedBox(height: size.height * 0.2),
+                Image.asset(
+                  'assets/images/app_icon.png',
+                  width: 100,
+                ),
+                const SizedBox(height: 30),
+                Text(
+                  'Вход на Жайдемчи',
+                  style: theme.textTheme.displayMedium,
+                ),
+                const SizedBox(height: 30),
+                AuthTextFormField(
+                  labelText: 'Телефон или Email',
+                  keyboardType: TextInputType.emailAddress,
+                  controller: loginController,
+                ),
+                const SizedBox(height: 16),
+                AuthTextFormField(
+                  labelText: 'Пароль',
+                  obscureText: true,
+                  controller: passwordController,
+                ),
+                const SizedBox(height: 30),
+                AppButton(
+                  text: 'Войти',
+                  isLoading: state is AuthLoading,
+                  onPressed: () {
+                    final username = loginController.text.trim();
+                    final password = passwordController.text.trim();
 
-                      if (username.isNotEmpty && password.isNotEmpty) {
-                        context.read<AuthCubit>().login(username, password);
-                      }
-                    },
-                  );
-                },
-              ),
-            ],
+                    if (username.isNotEmpty && password.isNotEmpty) {
+                      context.read<AuthCubit>().login(username, password);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

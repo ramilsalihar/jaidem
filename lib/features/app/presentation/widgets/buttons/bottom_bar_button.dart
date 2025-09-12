@@ -41,7 +41,7 @@ class BottomBarButton extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
-              style: context.textTheme.labelMedium!.copyWith(
+              style: context.textTheme.labelSmall!.copyWith(
                 color: isSelected ? selectedCol : unselectedCol,
               ),
               textAlign: TextAlign.center,
