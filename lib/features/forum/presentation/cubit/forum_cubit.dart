@@ -19,9 +19,9 @@ class ForumCubit extends Cubit<ForumState> {
   final GetForumComment getForumComment;
   final PostForumComment postForumComment;
 
-  Future<void> fetchAllForums() async {
+  Future<void> fetchAllForums({String? search}) async {
     emit(state.copyWith(isLoading: true, error: null));
-    final result = await getAllForums();
+    final result = await getAllForums(search);
     result.fold(
       (failure) {
         emit(state.copyWith(isLoading: false, error: failure.toString()));
@@ -37,10 +37,12 @@ class ForumCubit extends Cubit<ForumState> {
     final result = await getForumComment(forumId);
     result.fold(
       (failure) {
-        emit(state.copyWith(isCommentsLoading: false, commentsError: failure.toString()));
+        emit(state.copyWith(
+            isCommentsLoading: false, commentsError: failure.toString()));
       },
       (comments) {
-        emit(state.copyWith(isCommentsLoading: false, comments: comments, commentsError: null));
+        emit(state.copyWith(
+            isCommentsLoading: false, comments: comments, commentsError: null));
       },
     );
   }
@@ -50,10 +52,14 @@ class ForumCubit extends Cubit<ForumState> {
     final result = await postForumComment(comment: comment);
     result.fold(
       (failure) {
-        emit(state.copyWith(isCommentsLoading: false, commentsError: failure.toString()));
+        emit(state.copyWith(
+            isCommentsLoading: false, commentsError: failure.toString()));
       },
       (comment) {
-        emit(state.copyWith(isCommentsLoading: false, lastPostedComment: comment, commentsError: null));
+        emit(state.copyWith(
+            isCommentsLoading: false,
+            lastPostedComment: comment,
+            commentsError: null));
       },
     );
   }

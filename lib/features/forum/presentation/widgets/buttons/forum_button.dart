@@ -5,12 +5,12 @@ class ForumButton extends StatelessWidget {
   const ForumButton({
     super.key,
     required this.icon,
-    required this.count,
+    this.count,
     this.onTap,
   });
 
   final String icon;
-  final int count;
+  final int? count;
   final VoidCallback? onTap;
 
   @override
@@ -24,11 +24,13 @@ class ForumButton extends StatelessWidget {
             height: 20,
             color: Colors.grey,
           ),
-          const SizedBox(width: 5),
-          Text(
-            '$count',
-            style: context.textTheme.headlineSmall,
-          ),
+          if (count != null) ...[
+            const SizedBox(width: 5),
+            Text(
+              '$count',
+              style: context.textTheme.headlineSmall,
+            ),
+          ]
         ],
       ),
     );

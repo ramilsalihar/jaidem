@@ -17,9 +17,18 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
   ForumRemoteDataSourceImpl(this.dio, this.prefs);
 
   @override
-  Future<Either<String, List<ForumModel>>> fetchAllForums() async {
+  Future<Either<String, List<ForumModel>>> fetchAllForums(
+      String? search) async {
     try {
-      final response = await dio.get(ApiConst.forum);
+      final Map<String, dynamic> queryParams = {};
+
+      if (search != null) {
+        queryParams['search'] = search;
+      }
+      final response = await dio.get(
+        ApiConst.forum,
+        queryParameters: queryParams,
+      );
       if (response.statusCode == 200) {
         final responseModel = ResponseModel<ForumModel>.fromJson(
           response.data,

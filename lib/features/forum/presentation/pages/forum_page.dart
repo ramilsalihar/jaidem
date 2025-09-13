@@ -65,12 +65,10 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             child: AppSearchField(
               hintText: 'Search for places, events...',
               onChanged: (query) {
-                // Handle search query changes
-                print('Search query: $query');
+                context.read<ForumCubit>().fetchAllForums(search: query);
               },
               onSubmitted: (query) {
-                // Handle search submission
-                print('Search submitted: $query');
+                context.read<ForumCubit>().fetchAllForums(search: query);
               },
             ),
           ),

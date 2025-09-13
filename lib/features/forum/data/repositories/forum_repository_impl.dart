@@ -11,8 +11,9 @@ class ForumRepositoryImpl implements ForumRepository {
 
   ForumRepositoryImpl({required this.remoteDataSource});
   @override
-  Future<Either<String, List<ForumEntity>>> fetchAllForums() async {
-    final result = await remoteDataSource.fetchAllForums();
+  Future<Either<String, List<ForumEntity>>> fetchAllForums(
+      String? search) async {
+    final result = await remoteDataSource.fetchAllForums(search);
     return result.map((forums) =>
         forums.map((forum) => ForumMapper.toEntity(forum)).toList());
   }

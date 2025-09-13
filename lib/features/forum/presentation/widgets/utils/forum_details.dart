@@ -6,7 +6,12 @@ import 'package:jaidem/features/forum/presentation/widgets/buttons/forum_button.
 const double spaceBetweenButtons = 25.0;
 
 class ForumDetails extends StatefulWidget {
-  const ForumDetails({super.key});
+  const ForumDetails({
+    super.key,
+    this.likesCount,
+  });
+
+  final int? likesCount;
 
   @override
   State<ForumDetails> createState() => _ForumDetailsState();
@@ -24,16 +29,18 @@ class _ForumDetailsState extends State<ForumDetails> with CommentDialog {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ForumButton(icon: 'assets/icons/heart.png', count: 24),
+          ForumButton(
+            icon: 'assets/icons/heart.png',
+            count: widget.likesCount,
+          ),
           const SizedBox(width: spaceBetweenButtons),
           ForumButton(
               icon: 'assets/icons/chat.png',
-              count: 120,
               onTap: () {
                 showCommentBottomSheet(forumId: 1);
               }),
           const SizedBox(width: spaceBetweenButtons),
-          ForumButton(icon: 'assets/icons/share.png', count: 120),
+          ForumButton(icon: 'assets/icons/share.png'),
         ],
       ),
     );

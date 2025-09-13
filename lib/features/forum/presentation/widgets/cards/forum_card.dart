@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/features/forum/domain/entities/forum_entity.dart';
 import 'package:jaidem/features/forum/presentation/widgets/utils/forum_details.dart';
@@ -31,13 +32,21 @@ class ForumCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
-                'https://cdn.britannica.com/99/128399-050-EB6E336F/Temple-of-Saturn-Roman-Forum-Rome.jpg',
+                forum.photo ?? AppConstants.defaultForumPost,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    AppConstants.defaultForumPost,
+                    fit: BoxFit.cover,
+                  );
+                },
               ),
             ),
           ),
           const SizedBox(height: 10),
-          ForumDetails()
+          ForumDetails(
+            likesCount: forum.likesCount,
+          ),
         ],
       ),
     );
