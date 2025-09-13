@@ -22,4 +22,7 @@ class AppConstants {
   // Default items
   static const String defaultForumPost =
       "https://cdn.britannica.com/99/128399-050-EB6E336F/Temple-of-Saturn-Roman-Forum-Rome.jpg";
+
+  static const String defaultEventImage =
+      'https://cdn-cjhkj.nitrocdn.com/krXSsXVqwzhduXLVuGLToUwHLNnSxUxO/assets/images/optimized/rev-ff94111/spotme.com/wp-content/uploads/2020/07/Hero-1.jpg';
 }

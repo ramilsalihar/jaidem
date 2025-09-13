@@ -66,59 +66,64 @@ class _AppSearchFieldState extends State<AppSearchField> {
           _focusNode.unfocus();
         }
       },
-      child: SearchBar(
-        controller: _searchController,
-        focusNode: _focusNode,
-        hintText: widget.hintText,
-        enabled: widget.enabled,
-        keyboardType: widget.keyboardType,
-        leading: widget.leading ??
-            const Icon(
-              Icons.search,
+      child: SizedBox(
+        height: 45,
+        child: SearchBar(
+          controller: _searchController,
+          focusNode: _focusNode,
+          hintText: widget.hintText,
+          enabled: widget.enabled,
+          keyboardType: widget.keyboardType,
+          leading: widget.leading ??
+              const Icon(
+                Icons.search,
+                color: AppColors.grey,
+              ),
+          trailing: widget.trailing != null
+              ? [widget.trailing!]
+              : [
+                  if (_searchController.text.isNotEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        if (widget.onChanged != null) {
+                          widget.onChanged!('');
+                        }
+                      },
+                    ),
+                ],
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          backgroundColor: WidgetStateProperty.all(AppColors.lightGrey),
+          surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+          shadowColor: WidgetStateProperty.all(Colors.transparent),
+          elevation: WidgetStateProperty.all(0),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(
+              horizontal: 16,
+            ),
+          ),
+          textStyle: WidgetStateProperty.all(
+            context.textTheme.headlineLarge,
+          ),
+          hintStyle: WidgetStateProperty.all(
+            context.textTheme.headlineSmall?.copyWith(
+              fontSize: 16,
               color: AppColors.grey,
             ),
-        trailing: widget.trailing != null
-            ? [widget.trailing!]
-            : [
-                if (_searchController.text.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchController.clear();
-                      if (widget.onChanged != null) {
-                        widget.onChanged!('');
-                      }
-                    },
-                  ),
-              ],
-        onChanged: widget.onChanged,
-        onSubmitted: widget.onSubmitted,
-        backgroundColor: WidgetStateProperty.all(AppColors.lightGrey),
-        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
-        overlayColor: WidgetStateProperty.all(Colors.transparent),
-        shadowColor: WidgetStateProperty.all(Colors.transparent),
-        elevation: WidgetStateProperty.all(0),
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        textStyle: WidgetStateProperty.all(
-          context.textTheme.headlineLarge,
-        ),
-        hintStyle: WidgetStateProperty.all(
-          context.textTheme.headlineSmall?.copyWith(
-            fontSize: 16,
-            color: AppColors.grey,
           ),
-        ),
-        side: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.focused)) {
-            return BorderSide(color: AppColors.primary, width: 2);
-          }
-          return BorderSide(color: Colors.grey.shade300, width: 1);
-        }),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(60),
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.focused)) {
+              return BorderSide(color: AppColors.primary, width: 2);
+            }
+            return BorderSide(color: Colors.grey.shade300, width: 1);
+          }),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(60),
+            ),
           ),
         ),
       ),

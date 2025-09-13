@@ -13,4 +13,9 @@ abstract class ApiConst {
 
   // Notifications
   static const String notifications = 'notifications';
+
+  // Events
+  static const String event = '/core/event/';
+
+  static const String attendance = '/core/attendance/';
 }
