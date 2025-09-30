@@ -11,12 +11,35 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
   const JaidemsRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<Either<String, ResponseModel<PersonModel>>> getJaidems() async {
+  Future<Either<String, ResponseModel<PersonModel>>> getJaidems({
+    String? next,
+    String? previous,
+    String? flow,
+    String? generation,
+    String? university,
+    String? speciality,
+    String? age,
+    String? search,
+  }) async {
     try {
-      final response = await dio.get(ApiConst.profile);
+      // Build query parameters dynamically
+      final queryParameters = <String, dynamic>{};
+
+      if (next != null) queryParameters['next'] = next;
+      if (previous != null) queryParameters['previous'] = previous;
+      if (flow != null) queryParameters['flow'] = flow;
+      if (generation != null) queryParameters['generation'] = generation;
+      if (university != null) queryParameters['university'] = university;
+      if (speciality != null) queryParameters['speciality'] = speciality;
+      if (age != null) queryParameters['age'] = age;
+      if (search != null) queryParameters['search'] = search;
+
+      final response = await dio.get(
+        ApiConst.profile,
+        queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-
         final data = ResponseModel.fromJson(
           response.data,
           PersonModel.fromJson,

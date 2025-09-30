@@ -3,23 +3,26 @@ import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
 class AppTextFormField extends StatelessWidget {
-  const AppTextFormField(
-      {super.key,
-      required this.label,
-      required this.hintText,
-      required this.controller,
-      this.textStyle,
-      this.readOnly,
-      this.trailing,
-      this.maxLines});
+  const AppTextFormField({
+    super.key,
+    required this.label,
+    this.hintText,
+    required this.controller,
+    this.textStyle,
+    this.readOnly,
+    this.trailing,
+    this.maxLines,
+    this.keyboardType,
+  });
 
   final String label;
-  final String hintText;
+  final String? hintText;
   final TextEditingController controller;
   final TextStyle? textStyle;
   final bool? readOnly;
   final Widget? trailing;
   final int? maxLines;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +42,7 @@ class AppTextFormField extends StatelessWidget {
           style: context.textTheme.bodyMedium?.copyWith(
             color: Colors.black87,
           ),
+          keyboardType: keyboardType,
           decoration: InputDecoration(
             labelStyle: context.textTheme.bodyMedium,
             hintText: hintText,

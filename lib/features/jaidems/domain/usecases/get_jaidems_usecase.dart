@@ -8,7 +8,25 @@ class GetJaidemsUsecase {
 
   const GetJaidemsUsecase(this.repository);
 
-  Future<Either<String, ResponseModel<PersonModel>>> call() {
-    return repository.getJaidems();
+  Future<Either<String, ResponseModel<PersonModel>>> call({
+    String? next,
+    String? previous,
+    String? flow,
+    String? generation,
+    String? university,
+    String? speciality,
+    String? age,
+    String? search,
+  }) {
+    return repository.getJaidems(
+      next: next,
+      previous: previous,
+      flow: flow,
+      generation: generation,
+      university: university,
+      speciality: speciality,
+      age: age,
+      search: search,
+    );
   }
 }
