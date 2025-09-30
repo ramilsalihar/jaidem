@@ -9,12 +9,14 @@ class JaidemActionButtons extends StatelessWidget {
     this.spaceBetweenIcons = 5.0,
     this.isButtonExtended = false,
     this.hasTrailingButton = true,
+    this.onTap,
   });
 
   final double iconSize;
   final double spaceBetweenIcons;
   final bool isButtonExtended;
   final bool hasTrailingButton;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class JaidemActionButtons extends StatelessWidget {
           Flexible(
             flex: isButtonExtended ? 3 : 1,
             child: GestureDetector(
-              onTap: () {},
+              onTap: onTap,
               child: Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: isButtonExtended ? 16 : 8,

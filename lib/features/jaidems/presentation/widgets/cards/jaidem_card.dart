@@ -1,6 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/widgets/fields/user_name_field.dart';
-import 'package:jaidem/features/jaidems/domain/entities/jaidem_entity.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_pop_up.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
 import 'package:jaidem/core/widgets/fields/rating_field.dart';
@@ -13,7 +15,7 @@ class JaidemCard extends StatefulWidget {
     required this.person,
   });
 
-  final JaidemEntity person;
+  final PersonModel person;
 
   @override
   State<JaidemCard> createState() => _JaidemCardState();
@@ -26,7 +28,7 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
     return GestureDetector(
       onTap: () => showJaidemDetails(widget.person),
       child: Container(
-        height: 375,
+        height: 345,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -55,23 +57,27 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
                   const SizedBox(height: 10),
 
                   // Star Rating
-                  if (showRating) RatingField(rating: 2),
+                  // if (showRating) RatingField(rating: 2),
 
-                  const SizedBox(height: 10),
+                  // const SizedBox(height: 10),
 
                   // Information Fields
                   JaidemDetails(
-                    speciality: widget.person.speciality,
-                    interest: widget.person.interest,
+                    speciality: widget.person.speciality ?? '',
+                    interest: widget.person.interest ?? '',
                     phone: widget.person.phone ?? 'Не указан',
                     email: widget.person.email ?? 'Не указан',
-                    university: widget.person.university,
+                    university: widget.person.university ?? '',
                   ),
 
                   const SizedBox(height: 20),
 
                   // Social Media and Profile Button Row
-                  JaidemActionButtons()
+                  JaidemActionButtons(
+                    onTap: () {
+                      context.router.push(ProfileRoute(person: widget.person));
+                    },
+                  )
                 ],
               ),
             ),

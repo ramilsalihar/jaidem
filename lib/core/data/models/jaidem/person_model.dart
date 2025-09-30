@@ -28,15 +28,15 @@ class PersonModel {
   final int visit;
   final double progress;
   final List<num>? rewards;
-  final RegionModel region;
-  final VillageModel village;
+  final RegionModel? region;
+  final VillageModel? village;
   final bool block;
 
   const PersonModel({
     required this.id,
     this.fullname,
     this.avatar,
-     this.userType,
+    this.userType,
     required this.dateCreated,
     this.phone,
     required this.age,
@@ -57,8 +57,8 @@ class PersonModel {
     required this.visit,
     required this.progress,
     this.rewards,
-    required this.region,
-    required this.village,
+    this.region,
+    this.village,
     required this.block,
   });
 
@@ -89,8 +89,12 @@ class PersonModel {
       progress: (json['progress'] as num).toDouble(),
       rewards:
           (json['rewards'] as List<dynamic>?)?.map((e) => e as num).toList(),
-      region: RegionModel.fromJson(json['region'] as Map<String, dynamic>),
-      village: VillageModel.fromJson(json['village'] as Map<String, dynamic>),
+      region: json['region'] != null
+          ? RegionModel.fromJson(json['region'] as Map<String, dynamic>)
+          : null,
+      village: json['village'] != null
+          ? VillageModel.fromJson(json['village'] as Map<String, dynamic>)
+          : null,
       block: json['block'] as bool,
     );
   }

@@ -1,5 +1,7 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/features/app/presentation/pages/bottom_bar_page.dart';
 import 'package:jaidem/features/app/presentation/pages/splash_screen.dart';
 import 'package:jaidem/features/auth/presentation/pages/login_page.dart';
@@ -10,6 +12,7 @@ import 'package:jaidem/features/menu/presentation/pages/change_password_page.dar
 import 'package:jaidem/features/menu/presentation/pages/chat_list_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chat_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_edit_form_page.dart';
+import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
 
 part 'package:jaidem/core/routes/app_router.gr.dart';
 
@@ -76,6 +79,14 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: AddTaskRoute.page,
           path: '/add-task',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // profiles
+        CustomRoute(
+          page: ProfileRoute.page,
+          path: '/profile',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),

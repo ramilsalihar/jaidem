@@ -170,6 +170,29 @@ class ChatRouteArgs {
   String toString() {
     return 'ChatRouteArgs{key: $key, contactName: $contactName, contactStatus: $contactStatus, contactAvatarUrl: $contactAvatarUrl, initialMessages: $initialMessages, onSendMessage: $onSendMessage, onBackPressed: $onBackPressed, onAttachmentPressed: $onAttachmentPressed}';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ChatRouteArgs) return false;
+    return key == other.key &&
+        contactName == other.contactName &&
+        contactStatus == other.contactStatus &&
+        contactAvatarUrl == other.contactAvatarUrl &&
+        const ListEquality().equals(initialMessages, other.initialMessages) &&
+        onBackPressed == other.onBackPressed &&
+        onAttachmentPressed == other.onAttachmentPressed;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      contactName.hashCode ^
+      contactStatus.hashCode ^
+      contactAvatarUrl.hashCode ^
+      const ListEquality().hash(initialMessages) ^
+      onBackPressed.hashCode ^
+      onAttachmentPressed.hashCode;
 }
 
 /// generated route for
@@ -218,6 +241,52 @@ class ProfileEditFormRoute extends PageRouteInfo<void> {
       return const ProfileEditFormPage();
     },
   );
+}
+
+/// generated route for
+/// [ProfilePage]
+class ProfileRoute extends PageRouteInfo<ProfileRouteArgs> {
+  ProfileRoute({Key? key, PersonModel? person, List<PageRouteInfo>? children})
+      : super(
+          ProfileRoute.name,
+          args: ProfileRouteArgs(key: key, person: person),
+          initialChildren: children,
+        );
+
+  static const String name = 'ProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ProfileRouteArgs>(
+        orElse: () => const ProfileRouteArgs(),
+      );
+      return ProfilePage(key: args.key, person: args.person);
+    },
+  );
+}
+
+class ProfileRouteArgs {
+  const ProfileRouteArgs({this.key, this.person});
+
+  final Key? key;
+
+  final PersonModel? person;
+
+  @override
+  String toString() {
+    return 'ProfileRouteArgs{key: $key, person: $person}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ProfileRouteArgs) return false;
+    return key == other.key && person == other.person;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ person.hashCode;
 }
 
 /// generated route for

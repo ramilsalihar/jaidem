@@ -67,7 +67,7 @@ class PersonDetails extends StatelessWidget {
           ),
           DetailsTextField(
             label: 'Регион:',
-            value: person.region.name,
+            value: person.region?.name ?? '',
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -79,7 +79,7 @@ class PersonDetails extends StatelessWidget {
           ),
           DetailsTextField(
             label: 'Село/город:',
-            value: person.village.name,
+            value: person.village?.name ?? '',
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(

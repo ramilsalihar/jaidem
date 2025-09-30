@@ -6,6 +6,7 @@ import 'package:jaidem/core/utils/style/app_theme.dart';
 import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
+import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit.dart';
 import 'package:jaidem/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
@@ -39,6 +40,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider<EventsCubit>(
           create: (context) => sl<EventsCubit>(),
+        ),
+        BlocProvider<JaidemsCubit>(
+          create: (context) => sl<JaidemsCubit>(),
         ),
       ],
       child: MaterialApp.router(

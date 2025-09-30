@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/app_search_field.dart';
-import 'package:jaidem/features/jaidems/data/datasources/dummy_data.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
+import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 
 class JaidemsPage extends StatefulWidget {
@@ -13,6 +14,13 @@ class JaidemsPage extends StatefulWidget {
 }
 
 class _JaidemsPageState extends State<JaidemsPage> with NotificationMixin {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch Jaidems on page load
+    context.read<JaidemsCubit>().getJaidems();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,9 +43,7 @@ class _JaidemsPageState extends State<JaidemsPage> with NotificationMixin {
         ),
         actions: [
           GestureDetector(
-            onTap: () {
-              showNotificationPopup();
-            },
+            onTap: () => showNotificationPopup(),
             child: Padding(
               padding: const EdgeInsets.only(right: 15),
               child: Image.asset(
@@ -55,53 +61,69 @@ class _JaidemsPageState extends State<JaidemsPage> with NotificationMixin {
             child: AppSearchField(
               hintText: 'Search for places, events...',
               onChanged: (query) {
-                // Handle search query changes
                 print('Search query: $query');
               },
               onSubmitted: (query) {
-                // Handle search submission
                 print('Search submitted: $query');
               },
             ),
           ),
         ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  // Create rows of 2 items each
-                  if (index.isEven) {
-                    final leftIndex = index ~/ 2 * 2;
-                    final rightIndex = leftIndex + 1;
+      body: BlocBuilder<JaidemsCubit, JaidemsState>(
+        builder: (context, state) {
+          if (state is JaidemsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is JaidemsError) {
+            return Center(child: Text(state.message));
+          } else if (state is JaidemsLoaded) {
+            final jaidemList = state.response.results;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 15),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: JaidemCard(person: jaidemList[leftIndex]),
-                          ),
-                          if (rightIndex < jaidemList.length) ...[
-                            const SizedBox(width: 15),
-                            Expanded(
-                              child: JaidemCard(person: jaidemList[rightIndex]),
+            if (jaidemList.isEmpty) {
+              return const Center(child: Text('No Jaidems found'));
+            }
+
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index.isEven) {
+                          final leftIndex = index ~/ 2 * 2;
+                          final rightIndex = leftIndex + 1;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      JaidemCard(person: jaidemList[leftIndex]),
+                                ),
+                                if (rightIndex < jaidemList.length) ...[
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: JaidemCard(
+                                        person: jaidemList[rightIndex]),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ],
-                        ],
-                      ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-                childCount: (jaidemList.length / 2).ceil(),
-              ),
-            ),
-          ),
-        ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                      childCount: (jaidemList.length / 2).ceil(),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+          return const SizedBox();
+        },
       ),
     );
   }

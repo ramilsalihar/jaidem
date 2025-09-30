@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/details_text_field.dart';
-import 'package:jaidem/features/jaidems/domain/entities/jaidem_entity.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
 import 'package:jaidem/core/widgets/fields/rating_field.dart';
 
 mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
-  void showJaidemDetails(JaidemEntity person) {
+  void showJaidemDetails(PersonModel person) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -35,15 +35,15 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
+                        // Container(
+                        //   width: 12,
+                        //   height: 12,
+                        //   decoration: const BoxDecoration(
+                        //     color: Colors.red,
+                        //     shape: BoxShape.circle,
+                        //   ),
+                        // ),
+                        // const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             person.fullname ?? 'Нет имени',
@@ -52,26 +52,27 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.shade200,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Поколение: ${person.generation} Поток: ${person.flow}',
-                            style: context.textTheme.labelMedium?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.shade200,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        'Поколение: ${person.generation} Поток: ${person.flow.year}',
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
 
-                    const SizedBox(height: 20),
+                    // const SizedBox(height: 20),
 
                     // Rating stars
-                    RatingField(rating: 2),
+                    // RatingField(rating: 2),
 
                     const SizedBox(height: 20),
 
@@ -87,7 +88,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     ),
                     DetailsTextField(
                       label: 'Университет:',
-                      value: person.university,
+                      value: person.university ?? '',
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
                       valueStyle: context.textTheme.bodySmall?.copyWith(
@@ -95,7 +96,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                       ),
                     ),
                     DetailsTextField(
-                      label: 'Курс:',
+                      label: 'Год обучения:',
                       value: person.courseYear.toString(),
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
@@ -105,7 +106,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     ),
                     DetailsTextField(
                       label: 'Специальность:',
-                      value: person.speciality,
+                      value: person.speciality ?? '',
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
                       valueStyle: context.textTheme.bodySmall?.copyWith(
@@ -114,7 +115,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     ),
                     DetailsTextField(
                       label: 'Регион:',
-                      value: 'person.region',
+                      value: person.region?.name ?? "",
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
                       valueStyle: context.textTheme.bodySmall?.copyWith(
@@ -123,7 +124,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     ),
                     DetailsTextField(
                       label: 'Село/город:',
-                      value: person.state.toString(),
+                      value: person.state.name,
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
                       valueStyle: context.textTheme.bodySmall?.copyWith(
@@ -132,7 +133,7 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                     ),
                     DetailsTextField(
                       label: 'Интересы:',
-                      value: person.interest,
+                      value: person.interest ?? '',
                       hasSpace: true,
                       labelStyle: context.textTheme.bodySmall,
                       valueStyle: context.textTheme.bodySmall?.copyWith(

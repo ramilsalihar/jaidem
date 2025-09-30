@@ -26,8 +26,8 @@ extension PersonModelMapper on PersonModel {
     data['visit'] = visit;
     data['progress'] = progress;
     if (rewards != null) data['rewards'] = rewards;
-    data['region'] = region.id;
-    data['village'] = village.id;
+    if (region != null) data['region'] = region!.id;
+    if (village != null) data['village'] = village!.id;
     data['block'] = block;
 
     return data;
