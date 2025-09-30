@@ -4,7 +4,7 @@ abstract class ApiConst {
   static const String login = '/user/login/';
 
   // Profile
-  static const String profile = '/user/user/';
+  static const String profile = '/user/jaidemchiler/';
 
   // Forum
   static const String forum = '/core/forum_post/';

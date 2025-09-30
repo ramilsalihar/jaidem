@@ -1,4 +1,4 @@
-import 'package:jaidem/core/data/models/flow_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 
 class EventModel {
   final int id;

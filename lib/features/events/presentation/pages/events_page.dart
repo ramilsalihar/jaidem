@@ -23,7 +23,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin, Show {
   @override
   void initState() {
     super.initState();
-    context.read<EventsCubit>().fetchEvents();
+    // context.read<EventsCubit>().fetchEvents();
   }
 
   @override

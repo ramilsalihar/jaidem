@@ -21,7 +21,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
   void initState() {
     super.initState();
     // Fetch forums when the page is first built
-    Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
+    // Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
   }
 
   @override

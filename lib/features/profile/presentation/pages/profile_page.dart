@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:jaidem/features/profile/presentation/widgets/layout/profile_body.dart';
 import 'package:jaidem/features/profile/presentation/widgets/layout/profile_header.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -16,7 +17,6 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
   @override
   void initState() {
     super.initState();
-    // Load user profile when page initializes
     _loadUserProfile();
   }
 
@@ -55,31 +55,24 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
       body: BlocConsumer<ProfileCubit, ProfileState>(
         listener: (context, state) {},
         builder: (context, state) {
+          if (state is ProfileLoading) {
+            return Center(child: const CircularProgressIndicator());
+          }
+
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                if (state is ProfileLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else if (state is ProfileLoaded)
+                if (state is ProfileLoaded)
                   Column(
                     children: [
                       ProfileHeader(person: state.user),
-                      const SizedBox(height: 16),
+                      ProfileBody(
+                        person: state.user,
+                        canEdit: true,
+                      )
                     ],
                   )
-                else
-                  const Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Center(
-                      child: Text('Loading profile...'),
-                    ),
-                  ),
               ],
             ),
           );

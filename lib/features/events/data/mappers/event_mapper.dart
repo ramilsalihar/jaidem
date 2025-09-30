@@ -1,4 +1,4 @@
-import 'package:jaidem/core/data/models/flow_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/features/events/data/models/event_model.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 

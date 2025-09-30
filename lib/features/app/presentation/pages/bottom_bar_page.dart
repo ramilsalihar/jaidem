@@ -1,8 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/app/presentation/widgets/buttons/bottom_bar_button.dart';
+import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/pages/events_page.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
@@ -23,6 +26,9 @@ class _BottomBarPageState extends State<BottomBarPage> {
   @override
   void initState() {
     super.initState();
+    // context.read<ProfileCubit>().getUser();
+    context.read<EventsCubit>().fetchEvents();
+    Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
     _pageController = PageController(initialPage: _selectedIndex);
   }
 
@@ -38,7 +44,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
     });
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 10),
       curve: Curves.easeInOut,
     );
   }
@@ -48,6 +54,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _selectedIndex = index;
