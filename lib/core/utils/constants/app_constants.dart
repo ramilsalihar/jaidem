@@ -24,5 +24,11 @@ class AppConstants {
       "https://cdn.britannica.com/99/128399-050-EB6E336F/Temple-of-Saturn-Roman-Forum-Rome.jpg";
 
   static const String defaultEventImage =
-      'https://cdn-cjhkj.nitrocdn.com/krXSsXVqwzhduXLVuGLToUwHLNnSxUxO/assets/images/optimized/rev-ff94111/spotme.com/wp-content/uploads/2020/07/Hero-1.jpg';
+      'https://cdn-cjhkj.nitrocdn.com/spotme.com/wp-content/uploads/2020/07/Hero-1.jpg';
+
+  // Firebase Collections
+  static const String chatsCollection = 'chats';
+  static const String mentorsCollection = 'mentors';
+  static const String usersCollection = 'users';
+  static const String adminCollection = 'admin';
 }

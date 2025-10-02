@@ -9,8 +9,8 @@ import 'package:jaidem/features/goals/presentation/pages/add_goal_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_task_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/change_password_page.dart';
-import 'package:jaidem/features/menu/presentation/pages/chat_list_page.dart';
-import 'package:jaidem/features/menu/presentation/pages/chat_page.dart';
+import 'package:jaidem/features/menu/presentation/pages/chats/chat_list_page.dart';
+import 'package:jaidem/features/menu/presentation/pages/chats/chat_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_edit_form_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
 

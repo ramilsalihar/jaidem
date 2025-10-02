@@ -4,14 +4,12 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String contactName;
-  final String contactStatus;
   final String? contactAvatarUrl;
   final VoidCallback? onBackPressed;
 
   const ChatAppBar({
     super.key,
     required this.contactName,
-    required this.contactStatus,
     this.contactAvatarUrl,
     this.onBackPressed,
   });
@@ -52,26 +50,13 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
           const SizedBox(width: 12),
 
           // Name and status
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contactName,
-                  style: context.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  contactStatus,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: AppColors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+
+          Text(
+            contactName,
+            style: context.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

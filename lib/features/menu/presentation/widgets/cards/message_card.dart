@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
-import 'package:jaidem/features/menu/presentation/pages/chat_page.dart';
+import 'package:jaidem/features/menu/data/models/message_model.dart';
 
 class MessageCard extends StatelessWidget {
-  const MessageCard({super.key, required this.message});
+  const MessageCard({super.key, required this.message, required this.currentUserId});
 
-  final Message message;
+  final MessageModel message;
+  final String currentUserId;
+
+  bool get isMe => message.senderId == currentUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +17,10 @@ class MessageCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment:
-            message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!message.isMe) ...[
+          if (!isMe) ...[
             // Avatar for received messages
             Container(
               width: 32,
@@ -41,20 +44,20 @@ class MessageCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color:
-                    message.isMe ? AppColors.lightGrey : AppColors.barColor,
+                    isMe ? AppColors.lightGrey : AppColors.barColor,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 message.text,
                 style: context.textTheme.bodyMedium?.copyWith(
-                  color: message.isMe ? AppColors.primary : Colors.black87,
+                  color: isMe ? AppColors.primary : Colors.black87,
                   height: 1.4,
                 ),
               ),
             ),
           ),
 
-          if (message.isMe) const SizedBox(width: 8),
+          if (isMe) const SizedBox(width: 8),
         ],
       ),
     );

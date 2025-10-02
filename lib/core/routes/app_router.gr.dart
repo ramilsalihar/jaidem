@@ -93,28 +93,10 @@ class ChatListRoute extends PageRouteInfo<void> {
 /// generated route for
 /// [ChatPage]
 class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
-  ChatRoute({
-    Key? key,
-    required String contactName,
-    required String contactStatus,
-    String? contactAvatarUrl,
-    List<Message>? initialMessages,
-    dynamic Function(String)? onSendMessage,
-    VoidCallback? onBackPressed,
-    VoidCallback? onAttachmentPressed,
-    List<PageRouteInfo>? children,
-  }) : super(
+  ChatRoute({Key? key, required String chatType, List<PageRouteInfo>? children})
+      : super(
           ChatRoute.name,
-          args: ChatRouteArgs(
-            key: key,
-            contactName: contactName,
-            contactStatus: contactStatus,
-            contactAvatarUrl: contactAvatarUrl,
-            initialMessages: initialMessages,
-            onSendMessage: onSendMessage,
-            onBackPressed: onBackPressed,
-            onAttachmentPressed: onAttachmentPressed,
-          ),
+          args: ChatRouteArgs(key: key, chatType: chatType),
           initialChildren: children,
         );
 
@@ -124,75 +106,32 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<ChatRouteArgs>();
-      return ChatPage(
-        key: args.key,
-        contactName: args.contactName,
-        contactStatus: args.contactStatus,
-        contactAvatarUrl: args.contactAvatarUrl,
-        initialMessages: args.initialMessages,
-        onSendMessage: args.onSendMessage,
-        onBackPressed: args.onBackPressed,
-        onAttachmentPressed: args.onAttachmentPressed,
-      );
+      return ChatPage(key: args.key, chatType: args.chatType);
     },
   );
 }
 
 class ChatRouteArgs {
-  const ChatRouteArgs({
-    this.key,
-    required this.contactName,
-    required this.contactStatus,
-    this.contactAvatarUrl,
-    this.initialMessages,
-    this.onSendMessage,
-    this.onBackPressed,
-    this.onAttachmentPressed,
-  });
+  const ChatRouteArgs({this.key, required this.chatType});
 
   final Key? key;
 
-  final String contactName;
-
-  final String contactStatus;
-
-  final String? contactAvatarUrl;
-
-  final List<Message>? initialMessages;
-
-  final dynamic Function(String)? onSendMessage;
-
-  final VoidCallback? onBackPressed;
-
-  final VoidCallback? onAttachmentPressed;
+  final String chatType;
 
   @override
   String toString() {
-    return 'ChatRouteArgs{key: $key, contactName: $contactName, contactStatus: $contactStatus, contactAvatarUrl: $contactAvatarUrl, initialMessages: $initialMessages, onSendMessage: $onSendMessage, onBackPressed: $onBackPressed, onAttachmentPressed: $onAttachmentPressed}';
+    return 'ChatRouteArgs{key: $key, chatType: $chatType}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! ChatRouteArgs) return false;
-    return key == other.key &&
-        contactName == other.contactName &&
-        contactStatus == other.contactStatus &&
-        contactAvatarUrl == other.contactAvatarUrl &&
-        const ListEquality().equals(initialMessages, other.initialMessages) &&
-        onBackPressed == other.onBackPressed &&
-        onAttachmentPressed == other.onAttachmentPressed;
+    return key == other.key && chatType == other.chatType;
   }
 
   @override
-  int get hashCode =>
-      key.hashCode ^
-      contactName.hashCode ^
-      contactStatus.hashCode ^
-      contactAvatarUrl.hashCode ^
-      const ListEquality().hash(initialMessages) ^
-      onBackPressed.hashCode ^
-      onAttachmentPressed.hashCode;
+  int get hashCode => key.hashCode ^ chatType.hashCode;
 }
 
 /// generated route for

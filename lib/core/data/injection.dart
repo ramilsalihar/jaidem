@@ -12,7 +12,7 @@ import 'package:jaidem/features/events/event_injection.dart';
 import 'package:jaidem/features/forum/forum_injection.dart';
 import 'package:jaidem/features/goals/goal_injection.dart';
 import 'package:jaidem/features/jaidems/jaidem_injection.dart';
-import 'package:jaidem/features/menu/manu_injection.dart';
+import 'package:jaidem/features/menu/menu_injection.dart';
 import 'package:jaidem/features/notifications/notification_injection.dart';
 import 'package:jaidem/features/profile/profile_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';

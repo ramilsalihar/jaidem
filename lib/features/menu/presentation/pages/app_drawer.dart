@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
-import 'package:jaidem/features/menu/presentation/cubit/menu_cubit.dart';
+import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/buttons/menu_button.dart';
 
 class AppDrawer extends StatelessWidget {
