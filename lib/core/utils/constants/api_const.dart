@@ -18,4 +18,7 @@ abstract class ApiConst {
   static const String event = '/core/event/';
 
   static const String attendance = '/core/attendance/';
+
+  // Goals
+  static const String goals = '/core/goal/';
 }

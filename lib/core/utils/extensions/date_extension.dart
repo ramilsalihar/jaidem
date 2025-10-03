@@ -33,4 +33,9 @@ extension DateTimeExtension on DateTime {
 
     return formatted;
   }
+
+  String formatDeadline(DateTime? deadline) {
+    if (deadline == null) return '31.12.2025';
+    return '${deadline.day.toString().padLeft(2, '0')}.${deadline.month.toString().padLeft(2, '0')}.${deadline.year}';
+  }
 }
