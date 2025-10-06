@@ -9,7 +9,7 @@ class GoalModel {
   final String? frequency;
   final String? reminder;
   final double progress;
-  final String? student;
+  final dynamic student;
   final int? category;
 
   const GoalModel({
@@ -54,7 +54,9 @@ class GoalModel {
       'status': status,
       'date_created': dateCreated.toIso8601String(),
       'date_updated': dateUpdated.toIso8601String(),
-      'deadline': deadline?.toIso8601String(),
+      'deadline': deadline != null 
+          ? '${deadline!.year.toString().padLeft(4, '0')}-${deadline!.month.toString().padLeft(2, '0')}-${deadline!.day.toString().padLeft(2, '0')}'
+          : null,
       'frequency': frequency,
       'reminder': reminder,
       'progress': progress,
@@ -74,7 +76,7 @@ class GoalModel {
     String? frequency,
     String? reminder,
     double? progress,
-    String? student,
+    dynamic student,
     int? category,
   }) {
     return GoalModel(

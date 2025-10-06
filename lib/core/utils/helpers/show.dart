@@ -31,7 +31,7 @@ mixin Show<T extends StatefulWidget> {
     Color backgroundColor = Colors.red,
     Color textColor = AppColors.white,
   }) {
-    scaffoldMessengerKey.currentState?.showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
           message,

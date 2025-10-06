@@ -13,10 +13,10 @@ Future<void> main() async {
   );
 
   await initInjections();
-  final ds = MenuRemoteDatasourceImpl(sl<FirebaseFirestore>());
+  // final ds = MenuRemoteDatasourceImpl(sl<FirebaseFirestore>());
 
-  // Add dummy data
-  await ds.seedDummyData();
+  // // Add dummy data
+  // await ds.seedDummyData();
 
   runApp(const App());
 }

@@ -1,3 +1,5 @@
+import 'package:jaidem/features/goals/data/models/goal_model.dart';
+
 class GoalIndicatorModel {
   final int? id;
   final String title;
@@ -5,7 +7,7 @@ class GoalIndicatorModel {
   final String? endTime;
   final String? reminder;
   final double progress;
-  final int goal;
+  final dynamic goal;
 
   const GoalIndicatorModel({
     this.id,
@@ -25,7 +27,7 @@ class GoalIndicatorModel {
       endTime: json['end_time'] as String?,
       reminder: json['reminder'] as String?,
       progress: (json['progress'] as num).toDouble(),
-      goal: json['goal'] as int,
+      goal: GoalModel.fromJson(json['goal'] as Map<String, dynamic>),
     );
   }
 
@@ -48,7 +50,7 @@ class GoalIndicatorModel {
     String? endTime,
     String? reminder,
     double? progress,
-    int? goal,
+    dynamic goal,
   }) {
     return GoalIndicatorModel(
       id: id ?? this.id,
@@ -69,25 +71,25 @@ class GoalIndicatorModel {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is GoalIndicatorModel &&
-      other.id == id &&
-      other.title == title &&
-      other.startTime == startTime &&
-      other.endTime == endTime &&
-      other.reminder == reminder &&
-      other.progress == progress &&
-      other.goal == goal;
+        other.id == id &&
+        other.title == title &&
+        other.startTime == startTime &&
+        other.endTime == endTime &&
+        other.reminder == reminder &&
+        other.progress == progress &&
+        other.goal == goal;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-      title.hashCode ^
-      startTime.hashCode ^
-      endTime.hashCode ^
-      reminder.hashCode ^
-      progress.hashCode ^
-      goal.hashCode;
+        title.hashCode ^
+        startTime.hashCode ^
+        endTime.hashCode ^
+        reminder.hashCode ^
+        progress.hashCode ^
+        goal.hashCode;
   }
 }

@@ -21,4 +21,6 @@ abstract class ApiConst {
 
   // Goals
   static const String goals = '/core/goal/';
+
+  static const String indicators = '/core/indicators/';
 }

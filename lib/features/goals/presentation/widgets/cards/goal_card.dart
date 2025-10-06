@@ -72,7 +72,6 @@ class _GoalCardState extends State<GoalCard>
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => GoalOverviewPage(
               goal: widget.goal,
-              indicators: [],
             ),
           ));
         }

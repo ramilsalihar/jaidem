@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/utils/extensions/theme_extension.dart';
+import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/presentation/helpers/progress_color_helper.dart';
 
@@ -23,10 +25,13 @@ class IndicatorCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
-          if (indicator.endTime != null) _buildDeadline(),
-          const SizedBox(height: 12),
-          _buildProgressSection(progressPercent, progressColor),
+          _buildHeader(context),
+          if (indicator.endTime != null) _buildDeadline(context),
+          _buildProgressSection(
+            progressPercent,
+            progressColor,
+            context,
+          ),
         ],
       ),
     );
@@ -34,12 +39,11 @@ class IndicatorCard extends StatelessWidget {
 
   BoxDecoration _buildCardDecoration() {
     return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.grey.shade200),
+      color: AppColors.primary.shade50,
+      borderRadius: BorderRadius.circular(10),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black12,
           blurRadius: 4,
           offset: const Offset(0, 2),
         ),
@@ -47,16 +51,15 @@ class IndicatorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             indicator.title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
+            style: context.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -65,20 +68,24 @@ class IndicatorCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDeadline() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Text(
-        'Срок до ${indicator.endTime}',
-        style: TextStyle(
-          color: Colors.grey.shade600,
-          fontSize: 12,
-        ),
+  Widget _buildDeadline(BuildContext context) {
+    final formattedTime = indicator.endTime != null 
+        ? indicator.endTime!.substring(0, 5) // Takes only HH:MM part
+        : '';
+    
+    return Text(
+      'Срок до $formattedTime',
+      style: context.textTheme.labelLarge?.copyWith(
+        color: Colors.grey[600],
       ),
     );
   }
 
-  Widget _buildProgressSection(int progressPercent, Color progressColor) {
+  Widget _buildProgressSection(
+    int progressPercent,
+    Color progressColor,
+    BuildContext context,
+  ) {
     return Row(
       children: [
         Expanded(
@@ -86,25 +93,24 @@ class IndicatorCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: indicator.progress,
-              backgroundColor: progressColor.withOpacity(0.2),
+              backgroundColor: progressColor.withAlpha(20),
               valueColor: AlwaysStoppedAnimation<Color>(progressColor),
               minHeight: 8,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 15),
         Text(
           '$progressPercent%',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+          style: context.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(width: 8),
-        const Icon(
-          Icons.keyboard_arrow_down,
-          color: Colors.deepPurple,
-        ),
+        // const SizedBox(width: 8),
+        // const Icon(
+        //   Icons.keyboard_arrow_down,
+        //   color: Colors.deepPurple,
+        // ),
       ],
     );
   }

@@ -28,18 +28,48 @@ class AddGoalRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [AddTaskPage]
-class AddTaskRoute extends PageRouteInfo<void> {
-  const AddTaskRoute({List<PageRouteInfo>? children})
-      : super(AddTaskRoute.name, initialChildren: children);
+class AddTaskRoute extends PageRouteInfo<AddTaskRouteArgs> {
+  AddTaskRoute({Key? key, int? goalId, List<PageRouteInfo>? children})
+      : super(
+          AddTaskRoute.name,
+          args: AddTaskRouteArgs(key: key, goalId: goalId),
+          initialChildren: children,
+        );
 
   static const String name = 'AddTaskRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const AddTaskPage();
+      final args = data.argsAs<AddTaskRouteArgs>(
+        orElse: () => const AddTaskRouteArgs(),
+      );
+      return AddTaskPage(key: args.key, goalId: args.goalId);
     },
   );
+}
+
+class AddTaskRouteArgs {
+  const AddTaskRouteArgs({this.key, this.goalId});
+
+  final Key? key;
+
+  final int? goalId;
+
+  @override
+  String toString() {
+    return 'AddTaskRouteArgs{key: $key, goalId: $goalId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AddTaskRouteArgs) return false;
+    return key == other.key && goalId == other.goalId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ goalId.hashCode;
 }
 
 /// generated route for

@@ -50,7 +50,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-        title: editMode
+        title: !editMode
             ? Text(
                 widget.person?.fullname ?? 'Профиль',
                 style: context.textTheme.headlineLarge,
