@@ -33,4 +33,12 @@ abstract class MenuRepository {
 
   // Get list of users to chat with
   Stream<Either<String, List<ChatUserModel>>> getUsers();
+
+  // New methods for specific chat types
+  Future<Either<String, ChatModel?>> getChatWithUser(String userId);
+  Future<Either<String, ChatModel?>> getChatWithMentor();
+  Future<Either<String, ChatModel?>> getChatWithAdmin();
+  Future<Either<String, void>> sendMessageToUser(String userId, String messageText);
+  Future<Either<String, void>> sendMessageToMentor(String messageText);
+  Future<Either<String, void>> sendMessageToAdmin(String messageText);
 }

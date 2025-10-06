@@ -101,8 +101,9 @@ class AppDrawer extends StatelessWidget {
                               leadingIcon: 'assets/icons/backpack.png',
                             ),
                             MenuButton(
-                              title: 'Чат',
+                              title: 'Список чатов',
                               onTap: () {
+                                Navigator.pop(context);
                                 context.router.push(ChatListRoute());
                               },
                               leadingIcon: 'assets/icons/chat.png',
@@ -111,6 +112,7 @@ class AppDrawer extends StatelessWidget {
                               title: 'Чат с Админом',
                               onTap: () {
                                 Navigator.pop(context);
+                                context.router.push(ChatRoute(chatType: 'admin'));
                               },
                               leadingIcon: 'assets/icons/chat.png',
                             ),
@@ -118,6 +120,7 @@ class AppDrawer extends StatelessWidget {
                               title: 'Чат с ментором',
                               onTap: () {
                                 Navigator.pop(context);
+                                context.router.push(ChatRoute(chatType: 'mentors'));
                               },
                               leadingIcon: 'assets/icons/chat.png',
                             ),

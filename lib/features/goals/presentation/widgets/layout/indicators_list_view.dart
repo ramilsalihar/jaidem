@@ -21,10 +21,7 @@ class IndicatorsListView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // Indicator cards
-          ...indicators.map((indicator) => IndicatorCard(indicator: indicator)).toList(),
-          
-          // Add button if under 3 indicators
+          ...indicators.map((indicator) => IndicatorCard(indicator: indicator)),
           if (shouldShowAddButton)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),

@@ -50,8 +50,8 @@ class JaidemsCubit extends Cubit<JaidemsState> {
             allResults = response.results;
           }
 
-          nextUrl = response.next.isNotEmpty ? response.next : null;
-          previousUrl = response.previous.isNotEmpty ? response.previous : null;
+          nextUrl = response.next;
+          previousUrl = response.previous;
 
           emit(JaidemsLoaded(
             response: ResponseModel(
@@ -65,6 +65,56 @@ class JaidemsCubit extends Cubit<JaidemsState> {
       );
     } catch (e) {
       emit(JaidemsError(message: e.toString()));
+    }
+  }
+
+  /// Check if there's a next page available
+  bool get hasNextPage => nextUrl != null;
+
+  /// Check if there's a previous page available
+  bool get hasPreviousPage => previousUrl != null;
+
+  /// Load next page if available
+  Future<void> loadNextPage({
+    String? flow,
+    String? generation,
+    String? university,
+    String? speciality,
+    String? age,
+    String? search,
+  }) async {
+    if (hasNextPage) {
+      await getJaidems(
+        next: nextUrl,
+        flow: flow,
+        generation: generation,
+        university: university,
+        speciality: speciality,
+        age: age,
+        search: search,
+      );
+    }
+  }
+
+  /// Load previous page if available
+  Future<void> loadPreviousPage({
+    String? flow,
+    String? generation,
+    String? university,
+    String? speciality,
+    String? age,
+    String? search,
+  }) async {
+    if (hasPreviousPage) {
+      await getJaidems(
+        previous: previousUrl,
+        flow: flow,
+        generation: generation,
+        university: university,
+        speciality: speciality,
+        age: age,
+        search: search,
+      );
     }
   }
 }

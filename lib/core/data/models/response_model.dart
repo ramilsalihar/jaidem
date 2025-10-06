@@ -1,13 +1,13 @@
 class ResponseModel<T> {
   final int count;
-  final String next;
-  final String previous;
+  final String? next;
+  final String? previous;
   final List<T> results;
 
   ResponseModel({
     required this.count,
-    required this.next,
-    required this.previous,
+    this.next,
+    this.previous,
     required this.results,
   });
 
@@ -17,8 +17,8 @@ class ResponseModel<T> {
   ) {
     return ResponseModel(
       count: json['count'] as int,
-      next: json['next'] as String? ?? '',
-      previous: json['previous'] as String? ?? '',
+      next: json['next'] as String?,
+      previous: json['previous'] as String?,
       results: (json['results'] as List<dynamic>)
           .map((item) => fromJsonT(item as Map<String, dynamic>))
           .toList(),

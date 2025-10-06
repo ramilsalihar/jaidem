@@ -101,4 +101,76 @@ class MenuRepositoryImpl implements MenuRepository {
       yield Left(e.toString());
     }
   }
+
+  @override
+  Future<Either<String, ChatModel?>> getChatWithUser(String userId) async {
+    try {
+      final chat = await remoteDatasource.getChatWithUser(userId);
+      return Right(chat);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while fetching chat with user');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, ChatModel?>> getChatWithMentor() async {
+    try {
+      final chat = await remoteDatasource.getChatWithMentor();
+      return Right(chat);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while fetching chat with mentor');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, ChatModel?>> getChatWithAdmin() async {
+    try {
+      final chat = await remoteDatasource.getChatWithAdmin();
+      return Right(chat);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while fetching chat with admin');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> sendMessageToUser(String userId, String messageText) async {
+    try {
+      await remoteDatasource.sendMessageToUser(userId, messageText);
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while sending message to user');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> sendMessageToMentor(String messageText) async {
+    try {
+      await remoteDatasource.sendMessageToMentor(messageText);
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while sending message to mentor');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, void>> sendMessageToAdmin(String messageText) async {
+    try {
+      await remoteDatasource.sendMessageToAdmin(messageText);
+      return const Right(null);
+    } on FirebaseException catch (e) {
+      return Left(e.message ?? 'Firebase error while sending message to admin');
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
 }

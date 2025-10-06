@@ -28,4 +28,11 @@ abstract class MenuRemoteDatasource {
 
   Stream<List<ChatUserModel>> getUsers();
 
+  // New methods for specific chat types
+  Future<ChatModel?> getChatWithUser(String userId);
+  Future<ChatModel?> getChatWithMentor();
+  Future<ChatModel?> getChatWithAdmin();
+  Future<void> sendMessageToUser(String userId, String messageText);
+  Future<void> sendMessageToMentor(String messageText);
+  Future<void> sendMessageToAdmin(String messageText);
 }

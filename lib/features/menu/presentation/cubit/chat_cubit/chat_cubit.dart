@@ -7,6 +7,12 @@ import 'package:jaidem/features/menu/domain/usecases/get_messages_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/send_message_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/get_chats_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/get_users_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_user_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_mentor_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_admin_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_user_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_mentor_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_admin_usecase.dart';
 
 part 'chat_state.dart';
 
@@ -15,12 +21,24 @@ class ChatCubit extends Cubit<ChatState> {
   final SendMessageUseCase sendMessageUseCase;
   final GetChatsUseCase getChatsUseCase;
   final GetUsersUseCase getUsersUseCase;
+  final GetChatWithUserUseCase getChatWithUserUseCase;
+  final GetChatWithMentorUseCase getChatWithMentorUseCase;
+  final GetChatWithAdminUseCase getChatWithAdminUseCase;
+  final SendMessageToUserUseCase sendMessageToUserUseCase;
+  final SendMessageToMentorUseCase sendMessageToMentorUseCase;
+  final SendMessageToAdminUseCase sendMessageToAdminUseCase;
 
   ChatCubit({
     required this.getMessagesUseCase,
     required this.sendMessageUseCase,
     required this.getChatsUseCase,
     required this.getUsersUseCase,
+    required this.getChatWithUserUseCase,
+    required this.getChatWithMentorUseCase,
+    required this.getChatWithAdminUseCase,
+    required this.sendMessageToUserUseCase,
+    required this.sendMessageToMentorUseCase,
+    required this.sendMessageToAdminUseCase,
   }) : super(const ChatState());
 
   /// 🔹 Get list of chats for current user
@@ -78,5 +96,71 @@ class ChatCubit extends Cubit<ChatState> {
         )),
       );
     });
+  }
+
+  /// 🔹 Get chat with a specific user
+  Future<ChatModel?> getChatWithUser(String userId) async {
+    try {
+      emit(state.copyWith(clearError: true));
+      final chat = await getChatWithUserUseCase(userId);
+      return chat;
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+      return null;
+    }
+  }
+
+  /// 🔹 Get chat with mentor
+  Future<ChatModel?> getChatWithMentor() async {
+    try {
+      emit(state.copyWith(clearError: true));
+      final chat = await getChatWithMentorUseCase();
+      return chat;
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+      return null;
+    }
+  }
+
+  /// 🔹 Get chat with admin
+  Future<ChatModel?> getChatWithAdmin() async {
+    try {
+      emit(state.copyWith(clearError: true));
+      final chat = await getChatWithAdminUseCase();
+      return chat;
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+      return null;
+    }
+  }
+
+  /// 🔹 Send message to a specific user (creates chat if doesn't exist)
+  Future<void> sendMessageToUser(String userId, String messageText) async {
+    try {
+      emit(state.copyWith(clearError: true));
+      await sendMessageToUserUseCase(userId, messageText);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  /// 🔹 Send message to mentor (creates chat if doesn't exist)
+  Future<void> sendMessageToMentor(String messageText) async {
+    try {
+      emit(state.copyWith(clearError: true));
+      await sendMessageToMentorUseCase(messageText);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  /// 🔹 Send message to admin (creates chat if doesn't exist)
+  Future<void> sendMessageToAdmin(String messageText) async {
+    try {
+      emit(state.copyWith(clearError: true));
+      await sendMessageToAdminUseCase(messageText);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
   }
 }

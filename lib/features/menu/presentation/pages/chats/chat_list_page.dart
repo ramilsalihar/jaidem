@@ -11,8 +11,22 @@ import 'package:jaidem/core/data/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
-class ChatListPage extends StatelessWidget {
+class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
+
+  @override
+  State<ChatListPage> createState() => _ChatListPageState();
+}
+
+class _ChatListPageState extends State<ChatListPage> {
+  @override
+  void initState() {
+    super.initState();
+    final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+    if (currentUserId.isNotEmpty) {
+      context.read<ChatCubit>().getChats(currentUserId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +77,16 @@ class ChatListPage extends StatelessWidget {
                   onTap: () {
                     final chatType = otherUser.role == 'mentor' ? 'mentors' : 
                                    otherUser.role == 'admin' ? 'admin' : 'users';
-                    context.router.push(
-                      ChatRoute(chatType: chatType),
-                    );
+                    
+                    if (chatType == 'users') {
+                      context.router.push(
+                        ChatRoute(chatType: chatType, userId: otherUser.id),
+                      );
+                    } else {
+                      context.router.push(
+                        ChatRoute(chatType: chatType),
+                      );
+                    }
                   },
                 );
               },

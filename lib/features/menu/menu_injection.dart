@@ -9,13 +9,19 @@ import 'package:jaidem/features/menu/domain/usecases/get_messages_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/mark_message_as_read_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/send_message_usecase.dart';
 import 'package:jaidem/features/menu/domain/usecases/get_users_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_user_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_mentor_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/get_chat_with_admin_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_user_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_mentor_usecase.dart';
+import 'package:jaidem/features/menu/domain/usecases/send_message_to_admin_usecase.dart';
 import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 
 void menuInjection() {
   // Datasource
   sl.registerSingleton<MenuRemoteDatasource>(
-    MenuRemoteDatasourceImpl(sl()),
+    MenuRemoteDatasourceImpl(sl(), sl()),
   );
 
   // Repostiroes
@@ -36,6 +42,14 @@ void menuInjection() {
 
   sl.registerFactory(() => GetUsersUseCase(sl()));
 
+  // New specific chat use cases
+  sl.registerFactory(() => GetChatWithUserUseCase(sl()));
+  sl.registerFactory(() => GetChatWithMentorUseCase(sl()));
+  sl.registerFactory(() => GetChatWithAdminUseCase(sl()));
+  sl.registerFactory(() => SendMessageToUserUseCase(sl()));
+  sl.registerFactory(() => SendMessageToMentorUseCase(sl()));
+  sl.registerFactory(() => SendMessageToAdminUseCase(sl()));
+
   // Register the MenuCubit
   sl.registerFactory<MenuCubit>(
     () => MenuCubit(
@@ -49,6 +63,12 @@ void menuInjection() {
       getMessagesUseCase: sl(),
       getChatsUseCase: sl(),
       getUsersUseCase: sl(),
+      getChatWithUserUseCase: sl(),
+      getChatWithMentorUseCase: sl(),
+      getChatWithAdminUseCase: sl(),
+      sendMessageToUserUseCase: sl(),
+      sendMessageToMentorUseCase: sl(),
+      sendMessageToAdminUseCase: sl(),
     ),
   );
 }

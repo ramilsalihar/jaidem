@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource_impl.dart';
 import 'package:jaidem/firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/app/app.dart';
 
 Future<void> main() async {
@@ -13,7 +14,8 @@ Future<void> main() async {
   );
 
   await initInjections();
-  // final ds = MenuRemoteDatasourceImpl(sl<FirebaseFirestore>());
+  // final ds = MenuRemoteDatasourceImpl(
+  //     sl<FirebaseFirestore>(), sl<SharedPreferences>());
 
   // // Add dummy data
   // await ds.seedDummyData();

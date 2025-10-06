@@ -34,6 +34,7 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
           response.data,
           (json) => ForumMapper.fromJson(json),
         );
+        
         return Right(responseModel.results);
       } else {
         return Left('Failed to fetch forums');

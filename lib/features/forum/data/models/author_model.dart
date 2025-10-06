@@ -1,11 +1,11 @@
 class AuthorModel {
   final int id;
   final String fullname;
-  final String avatar;
+  final String? avatar;
 
   const AuthorModel({
     required this.id,
     required this.fullname,
-    required this.avatar,
+    this.avatar,
   });
 }

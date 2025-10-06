@@ -21,7 +21,7 @@ class ForumCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            forum.content,
+            forum.content ?? 'Без названия',
             style: context.textTheme.headlineMedium,
             overflow: TextOverflow.ellipsis,
           ),

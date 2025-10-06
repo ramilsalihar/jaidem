@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
-import 'package:jaidem/features/menu/data/models/message_model.dart';
 import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/message_card.dart';
 import 'package:jaidem/features/menu/presentation/widgets/fields/chat_message_field.dart';
@@ -13,10 +12,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 @RoutePage()
 class ChatPage extends StatefulWidget {
   final String chatType;
+  final String? userId; // Optional userId for user-to-user chats
 
   const ChatPage({
     super.key,
     required this.chatType,
+    this.userId,
   });
 
   @override
@@ -26,30 +27,91 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String? chatId;
 
   @override
   void initState() {
     super.initState();
-    // Fetch messages when entering this page
-    context.read<ChatCubit>().getMessages('', widget.chatType);
+    _initializeChat();
   }
 
-  void _sendMessage() {
+  Future<void> _initializeChat() async {
+    final chatCubit = context.read<ChatCubit>();
+    
+    try {
+      // Get the appropriate chat based on chat type
+      switch (widget.chatType.toLowerCase()) {
+        case 'users':
+          if (widget.userId != null) {
+            final chat = await chatCubit.getChatWithUser(widget.userId!);
+            if (chat != null) {
+              chatId = chat.id;
+              chatCubit.getMessages(chat.id, widget.chatType);
+            }
+          }
+          break;
+        case 'mentors':
+          final chat = await chatCubit.getChatWithMentor();
+          if (chat != null) {
+            chatId = chat.id;
+            chatCubit.getMessages(chat.id, widget.chatType);
+          }
+          break;
+        case 'admin':
+          final chat = await chatCubit.getChatWithAdmin();
+          if (chat != null) {
+            chatId = chat.id;
+            chatCubit.getMessages(chat.id, widget.chatType);
+          }
+          break;
+      }
+    } catch (e) {
+      print('Error initializing chat: $e');
+    }
+  }
+
+  Future<void> _sendMessage() async {
     if (_messageController.text.trim().isEmpty) return;
 
-    final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
-    final message = MessageModel(
-      id: '', // Firestore generates this
-      senderId: currentUserId,
-      receiverId: '', // Will be set in datasource based on chat type
-      text: _messageController.text.trim(),
-      photoUrl: null,
-      createdAt: DateTime.now(),
-      readBy: [currentUserId], // Current user has read the message
-    );
-
-    context.read<ChatCubit>().sendMessage('', widget.chatType, message);
-    _messageController.clear();
+    final messageText = _messageController.text.trim();
+    final chatCubit = context.read<ChatCubit>();
+    
+    try {
+      // Send message using the appropriate method based on chat type
+      switch (widget.chatType.toLowerCase()) {
+        case 'users':
+          if (widget.userId != null) {
+            await chatCubit.sendMessageToUser(widget.userId!, messageText);
+            // If this is the first message, initialize chat after sending
+            if (chatId == null) {
+              await _initializeChat();
+            }
+          }
+          break;
+        case 'mentors':
+          await chatCubit.sendMessageToMentor(messageText);
+          // If this is the first message, initialize chat after sending
+          if (chatId == null) {
+            await _initializeChat();
+          }
+          break;
+        case 'admin':
+          await chatCubit.sendMessageToAdmin(messageText);
+          // If this is the first message, initialize chat after sending
+          if (chatId == null) {
+            await _initializeChat();
+          }
+          break;
+      }
+      
+      _messageController.clear();
+    } catch (e) {
+      print('Error sending message: $e');
+      // Show error to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send message: $e')),
+      );
+    }
   }
 
   void _scrollToBottom() {
@@ -64,12 +126,25 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  String _getContactName() {
+    switch (widget.chatType.toLowerCase()) {
+      case 'users':
+        return widget.userId != null ? 'Пользователь' : 'Чат';
+      case 'mentors':
+        return 'Наставник';
+      case 'admin':
+        return 'Администратор';
+      default:
+        return 'Чат';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: ChatAppBar(
-          contactName: 'Чат',
+          contactName: _getContactName(),
         ),
         body: Column(
           children: [

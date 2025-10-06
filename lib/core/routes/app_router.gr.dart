@@ -123,10 +123,14 @@ class ChatListRoute extends PageRouteInfo<void> {
 /// generated route for
 /// [ChatPage]
 class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
-  ChatRoute({Key? key, required String chatType, List<PageRouteInfo>? children})
-      : super(
+  ChatRoute({
+    Key? key,
+    required String chatType,
+    String? userId,
+    List<PageRouteInfo>? children,
+  }) : super(
           ChatRoute.name,
-          args: ChatRouteArgs(key: key, chatType: chatType),
+          args: ChatRouteArgs(key: key, chatType: chatType, userId: userId),
           initialChildren: children,
         );
 
@@ -136,32 +140,40 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
     name,
     builder: (data) {
       final args = data.argsAs<ChatRouteArgs>();
-      return ChatPage(key: args.key, chatType: args.chatType);
+      return ChatPage(
+        key: args.key,
+        chatType: args.chatType,
+        userId: args.userId,
+      );
     },
   );
 }
 
 class ChatRouteArgs {
-  const ChatRouteArgs({this.key, required this.chatType});
+  const ChatRouteArgs({this.key, required this.chatType, this.userId});
 
   final Key? key;
 
   final String chatType;
 
+  final String? userId;
+
   @override
   String toString() {
-    return 'ChatRouteArgs{key: $key, chatType: $chatType}';
+    return 'ChatRouteArgs{key: $key, chatType: $chatType, userId: $userId}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! ChatRouteArgs) return false;
-    return key == other.key && chatType == other.chatType;
+    return key == other.key &&
+        chatType == other.chatType &&
+        userId == other.userId;
   }
 
   @override
-  int get hashCode => key.hashCode ^ chatType.hashCode;
+  int get hashCode => key.hashCode ^ chatType.hashCode ^ userId.hashCode;
 }
 
 /// generated route for

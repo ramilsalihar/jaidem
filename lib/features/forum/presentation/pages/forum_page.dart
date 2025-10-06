@@ -17,12 +17,7 @@ class ForumPage extends StatefulWidget {
 class _ForumPageState extends State<ForumPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
-  void initState() {
-    super.initState();
-    // Fetch forums when the page is first built
-    // Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
-  }
+
 
   @override
   Widget build(BuildContext context) {
