@@ -51,10 +51,8 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
                   builder: (context, state) {
                     if (state.isCommentsLoading) {
                       return const Center(child: CircularProgressIndicator());
-                    } else if (state.commentsError != null) {
-                      return Center(child: Text('Error: \\${state.commentsError}'));
                     } else if (state.comments.isEmpty) {
-                      return const Center(child: Text('No comments yet.'));
+                      return const Center(child: Text('Нет комментариев'));
                     }
                     return ListView.builder(
                       controller: scrollController,

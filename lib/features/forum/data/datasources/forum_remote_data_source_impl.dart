@@ -18,7 +18,8 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
 
   @override
   Future<Either<String, List<ForumModel>>> fetchAllForums(
-      String? search) async {
+    String? search,
+  ) async {
     try {
       final Map<String, dynamic> queryParams = {};
 
@@ -34,7 +35,7 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
           response.data,
           (json) => ForumMapper.fromJson(json),
         );
-        
+
         return Right(responseModel.results);
       } else {
         return Left('Failed to fetch forums');
@@ -47,7 +48,12 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
   @override
   Future<Either<String, List<CommentModel>>> fetchComments(int postId) async {
     try {
-      final response = await dio.get(ApiConst.comments);
+      final response = await dio.get(
+        ApiConst.comments,
+        queryParameters: {
+          'post': postId,
+        },
+      );
       if (response.statusCode == 200) {
         final responseModel = ResponseModel<CommentModel>.fromJson(
           response.data,

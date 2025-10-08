@@ -9,9 +9,11 @@ class ForumDetails extends StatefulWidget {
   const ForumDetails({
     super.key,
     this.likesCount,
+    required this.forumId,
   });
 
   final int? likesCount;
+  final int forumId;
 
   @override
   State<ForumDetails> createState() => _ForumDetailsState();
@@ -37,7 +39,7 @@ class _ForumDetailsState extends State<ForumDetails> with CommentDialog {
           ForumButton(
               icon: 'assets/icons/chat.png',
               onTap: () {
-                showCommentBottomSheet(forumId: 1);
+                showCommentBottomSheet(forumId: widget.forumId);
               }),
           const SizedBox(width: spaceBetweenButtons),
           ForumButton(icon: 'assets/icons/share.png'),

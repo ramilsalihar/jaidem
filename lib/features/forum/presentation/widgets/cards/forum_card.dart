@@ -46,6 +46,7 @@ class ForumCard extends StatelessWidget {
           const SizedBox(height: 10),
           ForumDetails(
             likesCount: forum.likesCount,
+            forumId: forum.id,
           ),
         ],
       ),
