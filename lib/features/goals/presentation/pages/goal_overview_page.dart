@@ -1,11 +1,12 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaidem/core/data/injection.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
-import 'package:jaidem/features/goals/presentation/cubit/goals_cubit.dart';
-import 'package:jaidem/features/goals/presentation/pages/add_task_page.dart';
+import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
+
 import 'package:jaidem/features/goals/presentation/widgets/cards/goal_card.dart';
 import 'package:jaidem/features/goals/presentation/widgets/fields/overview_tab_selector.dart';
 import 'package:jaidem/features/goals/presentation/widgets/layout/indicators_list_view.dart';
@@ -32,7 +33,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage> {
     super.initState();
     final goalId = widget.goal.id?.toString();
     if (goalId != null) {
-      context.read<GoalsCubit>().fetchGoalIndicators(goalId);
+      context.read<IndicatorsCubit>().fetchGoalIndicators(goalId);
     }
   }
 
@@ -49,14 +50,12 @@ class _GoalOverviewPageState extends State<GoalOverviewPage> {
   }
 
   Future<void> _navigateToAddTask() async {
-    final result = await Navigator.of(context).push<GoalIndicatorModel>(
-      MaterialPageRoute(
-        builder: (context) => AddTaskPage(goalId: widget.goal.id),
-      ),
+    final result = await context.router.push<GoalIndicatorModel>(
+      AddIndicatorRoute(goalId: widget.goal.id),
     );
 
     if (result != null) {
-      context.read<GoalsCubit>().createGoalIndicator(result);
+      context.read<IndicatorsCubit>().createGoalIndicator(result);
     }
   }
 
@@ -99,23 +98,24 @@ class _GoalOverviewPageState extends State<GoalOverviewPage> {
               ),
             ),
             const SizedBox(height: 16),
-            BlocBuilder<GoalsCubit, GoalsState>(
+            BlocBuilder<IndicatorsCubit, IndicatorsState>(
               builder: (context, state) {
                 final goalId = widget.goal.id.toString();
                 final indicators = state.goalIndicators[goalId] ?? [];
-      
-                if (state is GoalIndicatorsLoading) {
+
+                if (state is IndicatorsLoading) {
                   return const Padding(
                     padding: EdgeInsets.all(50.0),
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
-      
+
                 // Show content based on selected tab
                 if (_selectedTab == 0) {
                   return IndicatorsListView(
                     indicators: indicators,
-                    onAddIndicator: indicators.length < 3 ? _navigateToAddTask : null,
+                    onAddIndicator:
+                        indicators.length < 3 ? _navigateToAddTask : null,
                   );
                 } else {
                   return StatisticsView(mode: _statisticsMode);

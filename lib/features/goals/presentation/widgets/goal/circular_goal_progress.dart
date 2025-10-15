@@ -14,6 +14,13 @@ class CircularGoalProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Rendering CircularGoalProgress with progress: $progress');
+
+    // Normalize progress: if it's > 1.0, treat it as percentage (e.g., 75.0 = 75%)
+    // if it's <= 1.0, treat it as fraction (e.g., 0.75 = 75%)
+    final normalizedProgress = progress > 1.0 ? progress / 100.0 : progress;
+    final displayPercentage = (normalizedProgress * 100).toInt();
+
     return SizedBox(
       width: 80,
       height: 80,
@@ -22,15 +29,19 @@ class CircularGoalProgress extends StatelessWidget {
           CustomPaint(
             size: const Size(80, 80),
             painter: _CircularProgressPainter(
-              progress: progress,
+              progress: normalizedProgress,
               backgroundColor: AppColors.warning,
-              progressColor: progress < 1 ? AppColors.secondary : AppColors.green,
-              accentColor: progress < 1 ? AppColors.secondary : AppColors.green,
+              progressColor: normalizedProgress < 1
+                  ? AppColors.secondary
+                  : AppColors.green,
+              accentColor: normalizedProgress < 1
+                  ? AppColors.secondary
+                  : AppColors.green,
             ),
           ),
           Center(
             child: Text(
-              '${(progress * 100).toInt()}%',
+              '$displayPercentage%',
               style: context.textTheme.titleLarge?.copyWith(
                 color: Colors.white,
                 fontSize: 20,

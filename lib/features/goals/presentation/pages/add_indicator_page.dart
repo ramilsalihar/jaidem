@@ -7,24 +7,25 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/utils/helpers/time_picker_mixin.dart';
 import 'package:jaidem/core/widgets/buttons/app_button.dart';
 import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
-import 'package:jaidem/features/goals/data/models/goal_task_model.dart';
+import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 
 @RoutePage()
-class AddTaskPage extends StatefulWidget {
-  final int? indicatorId;
-  final GoalTaskModel? existingTask;
+class AddIndicatorPage extends StatefulWidget {
+  final int? goalId;
+  final GoalIndicatorModel? existingIndicator;
 
-  const AddTaskPage({
+  const AddIndicatorPage({
     super.key,
-    this.indicatorId,
-    this.existingTask,
+    this.goalId,
+    this.existingIndicator,
   });
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<AddIndicatorPage> createState() => _AddIndicatorPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
+class _AddIndicatorPageState extends State<AddIndicatorPage>
+    with TimePickerMixin, Show {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _startTimeController = TextEditingController();
@@ -42,12 +43,44 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
   }
 
   void _initializeData() {
-    if (widget.existingTask != null) {
-      final task = widget.existingTask!;
+    if (widget.existingIndicator != null) {
+      final indicator = widget.existingIndicator!;
 
       // Initialize title
-      _titleController.text = task.title;
+      _titleController.text = indicator.title;
+
+      // Initialize start time
+      if (indicator.startTime != null) {
+        _startTime = _parseTimeOfDay(indicator.startTime!);
+        _startTimeController.text = indicator.startTime!;
+      }
+
+      // Initialize end time
+      if (indicator.endTime != null) {
+        _endTime = _parseTimeOfDay(indicator.endTime!);
+        _endTimeController.text = indicator.endTime!;
+      }
+
+      // Initialize reminder time
+      if (indicator.reminder != null) {
+        _reminderTime = _parseTimeOfDay(indicator.reminder!);
+        _reminderController.text = indicator.reminder!;
+      }
     }
+  }
+
+  TimeOfDay? _parseTimeOfDay(String timeString) {
+    try {
+      final parts = timeString.split(':');
+      if (parts.length == 2) {
+        final hour = int.parse(parts[0]);
+        final minute = int.parse(parts[1]);
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    } catch (e) {
+      // If parsing fails, return null
+    }
+    return null;
   }
 
   @override
@@ -106,21 +139,22 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
       return;
     }
 
-    final goalTask = GoalTaskModel(
-      id: widget.existingTask?.id,
+    final goalIndicator = GoalIndicatorModel(
+      id: widget.existingIndicator?.id,
       title: _titleController.text.trim(),
-      isCompleted: widget.existingTask?.isCompleted ?? false,
-      indicator: widget.indicatorId ?? widget.existingTask?.indicatorId ?? -1,
-      dateCreated: widget.existingTask?.dateCreated,
-      dateUpdated: widget.existingTask != null ? DateTime.now() : null,
+      startTime: _startTime != null ? formatTimeOfDay(_startTime!) : null,
+      endTime: _endTime != null ? formatTimeOfDay(_endTime!) : null,
+      reminder: _reminderTime != null ? formatTimeOfDay(_reminderTime!) : null,
+      progress: widget.existingIndicator?.progress ?? 0.0,
+      goal: widget.goalId ?? widget.existingIndicator?.goalId ?? -1,
     );
 
-    Navigator.of(context).pop(goalTask);
+    Navigator.of(context).pop(goalIndicator);
   }
 
   String? _validateForm() {
     if (_titleController.text.trim().isEmpty) {
-      return 'Название задачи обязательно';
+      return 'Название индикатора обязательно';
     }
 
     if (_titleController.text.trim().length < 3) {
@@ -163,7 +197,9 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         title: Text(
-          widget.existingTask != null ? 'Редактировать задачу' : 'Новая задача',
+          widget.existingIndicator != null
+              ? 'Редактировать индикатор'
+              : 'Новый индикатор',
           style: context.textTheme.headlineMedium,
         ),
       ),
@@ -178,7 +214,7 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
                 color: AppColors.grey,
               ),
               AppTextFormField(
-                label: 'Название задачи',
+                label: 'Название индикатора',
                 hintText: 'Выучить 20 слов',
                 controller: _titleController,
               ),

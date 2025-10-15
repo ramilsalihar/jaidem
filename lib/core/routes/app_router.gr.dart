@@ -27,12 +27,83 @@ class AddGoalRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [AddIndicatorPage]
+class AddIndicatorRoute extends PageRouteInfo<AddIndicatorRouteArgs> {
+  AddIndicatorRoute({
+    Key? key,
+    int? goalId,
+    GoalIndicatorModel? existingIndicator,
+    List<PageRouteInfo>? children,
+  }) : super(
+          AddIndicatorRoute.name,
+          args: AddIndicatorRouteArgs(
+            key: key,
+            goalId: goalId,
+            existingIndicator: existingIndicator,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'AddIndicatorRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<AddIndicatorRouteArgs>(
+        orElse: () => const AddIndicatorRouteArgs(),
+      );
+      return AddIndicatorPage(
+        key: args.key,
+        goalId: args.goalId,
+        existingIndicator: args.existingIndicator,
+      );
+    },
+  );
+}
+
+class AddIndicatorRouteArgs {
+  const AddIndicatorRouteArgs({this.key, this.goalId, this.existingIndicator});
+
+  final Key? key;
+
+  final int? goalId;
+
+  final GoalIndicatorModel? existingIndicator;
+
+  @override
+  String toString() {
+    return 'AddIndicatorRouteArgs{key: $key, goalId: $goalId, existingIndicator: $existingIndicator}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AddIndicatorRouteArgs) return false;
+    return key == other.key &&
+        goalId == other.goalId &&
+        existingIndicator == other.existingIndicator;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^ goalId.hashCode ^ existingIndicator.hashCode;
+}
+
+/// generated route for
 /// [AddTaskPage]
 class AddTaskRoute extends PageRouteInfo<AddTaskRouteArgs> {
-  AddTaskRoute({Key? key, int? goalId, List<PageRouteInfo>? children})
-      : super(
+  AddTaskRoute({
+    Key? key,
+    int? indicatorId,
+    GoalTaskModel? existingTask,
+    List<PageRouteInfo>? children,
+  }) : super(
           AddTaskRoute.name,
-          args: AddTaskRouteArgs(key: key, goalId: goalId),
+          args: AddTaskRouteArgs(
+            key: key,
+            indicatorId: indicatorId,
+            existingTask: existingTask,
+          ),
           initialChildren: children,
         );
 
@@ -44,32 +115,41 @@ class AddTaskRoute extends PageRouteInfo<AddTaskRouteArgs> {
       final args = data.argsAs<AddTaskRouteArgs>(
         orElse: () => const AddTaskRouteArgs(),
       );
-      return AddTaskPage(key: args.key, goalId: args.goalId);
+      return AddTaskPage(
+        key: args.key,
+        indicatorId: args.indicatorId,
+        existingTask: args.existingTask,
+      );
     },
   );
 }
 
 class AddTaskRouteArgs {
-  const AddTaskRouteArgs({this.key, this.goalId});
+  const AddTaskRouteArgs({this.key, this.indicatorId, this.existingTask});
 
   final Key? key;
 
-  final int? goalId;
+  final int? indicatorId;
+
+  final GoalTaskModel? existingTask;
 
   @override
   String toString() {
-    return 'AddTaskRouteArgs{key: $key, goalId: $goalId}';
+    return 'AddTaskRouteArgs{key: $key, indicatorId: $indicatorId, existingTask: $existingTask}';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is! AddTaskRouteArgs) return false;
-    return key == other.key && goalId == other.goalId;
+    return key == other.key &&
+        indicatorId == other.indicatorId &&
+        existingTask == other.existingTask;
   }
 
   @override
-  int get hashCode => key.hashCode ^ goalId.hashCode;
+  int get hashCode =>
+      key.hashCode ^ indicatorId.hashCode ^ existingTask.hashCode;
 }
 
 /// generated route for

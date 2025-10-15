@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jaidem/core/app/app.dart';
 import 'package:jaidem/core/utils/constants/app_sizes.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -110,6 +109,66 @@ mixin Show<T extends StatefulWidget> {
           padding: padding,
           child: child,
         ),
+      ),
+    );
+  }
+
+  void showDialogContent({
+    required BuildContext context,
+    required Widget child,
+    bool isDismissible = true,
+    Color? backgroundColor,
+    Color? barrierColor,
+    EdgeInsets? padding = const EdgeInsets.all(AppSizes.padding),
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: isDismissible,
+      barrierColor: barrierColor ?? Colors.black54,
+      builder: (context) => AlertDialog(
+        backgroundColor: backgroundColor ?? Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: padding,
+        content: child,
+      ),
+    );
+  }
+
+  void showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String content,
+    required String confirmText,
+    required VoidCallback onConfirm,
+    String cancelText = 'Отмена',
+    Color? confirmTextColor,
+    VoidCallback? onCancel,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onCancel?.call();
+            },
+            child: Text(cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onConfirm();
+            },
+            style: confirmTextColor != null
+                ? TextButton.styleFrom(foregroundColor: confirmTextColor)
+                : null,
+            child: Text(confirmText),
+          ),
+        ],
       ),
     );
   }

@@ -16,7 +16,7 @@ class GoalIndicatorModel {
     this.endTime,
     this.reminder,
     required this.progress,
-    required this.goal,
+    this.goal,
   });
 
   factory GoalIndicatorModel.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,9 @@ class GoalIndicatorModel {
       endTime: json['end_time'] as String?,
       reminder: json['reminder'] as String?,
       progress: (json['progress'] as num).toDouble(),
-      goal: GoalModel.fromJson(json['goal'] as Map<String, dynamic>),
+      goal: json['goal'] != null && json['goal'] is Map<String, dynamic>
+          ? GoalModel.fromJson(json['goal'] as Map<String, dynamic>)
+          : json['goal'],
     );
   }
 
@@ -61,6 +63,26 @@ class GoalIndicatorModel {
       progress: progress ?? this.progress,
       goal: goal ?? this.goal,
     );
+  }
+
+  /// Helper method to get the goal ID as an integer
+  int? get goalId {
+    if (goal == null) return null;
+    if (goal is int) return goal as int;
+    if (goal is GoalModel) return (goal as GoalModel).id;
+    return null;
+  }
+
+  /// Helper method to get the goal ID as a string for map keys
+  String get goalIdString {
+    final id = goalId;
+    return id?.toString() ?? goal?.toString() ?? 'null';
+  }
+
+  /// Helper method to get the GoalModel if available
+  GoalModel? get goalModel {
+    if (goal is GoalModel) return goal as GoalModel;
+    return null;
   }
 
   @override

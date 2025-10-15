@@ -1,9 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/data/injection.dart';
-import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/helpers/time_picker_mixin.dart';
@@ -12,7 +11,8 @@ import 'package:jaidem/core/widgets/buttons/app_button.dart';
 import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
-import 'package:jaidem/features/goals/presentation/cubit/goals_cubit.dart';
+import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
+import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_task_page.dart';
 import 'package:jaidem/features/goals/presentation/widgets/buttons/task_add_button.dart';
 import 'package:jaidem/features/goals/presentation/widgets/dropdowns/frequency_dropdown.dart';
@@ -49,10 +49,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
   }
 
   Future<void> _navigateToAddTask() async {
-    final result = await Navigator.of(context).push<GoalIndicatorModel>(
-      MaterialPageRoute(
-        builder: (context) => const AddTaskPage(goalId: -1),
-      ),
+    final result = await context.router.push<GoalIndicatorModel>(
+      AddIndicatorRoute(),
     );
 
     if (result != null) {
@@ -131,7 +129,6 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
       return;
     }
 
-
     final goalModel = GoalModel(
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isNotEmpty
@@ -142,14 +139,14 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
       dateUpdated: DateTime.now(),
       deadline: _selectedDeadline,
       frequency: _selectedFrequency!,
-      reminder: _selectedReminderTime != null 
+      reminder: _selectedReminderTime != null
           ? formatTimeOfDay(_selectedReminderTime!) // Format as HH:MM
           : null,
       progress: 0.0,
     );
 
-    // Use the cubit to create goal with indicators
-    context.read<GoalsCubit>().createGoalWithIndicators(goalModel, _indicators);
+    // First create the goal, then create indicators in the listener
+    context.read<GoalsCubit>().createGoal(goalModel);
   }
 
   void _cancelGoal() {
@@ -158,23 +155,60 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<GoalsCubit>(),
-      child: BlocListener<GoalsCubit, GoalsState>(
-        listener: (context, state) {
-          if (state is GoalCreated) {
-            showMessage(context, 
-              message: 'Цель успешно создана!',
-              backgroundColor: Colors.green,
-              textColor: Colors.white,
-            );
-            Navigator.of(context).pop();
-          } else if (state is GoalCreationError) {
-            showErrorMessage(context, message: state.message);
-          } else if (state is GoalIndicatorCreationError) {
-            showErrorMessage(context, message: 'Ошибка создания задачи: ${state.message}');
-          }
-        },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => sl<GoalsCubit>()),
+        BlocProvider(create: (context) => sl<IndicatorsCubit>()),
+      ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<GoalsCubit, GoalsState>(
+            listener: (context, state) {
+              if (state is GoalCreated) {
+                // After goal is created, create indicators if any
+                if (_indicators.isNotEmpty) {
+                  final goalId = state.goals.first.id;
+                  for (final indicator in _indicators) {
+                    final updatedIndicator = indicator.copyWith(goal: goalId);
+                    context.read<IndicatorsCubit>().createGoalIndicator(updatedIndicator);
+                  }
+                } else {
+                  showMessage(
+                    context,
+                    message: 'Цель успешно создана!',
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                  );
+                  Navigator.of(context).pop();
+                }
+              } else if (state is GoalCreationError) {
+                showErrorMessage(context, message: state.message);
+              }
+            },
+          ),
+          BlocListener<IndicatorsCubit, IndicatorsState>(
+            listener: (context, state) {
+              if (state is IndicatorCreated) {
+                // Check if all indicators are created
+                final createdIndicators = state.goalIndicators.values
+                    .expand((indicators) => indicators)
+                    .length;
+                if (createdIndicators >= _indicators.length) {
+                  showMessage(
+                    context,
+                    message: 'Цель и индикаторы успешно созданы!',
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                  );
+                  Navigator.of(context).pop();
+                }
+              } else if (state is IndicatorCreationError) {
+                showErrorMessage(context,
+                    message: 'Ошибка создания индикатора: ${state.message}');
+              }
+            },
+          ),
+        ],
         child: Scaffold(
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
@@ -184,159 +218,164 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
               style: context.textTheme.headlineMedium,
             ),
           ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Divider(
-                height: 50,
-                color: AppColors.grey,
-              ),
-              AppTextFormField(
-                label: 'Название цели',
-                hintText: 'Улучшить грамматику английского языка',
-                controller: _titleController,
-              ),
-              const SizedBox(height: 16),
-              AppTextFormField(
-                label: 'Описание (опционально)',
-                hintText: 'Описание',
-                controller: _descriptionController,
-              ),
-              const SizedBox(height: 16),
-              // AppTextFormField(
-              //   label: 'Категория',
-              //   hintText: 'Выберите категорию',
-              //   readOnly: true,
-              //   trailing: IconButton(
-              //     onPressed: _selectCategory,
-              //     icon: const Icon(Icons.keyboard_arrow_down_rounded),
-              //   ),
-              //   controller: _categoryController,
-              // ),
+          body: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(
+                    height: 50,
+                    color: AppColors.grey,
+                  ),
+                  AppTextFormField(
+                    label: 'Название цели',
+                    hintText: 'Улучшить грамматику английского языка',
+                    controller: _titleController,
+                  ),
+                  const SizedBox(height: 16),
+                  AppTextFormField(
+                    label: 'Описание (опционально)',
+                    hintText: 'Описание',
+                    controller: _descriptionController,
+                  ),
+                  const SizedBox(height: 16),
+                  // AppTextFormField(
+                  //   label: 'Категория',
+                  //   hintText: 'Выберите категорию',
+                  //   readOnly: true,
+                  //   trailing: IconButton(
+                  //     onPressed: _selectCategory,
+                  //     icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  //   ),
+                  //   controller: _categoryController,
+                  // ),
 
-              const SizedBox(height: 16),
-              AppTextFormField(
-                label: 'Срок цели',
-                hintText: 'Выберите дату завершения',
-                readOnly: true,
-                trailing: IconButton(
-                  onPressed: _selectDeadlineDate,
-                  icon: const Icon(
-                    Icons.calendar_month_rounded,
-                    color: Colors.grey,
+                  const SizedBox(height: 16),
+                  AppTextFormField(
+                    label: 'Срок цели',
+                    hintText: 'Выберите дату завершения',
+                    readOnly: true,
+                    trailing: IconButton(
+                      onPressed: _selectDeadlineDate,
+                      icon: const Icon(
+                        Icons.calendar_month_rounded,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    controller: _deadlineController,
                   ),
-                ),
-                controller: _deadlineController,
-              ),
-              const SizedBox(height: 16),
-              FrequencyDropdown(
-                selectedFrequency: _selectedFrequency,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedFrequency = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Индикаторы',
-                style: context.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Display existing indicators
-              for (final entry in _indicators.asMap().entries)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
+                  const SizedBox(height: 16),
+                  FrequencyDropdown(
+                    selectedFrequency: _selectedFrequency,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFrequency = value;
+                      });
+                    },
                   ),
-                  child: Row(
+                  const SizedBox(height: 16),
+                  Text(
+                    'Индикаторы',
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Display existing indicators
+                  for (final entry in _indicators.asMap().entries)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.value.title,
+                                  style: context.textTheme.titleSmall,
+                                ),
+                                if (entry.value.startTime != null &&
+                                    entry.value.endTime != null)
+                                  Text(
+                                    '${entry.value.startTime} - ${entry.value.endTime}',
+                                    style:
+                                        context.textTheme.labelSmall?.copyWith(
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => _removeIndicator(entry.key),
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.red),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Add Task Button (hidden if 3 or more indicators)
+                  if (_indicators.length < 3)
+                    TaskAddButton(
+                      onTap: _navigateToAddTask,
+                    ),
+                  const SizedBox(height: 16),
+                  AppTextFormField(
+                    label: 'Напоминание',
+                    hintText: 'Выберите время напоминания',
+                    readOnly: true,
+                    trailing: IconButton(
+                      onPressed: _selectReminderTime,
+                      icon: const Icon(Icons.access_time_rounded),
+                    ),
+                    controller: _reminderController,
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              entry.value.title,
-                              style: context.textTheme.titleSmall,
-                            ),
-                            if (entry.value.startTime != null &&
-                                entry.value.endTime != null)
-                              Text(
-                                '${entry.value.startTime} - ${entry.value.endTime}',
-                                style: context.textTheme.labelSmall?.copyWith(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                          ],
+                        child: BlocBuilder<GoalsCubit, GoalsState>(
+                          builder: (context, goalsState) {
+                            return BlocBuilder<IndicatorsCubit, IndicatorsState>(
+                              builder: (context, indicatorsState) {
+                                final isLoading = goalsState is GoalCreating ||
+                                    indicatorsState is IndicatorCreating;
+                                return AppButton(
+                                  text: isLoading ? 'Сохранение...' : 'Сохранить',
+                                  borderRadius: 10,
+                                  padding: EdgeInsets.zero,
+                                  onPressed: isLoading ? null : _saveGoal,
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => _removeIndicator(entry.key),
-                        icon:
-                            const Icon(Icons.delete_outline, color: Colors.red),
-                      ),
-                    ],
-                  ),
-                ),
-              // Add Task Button (hidden if 3 or more indicators)
-              if (_indicators.length < 3)
-                TaskAddButton(
-                  onTap: _navigateToAddTask,
-                ),
-              const SizedBox(height: 16),
-              AppTextFormField(
-                label: 'Напоминание',
-                hintText: 'Выберите время напоминания',
-                readOnly: true,
-                trailing: IconButton(
-                  onPressed: _selectReminderTime,
-                  icon: const Icon(Icons.access_time_rounded),
-                ),
-                controller: _reminderController,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: BlocBuilder<GoalsCubit, GoalsState>(
-                      builder: (context, state) {
-                        final isLoading = state is GoalCreating || 
-                                         state is GoalIndicatorCreating;
-                        return AppButton(
-                          text: isLoading ? 'Сохранение...' : 'Сохранить',
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AppButton(
+                          text: 'Отменить',
+                          isOutlined: true,
                           borderRadius: 10,
                           padding: EdgeInsets.zero,
-                          onPressed: isLoading ? null : _saveGoal,
-                        );
-                      },
-                    ),
+                          onPressed: _cancelGoal,
+                        ),
+                      )
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      text: 'Отменить',
-                      isOutlined: true,
-                      borderRadius: 10,
-                      padding: EdgeInsets.zero,
-                      onPressed: _cancelGoal,
-                    ),
-                  )
+                  const SizedBox(height: kToolbarHeight),
                 ],
               ),
-              const SizedBox(height: kToolbarHeight),
-            ],
+            ),
           ),
-        ),
-      ),
         ),
       ),
     );

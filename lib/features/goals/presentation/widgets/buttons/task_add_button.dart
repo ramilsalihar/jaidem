@@ -10,7 +10,7 @@ class TaskAddButton extends StatelessWidget {
   const TaskAddButton({
     super.key,
     this.onTap,
-    this.text = 'Добавить задачу',
+    this.text = 'Добавить Индикатор',
     this.width,
     this.height = 60,
   });

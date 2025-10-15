@@ -19,17 +19,20 @@ class OverviewTabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        _TabDropdownButton(
+        _HorizontalTabSelector(
           selectedTab: selectedTab,
           onTabChanged: onTabChanged,
         ),
         if (selectedTab == 1) ...[
-          const Spacer(),
-          StatisticsModeDropdown(
-            mode: statisticsMode,
-            onChanged: onStatisticsModeChanged,
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerRight,
+            child: StatisticsModeDropdown(
+              mode: statisticsMode,
+              onChanged: onStatisticsModeChanged,
+            ),
           ),
         ],
       ],
@@ -37,51 +40,54 @@ class OverviewTabSelector extends StatelessWidget {
   }
 }
 
-class _TabDropdownButton extends StatelessWidget {
+class _HorizontalTabSelector extends StatelessWidget {
   final int selectedTab;
   final Function(int) onTabChanged;
 
-  const _TabDropdownButton({
+  const _HorizontalTabSelector({
     required this.selectedTab,
     required this.onTabChanged,
   });
 
-  String get _selectedTitle => selectedTab == 0 ? 'Индикаторы' : 'Статистика';
+  final List<String> _tabTitles = const ['Индикаторы', 'Статистика'];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          _selectedTitle,
-          style: context.textTheme.headlineLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: 12),
-        GestureDetector(
-          onTap: () {
-            if (selectedTab == 0) {
-              onTabChanged(1);
-            } else {
-              onTabChanged(0);
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: AppColors.secondary,
-              borderRadius: BorderRadius.circular(10),
+    return Container(
+      height: 50,
+      child: Row(
+        children: List.generate(_tabTitles.length, (index) {
+          final isSelected = selectedTab == index;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => onTabChanged(index),
+              child: Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color:
+                          isSelected ? AppColors.secondary : Colors.transparent,
+                      width: 3,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    _tabTitles[index],
+                    style: context.textTheme.headlineLarge?.copyWith(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected ? AppColors.secondary : AppColors.grey,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            child: Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-        ),
-      ],
+          );
+        }),
+      ),
     );
   }
 }
