@@ -27,7 +27,7 @@ mixin EventDialog<T extends StatefulWidget> on State<T> {
               children: [
                 // Title
                 Text(
-                  'Укажите причину почему не придете на мероприятие',
+                  'Иш-чарага катышпай турганыңыздын себебин көрсөтүңүз.',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w300,
@@ -38,7 +38,7 @@ mixin EventDialog<T extends StatefulWidget> on State<T> {
                 // Text Field
                 AppTextFormField(
                   label: '',
-                  hintText: 'Ваша причина',
+                  hintText: 'Сиздин себебиңиз',
                   controller: controller,
                   maxLines: 5,
                 ),
@@ -48,7 +48,7 @@ mixin EventDialog<T extends StatefulWidget> on State<T> {
                 SizedBox(
                   width: double.infinity,
                   child: AppButton(
-                    text: 'Отправить',
+                    text: 'Жөнөтүү',
                     borderRadius: 10,
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -64,7 +64,7 @@ mixin EventDialog<T extends StatefulWidget> on State<T> {
                 SizedBox(
                   width: double.infinity,
                   child: AppButton(
-                    text: 'Отменить',
+                    text: 'Жокко чыгаруу',
                     borderRadius: 10,
                     isOutlined: true,
                     onPressed: () {

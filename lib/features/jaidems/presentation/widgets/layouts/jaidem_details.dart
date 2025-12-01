@@ -19,26 +19,29 @@ class JaidemDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> items = [];
+
+    void addField(String value, String label) {
+      if (value.isNotEmpty && value.trim() != "") {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: DetailsTextField(
+              label: label,
+              value: value,
+            ),
+          ),
+        );
+      }
+    }
+
+    speciality.isEmpty ? null : addField(speciality, 'Адис/кесип/кызмат орду:');
+    email.isEmpty ? null : addField(email, 'Email:');
+    university.isEmpty ? null : addField(university, 'Университет:');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DetailsTextField(
-          label: 'Спец/профессия/должность:',
-          value: speciality,
-        ),
-        // DetailsTextField(
-        //   label: 'Интересы/Навыки/Хобби:',
-        //   value: interest,
-        // ),
-        DetailsTextField(
-          label: 'Email:',
-          value: email,
-        ),
-        DetailsTextField(
-          label: 'Университет:',
-          value: university,
-        ),
-      ],
+      children: items,
     );
   }
 }

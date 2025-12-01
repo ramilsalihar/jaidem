@@ -50,7 +50,7 @@ class _EventCardState extends State<EventCard> with EventDialog, Show {
               },
             ),
           ),
-          const SizedBox(height: 7),
+          const SizedBox(height: 5),
           DetailsTextField(
             label: 'Тема:',
             value: widget.event.title,
@@ -61,7 +61,6 @@ class _EventCardState extends State<EventCard> with EventDialog, Show {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 1),
           DetailsTextField(
             label: 'Когда:',
             value: widget.event.date.toReadableDate(),
@@ -72,7 +71,6 @@ class _EventCardState extends State<EventCard> with EventDialog, Show {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 5),
           DetailsTextField(
             label: 'Где:',
             value: widget.event.location,
@@ -83,7 +81,7 @@ class _EventCardState extends State<EventCard> with EventDialog, Show {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           BlocBuilder<EventsCubit, EventsState>(
             builder: (context, state) {
               return EventActionButtons(

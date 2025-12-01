@@ -66,7 +66,7 @@ class EventActionButtons extends StatelessWidget with EventDialogs{
           backgroundColor: AppColors.primary.shade200,
           padding: const EdgeInsets.symmetric(vertical: 10),
           onPressed: primaryButtonAction ?? () {},
-          text: "Оставить отзыв",
+          text: "Пикир калтырыңыз",
         );
 
       case EventCardState.share:
@@ -81,24 +81,24 @@ class EventActionButtons extends StatelessWidget with EventDialogs{
                 backgroundColor: AppColors.green,
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 onPressed: primaryButtonAction ?? () {},
-                text: "Хочу участвовать",
+                text: "Мен катышкым келет",
               ),
             ),
-            const SizedBox(width: 8),
-            IconButton.filled(
-              style: IconButton.styleFrom(
-                backgroundColor: AppColors.primary.shade200,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(buttonRadius),
-                ),
-              ),
-              onPressed: shareButtonAction ?? () {},
-              icon: Image.asset(
-                'assets/icons/share.png',
-                color: AppColors.white,
-                height: 16,
-              ),
-            ),
+            // const SizedBox(width: 8),
+            // IconButton.filled(
+            //   style: IconButton.styleFrom(
+            //     backgroundColor: AppColors.primary.shade200,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(buttonRadius),
+            //     ),
+            //   ),
+            //   onPressed: shareButtonAction ?? () {},
+            //   icon: Image.asset(
+            //     'assets/icons/share.png',
+            //     color: AppColors.white,
+            //     height: 16,
+            //   ),
+            // ),
           ],
         );
 
@@ -113,7 +113,7 @@ class EventActionButtons extends StatelessWidget with EventDialogs{
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 onPressed: primaryButtonAction ?? () {},
                 backgroundColor: AppColors.green,
-                text: "Пойду",
+                text: "Барам",
               ),
             ),
             const SizedBox(width: 4),
@@ -127,7 +127,7 @@ class EventActionButtons extends StatelessWidget with EventDialogs{
                   showSkipEvent(context);
                 },
                 backgroundColor: AppColors.red,
-                text: 'Не пойду',
+                text: 'Барбайм',
               ),
             ),
             const SizedBox(width: 4),
@@ -139,7 +139,7 @@ class EventActionButtons extends StatelessWidget with EventDialogs{
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 onPressed: tertiaryButtonAction ?? () {},
                 backgroundColor: AppColors.orange,
-                text: 'Думаю',
+                text: 'Ойлон',
               ),
             ),
           ],

@@ -17,7 +17,7 @@ class AppSearchField extends StatefulWidget {
   const AppSearchField({
     super.key,
     this.controller,
-    this.hintText = 'Поиск...',
+    this.hintText = 'Издөө...',
     this.onChanged,
     this.onSubmitted,
     this.leading,

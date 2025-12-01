@@ -86,7 +86,7 @@ class _ChatMessageFieldState extends State<ChatMessageField> {
                   color: AppColors.black,
                 ),
                 decoration: InputDecoration(
-                  hintText: widget.hintText ?? 'Начните писать...',
+                  hintText: widget.hintText ?? 'Жазууну баштоо...',
                   hintStyle: context.textTheme.headlineMedium?.copyWith(
                     color: AppColors.grey,
                   ),

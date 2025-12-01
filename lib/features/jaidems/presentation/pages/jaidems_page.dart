@@ -90,12 +90,13 @@ class _JaidemsPageState extends State<JaidemsPage>
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
-        leadingWidth: 40,
+        leadingWidth: 35,
         leading: GestureDetector(
           child: Padding(
             padding: const EdgeInsets.only(left: 10),
             child: Image.asset(
               'assets/icons/menu.png',
+              height: 20,
               color: AppColors.primary,
             ),
           ),
@@ -125,7 +126,7 @@ class _JaidemsPageState extends State<JaidemsPage>
               children: [
                 Expanded(
                   child: AppSearchField(
-                    hintText: 'Поиск жайдемовцев...',
+                    hintText: 'Жадемовиттерди издеңиз...',
                     onChanged: (query) {
                       searchQuery = query;
                       _fetchJaidems();
@@ -194,6 +195,10 @@ class _JaidemsPageState extends State<JaidemsPage>
                       (context, index) {
                         final leftIndex = index * 2;
                         final rightIndex = leftIndex + 1;
+
+                        if(jaidemList[index].id == ''){
+                          return null;
+                        }
 
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 15),

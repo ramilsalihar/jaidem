@@ -120,20 +120,20 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
 
   String? _validateForm() {
     if (_titleController.text.trim().isEmpty) {
-      return 'Название задачи обязательно';
+      return 'Тапшырманын аталышы талап кылынат';
     }
 
     if (_titleController.text.trim().length < 3) {
-      return 'Название должно содержать минимум 3 символа';
+      return 'Аталыш кеминде 3 символдон турушу керек';
     }
 
     // Require both start and end time
     if (_startTime == null) {
-      return 'Время начала обязательно';
+      return 'Баштоо убактысы милдеттүү түрдө көрсөтүлүшү керек';
     }
 
     if (_endTime == null) {
-      return 'Время окончания обязательно';
+      return 'Аяктоо убактысы талап кылынат';
     }
 
     // Validate time order
@@ -141,7 +141,7 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
     final endMinutes = _endTime!.hour * 60 + _endTime!.minute;
 
     if (startMinutes >= endMinutes) {
-      return 'Время окончания должно быть позже времени начала';
+      return 'Аяктоо убактысы баштоо убактысынан кечирээк болушу керек.';
     }
 
     // Check if the time difference is at least 15 minutes
@@ -163,7 +163,7 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         title: Text(
-          widget.existingTask != null ? 'Редактировать задачу' : 'Новая задача',
+          widget.existingTask != null ? 'Тапшырманы түзөтүү' : 'Жаңы тапшырма',
           style: context.textTheme.headlineMedium,
         ),
       ),
@@ -178,14 +178,14 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
                 color: AppColors.grey,
               ),
               AppTextFormField(
-                label: 'Название задачи',
-                hintText: 'Выучить 20 слов',
+                label: 'Тапшырманын аталышы',
+                hintText: '20 сөз үйрөнүңүз',
                 controller: _titleController,
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                label: 'Время с',
-                hintText: 'Выберите время начала',
+                label: 'Убакыт менен',
+                hintText: 'Баштоо убактысын тандаңыз',
                 readOnly: true,
                 controller: _startTimeController,
                 trailing: IconButton(
@@ -195,8 +195,8 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                label: 'Время до',
-                hintText: 'Выберите время окончания',
+                label: 'Буга чейинки убакыт',
+                hintText: 'Аяктоо убактысын тандаңыз',
                 readOnly: true,
                 controller: _endTimeController,
                 trailing: IconButton(
@@ -206,8 +206,8 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                label: 'Напоминание',
-                hintText: 'Выберите время напоминания',
+                label: 'Эскерткич',
+                hintText: 'Эскертме убакытын тандаңыз',
                 readOnly: true,
                 controller: _reminderController,
                 trailing: IconButton(
@@ -220,7 +220,7 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
                 children: [
                   Expanded(
                     child: AppButton(
-                      text: 'Сохранить',
+                      text: 'Сактоо',
                       borderRadius: 10,
                       padding: EdgeInsets.zero,
                       onPressed: _saveTask,
@@ -229,7 +229,7 @@ class _AddTaskPageState extends State<AddTaskPage> with TimePickerMixin, Show {
                   const SizedBox(width: 10),
                   Expanded(
                     child: AppButton(
-                      text: 'Отменить',
+                      text: 'Жокко чыгаруу',
                       isOutlined: true,
                       borderRadius: 10,
                       padding: EdgeInsets.zero,

@@ -21,7 +21,6 @@ mixin NotificationMixin<T extends StatefulWidget> on State<T> {
         );
       },
     ).then((_) {
-      // 🔹 Mark all as read when dialog closes
       context.read<NotificationsCubit>().markAllAsRead();
     });
   }

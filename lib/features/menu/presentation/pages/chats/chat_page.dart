@@ -129,9 +129,9 @@ class _ChatPageState extends State<ChatPage> {
   String _getContactName() {
     switch (widget.chatType.toLowerCase()) {
       case 'users':
-        return widget.userId != null ? 'Пользователь' : 'Чат';
+        return widget.userId != null ? 'Колдонуучу' : 'Чат';
       case 'mentors':
-        return 'Наставник';
+        return 'Насаатчы';
       case 'admin':
         return 'Администратор';
       default:

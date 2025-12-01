@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
-import 'package:jaidem/core/widgets/buttons/app_filter_button.dart';
-import 'package:jaidem/core/widgets/fields/app_search_field.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/layout/event_pagination.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
@@ -45,7 +43,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin, Show {
           ),
         ),
         title: Text(
-          'Мероприятия',
+          'Иш-чаралар',
           style: context.textTheme.headlineMedium,
         ),
         actions: [
@@ -69,14 +67,14 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin, Show {
             if (state.attendanceStatus == AttendanceStatus.success) {
               showMessage(
                 context,
-                message: 'Запрос отправлен успешно!',
+                message: 'Сурам ийгиликтүү жөнөтүлдү!',
                 backgroundColor: AppColors.green,
                 textColor: Colors.white,
               );
             } else if (state.attendanceStatus == AttendanceStatus.error) {
               showMessage(
                 context,
-                message: 'Не получилось отправить, повторите позже.',
+                message: 'Жөнөтүү ишке ашкан жок, кийинчерээк кайра аракет кылыңыз.',
                 backgroundColor: AppColors.red,
                 textColor: Colors.white,
               );
@@ -92,7 +90,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin, Show {
             if (state.eventsStatus == EventsStatus.error) {
               return Center(
                 child: Text(
-                  state.errorMessage ?? 'Ошибка при загрузке мероприятий',
+                  state.errorMessage ?? 'Иш-чараларды жүктөөдө ката кетти',
                   style:
                       context.textTheme.bodyMedium?.copyWith(color: Colors.red),
                 ),
@@ -103,22 +101,22 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin, Show {
               return SingleChildScrollView(
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(child: AppSearchField()),
-                        const SizedBox(width: 8),
-                        AppFilterButton(),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Expanded(child: AppSearchField()),
+                    //     const SizedBox(width: 8),
+                    //     // AppFilterButton(),
+                    //   ],
+                    // ),
                     const SizedBox(height: 12),
                     EventPagination(
                       events: state.requiredEvents,
-                      label: 'Обязательные мероприятия',
+                      label: 'Милдеттүү иш-чаралар',
                     ),
                     const SizedBox(height: 12),
                     EventPagination(
                       events: state.optionalEvents,
-                      label: 'Для всех желающих',
+                      label: 'Баары үчүн',
                     ),
                   ],
                 ),

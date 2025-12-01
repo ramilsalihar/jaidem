@@ -30,7 +30,7 @@ class PersonDetails extends StatelessWidget {
       child: Column(
         children: [
           DetailsTextField(
-            label: 'Возраст:',
+            label: 'Жашы:',
             value: person.age.toString(),
             hasSpace: true,
             labelWidth: 150,
@@ -42,7 +42,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Год обучения:',
+            label: 'Окуу жылы:',
             value: person.courseYear.toString(),
             hasSpace: true,
             labelWidth: 150,
@@ -54,7 +54,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Специальность:',
+            label: 'Адистик:',
             value: person.speciality ?? '',
             hasSpace: true,
             labelWidth: 150,
@@ -78,7 +78,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Село/город:',
+            label: 'Айыл/шаар:',
             value: person.village?.name ?? '',
             hasSpace: true,
             labelWidth: 150,
@@ -90,7 +90,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Интересы/навыки:',
+            label: 'Кызыкчылыктары/көндүмдөрү:',
             value: person.interest ?? '',
             hasSpace: true,
             labelWidth: 150,

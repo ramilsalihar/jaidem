@@ -37,29 +37,34 @@ class MenuButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white24),
         ),
-        child: Row(
-          children: [
-            Image.asset(
-              leadingIcon,
-              height: 24,
-              color: Colors.black87,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: context.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w100,
-                color: Colors.black87
+        child: Expanded(
+          child: Row(
+            children: [
+              Image.asset(
+                leadingIcon,
+                height: 24,
+                color: Colors.black87,
               ),
-            ),
-            const Spacer(),
-            trailing ??
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.primary.shade400,
-                  size: 16,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w100,
+                    color: Colors.black87
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis
                 ),
-          ],
+              ),
+              trailing ??
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: AppColors.primary.shade400,
+                    size: 16,
+                  ),
+            ],
+          ),
         ),
       ),
     );

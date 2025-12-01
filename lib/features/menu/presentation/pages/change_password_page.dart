@@ -24,7 +24,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         title: Text(
-          'Сменить пароль',
+          'Сырсөздү өзгөртүү',
           style: context.textTheme.headlineLarge,
         ),
       ),
@@ -37,20 +37,20 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               color: AppColors.grey,
             ),
             AppTextFormField(
-              label: 'Текущий пароль',
-              hintText: 'Введите текущий пароль',
+              label: 'Учурдагы сырсөз',
+              hintText: 'Учурдагы сырсөзүңүздү киргизиңиз',
               controller: currentPass,
             ),
             const SizedBox(height: 16),
             AppTextFormField(
-              label: 'Новый пароль',
-              hintText: 'Введите новый пароль',
+              label: 'Жаңы сыр сөз',
+              hintText: 'Жаңы сырсөз киргизиңиз',
               controller: newPass,
             ),
             const SizedBox(height: 16),
             AppTextFormField(
-              label: 'Подтвердите новый пароль',
-              hintText: 'Введите новый пароль',
+              label: 'Жаңы сырсөзүңүздү ырастаңыз',
+              hintText: 'Жаңы сырсөз киргизиңиз',
               controller: confirmPass,
             ),
             const SizedBox(height: kToolbarHeight),
@@ -58,7 +58,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               children: [
                 Expanded(
                   child: AppButton(
-                    text: 'Сохранить',
+                    text: 'Сактоо',
                     borderRadius: 10,
                     padding: EdgeInsets.zero,
                     onPressed: () {},
@@ -67,7 +67,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: AppButton(
-                    text: 'Отменить',
+                    text: 'Жокко чыгаруу',
                     isOutlined: true,
                     borderRadius: 10,
                     padding: EdgeInsets.zero,

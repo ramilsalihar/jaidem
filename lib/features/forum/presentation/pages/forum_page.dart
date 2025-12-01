@@ -30,7 +30,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             padding: const EdgeInsets.only(left: 15),
             child: Image.asset(
               'assets/icons/menu.png',
-              height: 15,
+              height: 20,
             ),
           ),
         ),
@@ -57,7 +57,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           child: Padding(
             padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 12),
             child: AppSearchField(
-              hintText: 'Search for places, events...',
+              hintText: 'Жерлерди, иш-чараларды издеңиз...',
               onChanged: (query) {
                 context.read<ForumCubit>().fetchAllForums(search: query);
               },

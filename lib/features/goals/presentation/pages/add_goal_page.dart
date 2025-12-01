@@ -13,7 +13,6 @@ import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
-import 'package:jaidem/features/goals/presentation/pages/add_task_page.dart';
 import 'package:jaidem/features/goals/presentation/widgets/buttons/task_add_button.dart';
 import 'package:jaidem/features/goals/presentation/widgets/dropdowns/frequency_dropdown.dart';
 
@@ -31,7 +30,6 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
   final _descriptionController = TextEditingController();
   final _deadlineController = TextEditingController();
   final _reminderController = TextEditingController();
-  // final _categoryController = TextEditingController();
 
   final List<GoalIndicatorModel> _indicators = [];
   DateTime? _selectedDeadline;
@@ -44,7 +42,6 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     _descriptionController.dispose();
     _deadlineController.dispose();
     _reminderController.dispose();
-    // _categoryController.dispose();
     super.dispose();
   }
 
@@ -87,7 +84,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
       onTimeSelected: (selectedTime) {
         setState(() {
           _selectedReminderTime = selectedTime;
-          _reminderController.text = 'Утром ${formatTimeOfDay(selectedTime)}';
+          _reminderController.text =
+              'Эртең менен ${formatTimeOfDay(selectedTime)}';
         });
       },
     );
@@ -95,27 +93,27 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
 
   String? _validateForm() {
     if (_titleController.text.trim().isEmpty) {
-      return 'Название цели обязательно';
+      return 'Максаттын аты талап кылынат.';
     }
 
     if (_titleController.text.trim().length < 3) {
-      return 'Название должно содержать минимум 3 символа';
+      return 'Аталыш кеминде 3 символдон турушу керек';
     }
 
     if (_selectedDeadline == null) {
-      return 'Срок цели обязателен';
+      return 'Максаттуу дата милдеттүү түрдө көрсөтүлөт';
     }
 
     if (_selectedDeadline!.isBefore(DateTime.now())) {
-      return 'Дата завершения цели не может быть в прошлом';
+      return 'Максаттын аткарылуу күнү өткөн чакта болушу мүмкүн эмес.';
     }
 
     if (_selectedFrequency == null || _selectedFrequency!.isEmpty) {
-      return 'Частота обязательна';
+      return 'Жыштыгы милдеттүү';
     }
 
     if (_selectedReminderTime == null) {
-      return 'Время напоминания обязательно';
+      return 'Эскертүү убактысы милдеттүү түрдө көрсөтүлүшү керек';
     }
 
     return null;
@@ -170,12 +168,14 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                   final goalId = state.goals.first.id;
                   for (final indicator in _indicators) {
                     final updatedIndicator = indicator.copyWith(goal: goalId);
-                    context.read<IndicatorsCubit>().createGoalIndicator(updatedIndicator);
+                    context
+                        .read<IndicatorsCubit>()
+                        .createGoalIndicator(updatedIndicator);
                   }
                 } else {
                   showMessage(
                     context,
-                    message: 'Цель успешно создана!',
+                    message: 'Максат ийгиликтүү түзүлдү.!',
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
@@ -196,7 +196,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 if (createdIndicators >= _indicators.length) {
                   showMessage(
                     context,
-                    message: 'Цель и индикаторы успешно созданы!',
+                    message:
+                        'Максаттуу көрсөткүчтөр жана көрсөткүчтөр ийгиликтүү түзүлдү.!',
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
@@ -204,7 +205,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 }
               } else if (state is IndicatorCreationError) {
                 showErrorMessage(context,
-                    message: 'Ошибка создания индикатора: ${state.message}');
+                    message:
+                        'Индикаторду түзүүдө ката кетти: ${state.message}');
               }
             },
           ),
@@ -214,7 +216,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
           appBar: AppBar(
             backgroundColor: AppColors.backgroundColor,
             title: Text(
-              'Добавить цель',
+              'Максат кошуу',
               style: context.textTheme.headlineMedium,
             ),
           ),
@@ -230,14 +232,14 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     color: AppColors.grey,
                   ),
                   AppTextFormField(
-                    label: 'Название цели',
-                    hintText: 'Улучшить грамматику английского языка',
+                    label: 'Максаттуу ат',
+                    hintText: 'Англис тилинин грамматикасын өркүндөтүңүз',
                     controller: _titleController,
                   ),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                    label: 'Описание (опционально)',
-                    hintText: 'Описание',
+                    label: 'Сүрөттөмө (милдеттүү эмес)',
+                    hintText: 'Сүрөттөмө',
                     controller: _descriptionController,
                   ),
                   const SizedBox(height: 16),
@@ -254,8 +256,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
 
                   const SizedBox(height: 16),
                   AppTextFormField(
-                    label: 'Срок цели',
-                    hintText: 'Выберите дату завершения',
+                    label: 'Максат коюу мөөнөтү',
+                    hintText: 'Аяктоо күнүн тандаңыз',
                     readOnly: true,
                     trailing: IconButton(
                       onPressed: _selectDeadlineDate,
@@ -277,7 +279,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Индикаторы',
+                    'Индикаторлор',
                     style: context.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -329,8 +331,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     ),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                    label: 'Напоминание',
-                    hintText: 'Выберите время напоминания',
+                    label: 'Эскерткич',
+                    hintText: 'Эскертме убакытын тандаңыз',
                     readOnly: true,
                     trailing: IconButton(
                       onPressed: _selectReminderTime,
@@ -344,12 +346,13 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                       Expanded(
                         child: BlocBuilder<GoalsCubit, GoalsState>(
                           builder: (context, goalsState) {
-                            return BlocBuilder<IndicatorsCubit, IndicatorsState>(
+                            return BlocBuilder<IndicatorsCubit,
+                                IndicatorsState>(
                               builder: (context, indicatorsState) {
                                 final isLoading = goalsState is GoalCreating ||
                                     indicatorsState is IndicatorCreating;
                                 return AppButton(
-                                  text: isLoading ? 'Сохранение...' : 'Сохранить',
+                                  text: 'Сактоо',
                                   borderRadius: 10,
                                   padding: EdgeInsets.zero,
                                   onPressed: isLoading ? null : _saveGoal,
@@ -362,7 +365,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                       const SizedBox(width: 10),
                       Expanded(
                         child: AppButton(
-                          text: 'Отменить',
+                          text: 'Жокко чыгаруу',
                           isOutlined: true,
                           borderRadius: 10,
                           padding: EdgeInsets.zero,

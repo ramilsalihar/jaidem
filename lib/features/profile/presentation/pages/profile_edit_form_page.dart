@@ -1,8 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
-import 'package:jaidem/core/data/models/jaidem/details/village_model.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -72,37 +70,36 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
   }
 
   void _onSave(PersonModel user) {
-  final updatedUser = user.copyWith(
-    dateCreated: DateTime.tryParse(dateController.text) ?? user.dateCreated,
-    university: universityController.text,
-    courseYear: int.tryParse(courseYearController.text) ?? user.courseYear,
-    speciality: specialityController.text,
-    region: (user.region != null)
-        ? user.region!.copyWith(name: regionController.text)
-        : null,
-    village: (user.village != null)
-        ? user.village!.copyWith(name: villageController.text)
-        : null,
-    interest: interestController.text,
-    phone: phoneController.text,
-    socialMedias: {
-      ...?user.socialMedias,
-      'instagram': socialMediaController.text,
-    },
-  );
+    final updatedUser = user.copyWith(
+      dateCreated: DateTime.tryParse(dateController.text) ?? user.dateCreated,
+      university: universityController.text,
+      courseYear: int.tryParse(courseYearController.text) ?? user.courseYear,
+      speciality: specialityController.text,
+      region: (user.region != null)
+          ? user.region!.copyWith(name: regionController.text)
+          : null,
+      village: (user.village != null)
+          ? user.village!.copyWith(name: villageController.text)
+          : null,
+      interest: interestController.text,
+      phone: phoneController.text,
+      socialMedias: {
+        ...?user.socialMedias,
+        'instagram': socialMediaController.text,
+      },
+    );
 
-  context.read<ProfileCubit>().updateUser(updatedUser);
+    context.read<ProfileCubit>().updateUser(updatedUser);
 
-  context.router.pop();
-}
-
+    context.router.pop();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
-        title: Text('Редактировать профиль',
+        title: Text('Профилди түзөтүү',
             style: context.textTheme.headlineLarge),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -135,8 +132,8 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
               child: Column(
                 children: [
                   AppTextFormField(
-                      label: 'Дата рождения',
-                      hintText: 'Введите дату рождения',
+                      label: 'Туулган күн',
+                      hintText: 'Туулган күнүңүздү киргизиңиз',
                       controller: dateController),
                   const SizedBox(height: 16),
                   AppTextFormField(
@@ -145,12 +142,12 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                       controller: universityController),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                      label: 'Год обучения',
+                      label: 'Окуу жылы',
                       hintText: '2',
                       controller: courseYearController),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                      label: 'Специальность',
+                      label: 'Адистик',
                       hintText: 'Экономика и менеджмент',
                       controller: specialityController),
                   const SizedBox(height: 16),
@@ -160,18 +157,18 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                       controller: regionController),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                      label: 'Село/город',
+                      label: 'Айыл/шаар',
                       hintText: 'Кайырма',
                       controller: villageController),
                   const SizedBox(height: 16),
                   AppTextFormField(
-                      label: 'Интересы',
+                      label: 'Кызыкчылыктар',
                       hintText: 'Футбол, Чтение...',
                       controller: interestController),
                   const SizedBox(height: 16),
                   AppTextFormField(
                       label: 'Телефон',
-                      hintText: 'Введите номер телефона',
+                      hintText: 'Телефон номериңизди киргизиңиз',
                       controller: phoneController),
                   const SizedBox(height: 16),
                   AppTextFormField(
@@ -183,7 +180,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                     children: [
                       Expanded(
                         child: AppButton(
-                          text: 'Сохранить',
+                          text: 'Сактоо',
                           borderRadius: 6,
                           backgroundColor: AppColors.primary.shade300,
                           onPressed: () => _onSave(user),
@@ -192,7 +189,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: AppButton(
-                          text: 'Отменить',
+                          text: 'Жокко чыгаруу',
                           borderRadius: 6,
                           isOutlined: true,
                           textColor: AppColors.primary.shade300,

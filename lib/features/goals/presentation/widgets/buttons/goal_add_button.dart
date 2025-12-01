@@ -31,7 +31,7 @@ class GoalAddButton extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             Text(
-              'Добавить цель',
+              'Максат кошуу',
               style: context.textTheme.headlineMedium?.copyWith(
                 color: AppColors.primary,
               ),

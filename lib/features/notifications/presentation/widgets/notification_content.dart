@@ -42,7 +42,7 @@ class _NotificationContentState extends State<NotificationContent> {
                 height: size.width * 0.8,
                 width: size.width * 0.8,
                 child: Center(
-                  child: Text('There are no notifications yet'),
+                  child: Text('Азырынча эч кандай эскертмелер жок'),
                 ),
               );
             }

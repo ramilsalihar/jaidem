@@ -11,6 +11,7 @@ class DetailsTextField extends StatelessWidget {
     this.valueStyle,
     this.hasSpace = false,
     this.labelWidth,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
   });
 
   final String label;
@@ -19,6 +20,7 @@ class DetailsTextField extends StatelessWidget {
   final TextStyle? valueStyle;
   final bool hasSpace;
   final double? labelWidth;
+  final CrossAxisAlignment crossAxisAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -36,20 +38,31 @@ class DetailsTextField extends StatelessWidget {
 
     if (hasSpace) {
       return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: crossAxisAlignment,
         children: [
-          SizedBox(
-            width: labelWidth ?? 120,
-            child: Text(
+          // Label with fixed width or flexible
+          if (labelWidth != null)
+            SizedBox(
+              width: labelWidth,
+              child: Text(
+                label,
+                style: defaultLabelStyle,
+              ),
+            )
+          else
+            Text(
               label,
               style: defaultLabelStyle,
             ),
-          ),
+          
           const SizedBox(width: 8),
+          
+          // Value takes remaining space and can expand
           Expanded(
             child: Text(
               value,
               style: defaultValueStyle,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -58,9 +71,8 @@ class DetailsTextField extends StatelessWidget {
 
     return Text(
       value,
-      style: defaultValueStyle,
       maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+      style: defaultValueStyle,
     );
   }
 }

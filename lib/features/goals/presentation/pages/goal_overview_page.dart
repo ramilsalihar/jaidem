@@ -71,7 +71,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Цель/Учеба',
+          'Максат/Изилдөө',
           style: context.textTheme.headlineLarge,
         ),
         centerTitle: true,

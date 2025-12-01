@@ -93,15 +93,15 @@ class AppDrawer extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
+                            // MenuButton(
+                            //   title: 'База знаний',
+                            //   onTap: () {
+                            //     Navigator.pop(context);
+                            //   },
+                            //   leadingIcon: 'assets/icons/backpack.png',
+                            // ),
                             MenuButton(
-                              title: 'База знаний',
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                              leadingIcon: 'assets/icons/backpack.png',
-                            ),
-                            MenuButton(
-                              title: 'Список чатов',
+                              title: 'Чаттардын тизмеси',
                               onTap: () {
                                 Navigator.pop(context);
                                 context.router.push(ChatListRoute());
@@ -109,18 +109,20 @@ class AppDrawer extends StatelessWidget {
                               leadingIcon: 'assets/icons/chat.png',
                             ),
                             MenuButton(
-                              title: 'Чат с Админом',
+                              title: 'Администратор менен баарлашуу',
                               onTap: () {
                                 Navigator.pop(context);
-                                context.router.push(ChatRoute(chatType: 'admin'));
+                                context.router
+                                    .push(ChatRoute(chatType: 'admin'));
                               },
                               leadingIcon: 'assets/icons/chat.png',
                             ),
                             MenuButton(
-                              title: 'Чат с ментором',
+                              title: 'Насаатчы менен баарлашуу',
                               onTap: () {
                                 Navigator.pop(context);
-                                context.router.push(ChatRoute(chatType: 'mentors'));
+                                context.router
+                                    .push(ChatRoute(chatType: 'mentors'));
                               },
                               leadingIcon: 'assets/icons/chat.png',
                             ),
@@ -131,12 +133,12 @@ class AppDrawer extends StatelessWidget {
                               ),
                               alignment: Alignment.centerLeft,
                               child: Text(
-                                'Настройки',
+                                'Орнотуулар',
                                 style: context.textTheme.bodyMedium,
                               ),
                             ),
                             MenuButton(
-                              title: 'Уведомления',
+                              title: 'Эскертмелер',
                               onTap: () {},
                               leadingIcon: 'assets/icons/notification.png',
                               trailing: SizedBox(
@@ -152,7 +154,7 @@ class AppDrawer extends StatelessWidget {
                               onTrailingPressed: () {},
                             ),
                             MenuButton(
-                              title: 'Смена пароля',
+                              title: 'Сырсөздү өзгөртүү',
                               onTap: () {
                                 context.router.push(ChangePasswordRoute());
                               },
@@ -183,13 +185,16 @@ class AppDrawer extends StatelessWidget {
               child: BlocBuilder<MenuCubit, MenuState>(
                 builder: (context, state) {
                   final isLoading = state is MenuLoading;
-                  
+
                   return GestureDetector(
-                    onTap: isLoading ? null : () {
-                      _showSignOutDialog(context);
-                    },
+                    onTap: isLoading
+                        ? null
+                        : () {
+                            _showSignOutDialog(context);
+                          },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 30),
                       child: Row(
                         children: [
                           if (isLoading)
@@ -198,7 +203,8 @@ class AppDrawer extends StatelessWidget {
                               width: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
                           else
@@ -209,7 +215,7 @@ class AppDrawer extends StatelessWidget {
                             ),
                           const SizedBox(width: 8),
                           Text(
-                            isLoading ? 'Выходим...' : 'Выйти',
+                            'Чыгуу',
                             style: context.textTheme.displaySmall?.copyWith(
                               color: AppColors.white,
                             ),
@@ -232,12 +238,12 @@ class AppDrawer extends StatelessWidget {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Выйти из аккаунта'),
-          content: const Text('Вы уверены, что хотите выйти?'),
+          title: const Text('Аккаунтуңуздан чыгыңыз'),
+          content: const Text('Чын эле чыккыңыз келеби?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Отмена'),
+              child: const Text('Жокко чыгаруу'),
             ),
             TextButton(
               onPressed: () {
@@ -245,7 +251,7 @@ class AppDrawer extends StatelessWidget {
                 context.read<MenuCubit>().signOut();
               },
               child: const Text(
-                'Выйти',
+                'Чыгуу',
                 style: TextStyle(color: Colors.red),
               ),
             ),

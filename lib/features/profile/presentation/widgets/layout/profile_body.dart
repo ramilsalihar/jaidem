@@ -35,7 +35,7 @@ class ProfileBody extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                'Редактировать профиль',
+                'Профилди түзөтүү',
                 style: context.textTheme.labelSmall?.copyWith(
                   color: AppColors.primary,
                 ),
@@ -62,14 +62,14 @@ class ProfileBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Обо мне',
+                'Мен жөнүндө',
                 style: context.textTheme.headlineLarge?.copyWith(
                   color: AppColors.black,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                person.aboutMe ?? 'Нету данных',
+                person.aboutMe ?? 'Маалымат жок',
                 style: context.textTheme.bodySmall?.copyWith(
                   color: AppColors.black,
                 ),

@@ -58,7 +58,7 @@ class PersonShortInfo extends StatelessWidget {
                 // ),
                 const SizedBox(height: 5),
                 DetailsTextField(
-                  label: 'Спец/профессия: ',
+                  label: 'Адис/кесип: ',
                   value: person.speciality ?? '',
                   labelStyle: context.textTheme.labelMedium?.copyWith(
                     color: AppColors.grey,

@@ -68,12 +68,11 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
                         interest: widget.person.interest ?? '',
                         phone: widget.person.phone ?? 'Не указан',
                         email: widget.person.email ?? 'Не указан',
-                        
                         university: widget.person.university ?? '',
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
                     /// Buttons
                     JaidemActionButtons(
