@@ -17,8 +17,6 @@ class ForumPage extends StatefulWidget {
 class _ForumPageState extends State<ForumPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,15 +27,16 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         leading: GestureDetector(
           onTap: () => _scaffoldKey.currentState?.openDrawer(),
           child: Padding(
-            padding: const EdgeInsets.only(left: 10),
+            padding: const EdgeInsets.only(left: 15),
             child: Image.asset(
               'assets/icons/menu.png',
+              height: 15,
             ),
           ),
         ),
         title: Image.asset(
           'assets/images/logo_white.png',
-          width: 100,
+          width: 90,
         ),
         actions: [
           GestureDetector(
@@ -54,9 +53,9 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          preferredSize: const Size.fromHeight(40),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 12),
             child: AppSearchField(
               hintText: 'Search for places, events...',
               onChanged: (query) {

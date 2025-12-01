@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/widgets/fields/details_text_field.dart';
-import 'package:jaidem/features/jaidems/presentation/widgets/fields/jaidem_text_field.dart';
 
 class JaidemDetails extends StatelessWidget {
   const JaidemDetails({
@@ -27,14 +26,10 @@ class JaidemDetails extends StatelessWidget {
           label: 'Спец/профессия/должность:',
           value: speciality,
         ),
-        DetailsTextField(
-          label: 'Интересы/Навыки/Хобби:',
-          value: interest,
-        ),
-        DetailsTextField(
-          label: 'Телефон:',
-          value: phone,
-        ),
+        // DetailsTextField(
+        //   label: 'Интересы/Навыки/Хобби:',
+        //   value: interest,
+        // ),
         DetailsTextField(
           label: 'Email:',
           value: email,

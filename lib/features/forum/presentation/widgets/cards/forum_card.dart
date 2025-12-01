@@ -27,7 +27,7 @@ class ForumCard extends StatelessWidget {
           ),
           const SizedBox(height: 5),
           SizedBox(
-            height: 180,
+            height: 170,
             width: size.width,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),

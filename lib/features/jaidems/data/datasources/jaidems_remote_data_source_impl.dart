@@ -22,7 +22,6 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
     String? search,
   }) async {
     try {
-      // Build query parameters dynamically
       final queryParameters = <String, dynamic>{};
 
       if (next != null) queryParameters['next'] = next;
@@ -39,6 +38,7 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
         queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
       );
 
+  
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = ResponseModel.fromJson(
           response.data,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jaidem/core/data/services/contact_service.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
@@ -9,6 +10,8 @@ class JaidemActionButtons extends StatelessWidget {
     this.spaceBetweenIcons = 5.0,
     this.isButtonExtended = false,
     this.hasTrailingButton = true,
+    this.instagram,
+    this.whatsapp,
     this.onTap,
   });
 
@@ -16,34 +19,45 @@ class JaidemActionButtons extends StatelessWidget {
   final double spaceBetweenIcons;
   final bool isButtonExtended;
   final bool hasTrailingButton;
+  final String? instagram;
+  final String? whatsapp;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Flexible(
           flex: 0,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                'assets/icons/whatsapp.png',
-                width: iconSize,
-                height: iconSize,
+              GestureDetector(
+                onTap: () {
+                  if (whatsapp != null && whatsapp!.isNotEmpty) {
+                    ContactService().openWhatsapp(whatsapp!);
+                  }
+                },
+                child: Image.asset(
+                  'assets/icons/whatsapp.png',
+                  width: iconSize,
+                  height: iconSize,
+                ),
               ),
+              
               SizedBox(width: spaceBetweenIcons),
-              Image.asset(
-                'assets/icons/chat_colored.png',
-                width: iconSize,
-                height: iconSize,
-              ),
-              SizedBox(width: spaceBetweenIcons),
-              Image.asset(
-                'assets/icons/insta.png',
-                width: iconSize,
-                height: iconSize,
+              GestureDetector(
+                onTap: () {
+                  if (instagram != null && instagram!.isNotEmpty) {
+                    ContactService().openInstagram(instagram!);
+                  }
+                },
+                child: Image.asset(
+                  'assets/icons/insta.png',
+                  width: iconSize,
+                  height: iconSize,
+                ),
               ),
             ],
           ),

@@ -35,7 +35,7 @@ class UserNameField extends StatelessWidget {
             style: context.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),

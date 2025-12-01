@@ -39,6 +39,9 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         search: search,
       );
 
+      print(
+          'JaidemsCubit: getJaidems called with results ${result.toString()}');
+
       result.fold(
         (failure) => emit(JaidemsError(message: failure.toString())),
         (response) {

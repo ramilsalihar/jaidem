@@ -126,41 +126,45 @@ class _JaidemsPageState extends State<JaidemsPage>
                 Expanded(
                   child: AppSearchField(
                     hintText: 'Поиск жайдемовцев...',
-                    onChanged: (query) => searchQuery = query,
+                    onChanged: (query) {
+                      searchQuery = query;
+                      _fetchJaidems();
+                    },
                     onSubmitted: (query) {
                       searchQuery = query;
                       _fetchJaidems();
                     },
+                   
                   ),
                 ),
-                const SizedBox(width: 10),
-                GestureDetector(
-                  onTap: () {
-                    showFilters(
-                      onApply: (appliedFilters) {
-                        filters = appliedFilters;
-                        _fetchJaidems();
-                      },
-                      onReset: () {
-                        filters = {};
-                        _fetchJaidems();
-                      },
-                    );
-                  },
-                  child: Container(
-                    width: 60,
-                    height: 45,
-                    decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(50)),
-                    child: Center(
-                      child: Image.asset(
-                        'assets/icons/filter.png',
-                        height: 20,
-                      ),
-                    ),
-                  ),
-                ),
+                // const SizedBox(width: 10),
+                // GestureDetector(
+                //   onTap: () {
+                //     showFilters(
+                //       onApply: (appliedFilters) {
+                //         filters = appliedFilters;
+                //         _fetchJaidems();
+                //       },
+                //       onReset: () {
+                //         filters = {};
+                //         _fetchJaidems();
+                //       },
+                //     );
+                //   },
+                //   child: Container(
+                //     width: 60,
+                //     height: 45,
+                //     decoration: BoxDecoration(
+                //         color: AppColors.primary,
+                //         borderRadius: BorderRadius.circular(50)),
+                //     child: Center(
+                //       child: Image.asset(
+                //         'assets/icons/filter.png',
+                //         height: 20,
+                //       ),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

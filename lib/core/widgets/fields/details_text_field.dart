@@ -22,65 +22,45 @@ class DetailsTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final defaultLabelStyle = labelStyle ??
+        context.textTheme.labelSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: AppColors.grey,
+        );
+
+    final defaultValueStyle = valueStyle ??
+        context.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.w400,
+          color: Colors.grey,
+        );
+
     if (hasSpace) {
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: labelWidth ?? 120, 
+            width: labelWidth ?? 120,
             child: Text(
               label,
-              style: labelStyle ??
-                  context.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.grey,
-                  ),
+              style: defaultLabelStyle,
             ),
           ),
-          const SizedBox(width: 8), 
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: valueStyle ??
-                  context.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black,
-                  ),
+              style: defaultValueStyle,
             ),
           ),
         ],
       );
     }
 
-    return RichText(
-      maxLines: 1,
+    return Text(
+      value,
+      style: defaultValueStyle,
+      maxLines: 2,
       overflow: TextOverflow.ellipsis,
-      textHeightBehavior: TextHeightBehavior(
-        applyHeightToFirstAscent: false,
-        applyHeightToLastDescent: false,
-      ),
-      text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
-        children: [
-          TextSpan(
-            text: label,
-            style: labelStyle ??
-                context.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.grey,
-                ),
-          ),
-          const TextSpan(text: ' '),
-          TextSpan(
-            text: value,
-            style: valueStyle ??
-                context.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -1,10 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/details_text_field.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/buttons/jaidem_action_buttons.dart';
-import 'package:jaidem/core/widgets/fields/rating_field.dart';
 
 mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
   void showJaidemDetails(PersonModel person) {
@@ -166,6 +167,10 @@ mixin JaidemPopUp<T extends StatefulWidget> on State<T> {
                       iconSize: 35,
                       spaceBetweenIcons: 10,
                       isButtonExtended: true,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.router.push(ProfileRoute(person: person));
+                      },
                     )
                   ],
                 ),
