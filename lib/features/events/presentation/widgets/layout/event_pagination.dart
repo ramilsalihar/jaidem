@@ -31,7 +31,7 @@ class _EventPaginationState extends State<EventPagination> {
           controller: _pageController,
         ),
         SizedBox(
-          height: 260,
+          height: 265,
           width: size.width,
           child: PageView(
             controller: _pageController,

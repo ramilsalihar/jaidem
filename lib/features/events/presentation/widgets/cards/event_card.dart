@@ -24,113 +24,118 @@ class EventCard extends StatefulWidget {
 class _EventCardState extends State<EventCard> with EventDialog, Show {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightGrey,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              widget.event.image,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              height: 100,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.network(
-                  AppConstants.defaultEventImage,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  height: 100,
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 5),
-          DetailsTextField(
-            label: 'Тема:',
-            value: widget.event.title,
-            labelStyle: context.textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
-            valueStyle: context.textTheme.bodyMedium?.copyWith(
-              color: Colors.black,
-            ),
-          ),
-          DetailsTextField(
-            label: 'Когда:',
-            value: widget.event.date.toReadableDate(),
-            labelStyle: context.textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
-            valueStyle: context.textTheme.bodyMedium?.copyWith(
-              color: Colors.black,
-            ),
-          ),
-          DetailsTextField(
-            label: 'Где:',
-            value: widget.event.location,
-            labelStyle: context.textTheme.bodyMedium?.copyWith(
-              color: AppColors.grey,
-            ),
-            valueStyle: context.textTheme.bodyMedium?.copyWith(
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 5),
-          BlocBuilder<EventsCubit, EventsState>(
-            builder: (context, state) {
-              return EventActionButtons(
-                status: widget.event.isRequired
-                    ? EventCardState.decision
-                    : EventCardState.share,
-                primaryButtonAction: () {
-                  var attendance = AttendanceModel(
-                    status: 'will go',
-                    reason: 'will go',
-                    student: '',
-                    event: widget.event.id,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.lightGrey,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                widget.event.image,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                height: 120,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.network(
+                    AppConstants.defaultEventImage,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    height: 100,
                   );
-                  if (widget.event.isRequired) {
-                    context.read<EventsCubit>().sendRequest(attendance);
-                  } else {
-                    attendance =
-                        attendance.copyWith(reason: "Хочу участвовать");
-                    context.read<EventsCubit>().sendRequest(attendance);
-                  }
                 },
-                secondaryButtonAction: () {
-                  var attendance = AttendanceModel(
-                    status: 'will not go',
-                    reason: '',
-                    student: '',
-                    event: widget.event.id,
-                  );
-                  showEventDialog(onConfirm: (val) {
-                    attendance = attendance.copyWith(reason: val);
-
-                    if (val != null) {
+              ),
+            ),
+            const SizedBox(height: 5),
+            DetailsTextField(
+              label: 'Тема:',
+              hasSpace: true,
+              value: widget.event.title,
+              labelStyle: context.textTheme.labelLarge?.copyWith(
+                color: AppColors.grey,
+              ),
+              valueStyle: context.textTheme.labelLarge?.copyWith(
+                color: Colors.black,
+              ),
+            ),
+            DetailsTextField(
+              label: 'Когда:',
+              value: widget.event.date.toReadableDate(),
+              hasSpace: true,
+              labelStyle: context.textTheme.labelLarge?.copyWith(
+                color: AppColors.grey,
+              ),
+              valueStyle: context.textTheme.labelLarge?.copyWith(
+                color: Colors.black,
+              ),
+            ),
+            DetailsTextField(
+              label: 'Где:',
+              value: widget.event.location,
+              hasSpace: true,
+              labelStyle: context.textTheme.labelLarge?.copyWith(
+                color: AppColors.grey,
+              ),
+              valueStyle: context.textTheme.labelLarge?.copyWith(
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 5),
+            BlocBuilder<EventsCubit, EventsState>(
+              builder: (context, state) {
+                return EventActionButtons(
+                  status: widget.event.isRequired
+                      ? EventCardState.decision
+                      : EventCardState.share,
+                  primaryButtonAction: () {
+                    var attendance = AttendanceModel(
+                      status: 'will go',
+                      reason: 'will go',
+                      student: '',
+                      event: widget.event.id,
+                    );
+                    if (widget.event.isRequired) {
+                      context.read<EventsCubit>().sendRequest(attendance);
+                    } else {
+                      attendance =
+                          attendance.copyWith(reason: "Хочу участвовать");
                       context.read<EventsCubit>().sendRequest(attendance);
                     }
-                  });
-                },
-                tertiaryButtonAction: () {
-                  var attendance = AttendanceModel(
-                    status: 'maybe',
-                    reason: 'Думаю',
-                    student: '',
-                    event: widget.event.id,
-                  );
-                  context.read<EventsCubit>().sendRequest(attendance);
-                },
-              );
-            },
-          )
-        ],
+                  },
+                  secondaryButtonAction: () {
+                    var attendance = AttendanceModel(
+                      status: 'will not go',
+                      reason: '',
+                      student: '',
+                      event: widget.event.id,
+                    );
+                    showEventDialog(onConfirm: (val) {
+                      attendance = attendance.copyWith(reason: val);
+
+                      if (val != null) {
+                        context.read<EventsCubit>().sendRequest(attendance);
+                      }
+                    });
+                  },
+                  tertiaryButtonAction: () {
+                    var attendance = AttendanceModel(
+                      status: 'maybe',
+                      reason: 'Думаю',
+                      student: '',
+                      event: widget.event.id,
+                    );
+                    context.read<EventsCubit>().sendRequest(attendance);
+                  },
+                );
+              },
+            )
+          ],
+        ),
       ),
     );
   }
