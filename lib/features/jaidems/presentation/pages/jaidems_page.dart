@@ -5,6 +5,7 @@ import 'package:jaidem/core/widgets/fields/app_search_field.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_filters.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
+import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 
 class JaidemsPage extends StatefulWidget {
@@ -21,6 +22,8 @@ class _JaidemsPageState extends State<JaidemsPage>
   bool _isLoadingMore = false;
 
   final ScrollController _scrollController = ScrollController();
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -87,11 +90,13 @@ class _JaidemsPageState extends State<JaidemsPage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
         leadingWidth: 35,
         leading: GestureDetector(
+          onTap: () => _scaffoldKey.currentState?.openDrawer(),
           child: Padding(
             padding: const EdgeInsets.only(left: 10),
             child: Image.asset(
@@ -135,7 +140,6 @@ class _JaidemsPageState extends State<JaidemsPage>
                       searchQuery = query;
                       _fetchJaidems();
                     },
-                   
                   ),
                 ),
                 // const SizedBox(width: 10),
@@ -196,7 +200,7 @@ class _JaidemsPageState extends State<JaidemsPage>
                         final leftIndex = index * 2;
                         final rightIndex = leftIndex + 1;
 
-                        if(jaidemList[index].id == ''){
+                        if (jaidemList[index].id == '') {
                           return null;
                         }
 
@@ -238,6 +242,7 @@ class _JaidemsPageState extends State<JaidemsPage>
           return const SizedBox();
         },
       ),
+      drawer: const AppDrawer(),
     );
   }
 }
