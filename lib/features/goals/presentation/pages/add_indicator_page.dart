@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
@@ -92,28 +93,60 @@ class _AddIndicatorPageState extends State<AddIndicatorPage>
     super.dispose();
   }
 
-  Future<void> _selectStartTime() async {
-    await showCupertinoTimePicker(
-      context: context,
-      initialTime: _startTime,
-      onTimeSelected: (time) {
-        setState(() {
-          _startTime = time;
-          _startTimeController.text = formatTimeOfDay(time);
-        });
-      },
-    );
+  Future<void> _selectStartDate() async {
+    await _selectDate(controller: _startTimeController);
   }
 
-  Future<void> _selectEndTime() async {
-    await showCupertinoTimePicker(
+  Future<void> _selectEndDate() async {
+    await _selectDate(controller: _endTimeController);
+  }
+
+  Future<void> _selectDate({
+    required TextEditingController controller,
+  }) async {
+    DateTime initialDate = DateTime.now();
+
+    await showModalBottomSheet(
       context: context,
-      initialTime: _endTime,
-      onTimeSelected: (time) {
-        setState(() {
-          _endTime = time;
-          _endTimeController.text = formatTimeOfDay(time);
-        });
+      backgroundColor: Colors.white,
+      builder: (_) {
+        DateTime tempPicked = initialDate;
+
+        return SizedBox(
+          height: 260,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                        onPressed: () => context.router.pop(),
+                        child: const Text("Отмена")),
+                    TextButton(
+                      onPressed: () {
+                        controller.text =
+                            "${tempPicked.year}-${tempPicked.month.toString().padLeft(2, '0')}-${tempPicked.day.toString().padLeft(2, '0')}";
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Готово"),
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: initialDate,
+                  onDateTimeChanged: (DateTime value) {
+                    tempPicked = value;
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -220,24 +253,24 @@ class _AddIndicatorPageState extends State<AddIndicatorPage>
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                label: 'Время с',
-                hintText: 'Выберите время начала',
+                label: 'Дата с',
+                hintText: 'Выберите дату начала',
                 readOnly: true,
                 controller: _startTimeController,
                 trailing: IconButton(
-                  onPressed: _selectStartTime,
-                  icon: const Icon(Icons.access_time),
+                  onPressed: _selectStartDate,
+                  icon: const Icon(Icons.calendar_today),
                 ),
               ),
               const SizedBox(height: 16),
               AppTextFormField(
-                label: 'Время до',
-                hintText: 'Выберите время окончания',
+                label: 'Дата до',
+                hintText: 'Выберите дату окончания',
                 readOnly: true,
                 controller: _endTimeController,
                 trailing: IconButton(
-                  onPressed: _selectEndTime,
-                  icon: const Icon(Icons.access_time),
+                  onPressed: _selectEndDate,
+                  icon: const Icon(Icons.calendar_today),
                 ),
               ),
               const SizedBox(height: 16),

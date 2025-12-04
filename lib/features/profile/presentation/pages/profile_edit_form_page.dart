@@ -26,6 +26,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
   late final TextEditingController interestController;
   late final TextEditingController phoneController;
   late final TextEditingController socialMediaController;
+  late final TextEditingController aboutMe;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     interestController = TextEditingController();
     phoneController = TextEditingController();
     socialMediaController = TextEditingController();
+    aboutMe = TextEditingController();
   }
 
   void _fillControllers(PersonModel user) {
@@ -53,6 +55,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     interestController.text = user.interest ?? "";
     phoneController.text = user.phone ?? "";
     socialMediaController.text = user.socialMedias?['instagram'] ?? "";
+    aboutMe.text = user.aboutMe ?? "";
   }
 
   @override
@@ -66,6 +69,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     interestController.dispose();
     phoneController.dispose();
     socialMediaController.dispose();
+    aboutMe.dispose();
     super.dispose();
   }
 
@@ -87,6 +91,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
         ...?user.socialMedias,
         'instagram': socialMediaController.text,
       },
+      aboutMe: aboutMe.text,
     );
 
     context.read<ProfileCubit>().updateUser(updatedUser);
@@ -99,8 +104,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.backgroundColor,
-        title: Text('Профилди түзөтүү',
-            style: context.textTheme.headlineLarge),
+        title: Text('Профилди түзөтүү', style: context.textTheme.headlineLarge),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(
@@ -131,6 +135,13 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                   const EdgeInsets.all(16).copyWith(bottom: kToolbarHeight),
               child: Column(
                 children: [
+                  AppTextFormField(
+                    label: 'Өзүм жөнүндө',
+                    hintText: 'Өзүңүз тууралуу маалымат жазыңыз',
+                    controller: aboutMe,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
                   AppTextFormField(
                       label: 'Туулган күн',
                       hintText: 'Туулган күнүңүздү киргизиңиз',
