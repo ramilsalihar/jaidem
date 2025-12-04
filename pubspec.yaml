@@ -2,7 +2,7 @@ name: jaidem
 description: A new Flutter project with jaidem.
 publish_to: 'none'
 
-version: 1.0.0+11
+version: 1.0.0+14
 
 environment:
   sdk: ^3.6.1

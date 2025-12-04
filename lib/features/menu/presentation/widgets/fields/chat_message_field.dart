@@ -64,19 +64,19 @@ class _ChatMessageFieldState extends State<ChatMessageField> {
       child: SafeArea(
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(
-                Icons.emoji_emotions_outlined,
-                size: 25,
-              ),
-              color: AppColors.black,
-              onPressed: widget.onEmojiPressed ??
-                  () {
-                    // Handle emoji picker
-                  },
-            ),
+            // IconButton(
+            //   icon: const Icon(
+            //     Icons.emoji_emotions_outlined,
+            //     size: 25,
+            //   ),
+            //   color: AppColors.black,
+            //   onPressed: widget.onEmojiPressed ??
+            //       () {
+            //         // Handle emoji picker
+            //       },
+            // ),
 
-            const SizedBox(width: 8),
+            // const SizedBox(width: 8),
 
             // Text input
             Expanded(
@@ -107,18 +107,18 @@ class _ChatMessageFieldState extends State<ChatMessageField> {
             const SizedBox(width: 8),
 
             // Attachment button
-            GestureDetector(
-              onTap: widget.onAttachmentPressed ??
-                  () {
-                    // Handle attachment
-                  },
-              child: Image.asset(
-                'assets/icons/attach_file.png',
-                height: 24,
-              ),
-            ),
+            // GestureDetector(
+            //   onTap: widget.onAttachmentPressed ??
+            //       () {
+            //         // Handle attachment
+            //       },
+            //   child: Image.asset(
+            //     'assets/icons/attach_file.png',
+            //     height: 24,
+            //   ),
+            // ),
 
-            const SizedBox(width: 10),
+            // const SizedBox(width: 10),
 
             // Send button
             GestureDetector(

@@ -57,7 +57,7 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
       if (response.statusCode == 200) {
         final responseModel = ResponseModel<CommentModel>.fromJson(
           response.data,
-          (json) => CommentMapper.fromJson(json),
+          (json) => CommentMapper.fromComment(json),
         );
         return Right(responseModel.results);
       } else {

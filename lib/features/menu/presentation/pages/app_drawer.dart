@@ -89,80 +89,77 @@ class AppDrawer extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            // MenuButton(
-                            //   title: 'База знаний',
-                            //   onTap: () {
-                            //     Navigator.pop(context);
-                            //   },
-                            //   leadingIcon: 'assets/icons/backpack.png',
-                            // ),
-                            MenuButton(
-                              title: 'Чаттардын тизмеси',
-                              onTap: () {
-                                Navigator.pop(context);
-                                context.router.push(ChatListRoute());
-                              },
-                              leadingIcon: 'assets/icons/chat.png',
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          // MenuButton(
+                          //   title: 'База знаний',
+                          //   onTap: () {
+                          //     Navigator.pop(context);
+                          //   },
+                          //   leadingIcon: 'assets/icons/backpack.png',
+                          // ),
+                          MenuButton(
+                            title: 'Чаттардын тизмеси',
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router.push(ChatListRoute());
+                            },
+                            leadingIcon: 'assets/icons/chat.png',
+                          ),
+                          MenuButton(
+                            title: 'Администратор менен баарлашуу',
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router.push(ChatRoute(chatType: 'admin'));
+                            },
+                            leadingIcon: 'assets/icons/chat.png',
+                          ),
+                          MenuButton(
+                            title: 'Насаатчы менен баарлашуу',
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router
+                                  .push(ChatRoute(chatType: 'mentors'));
+                            },
+                            leadingIcon: 'assets/icons/chat.png',
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
                             ),
-                            MenuButton(
-                              title: 'Администратор менен баарлашуу',
-                              onTap: () {
-                                Navigator.pop(context);
-                                context.router
-                                    .push(ChatRoute(chatType: 'admin'));
-                              },
-                              leadingIcon: 'assets/icons/chat.png',
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Орнотуулар',
+                              style: context.textTheme.bodyMedium,
                             ),
-                            MenuButton(
-                              title: 'Насаатчы менен баарлашуу',
-                              onTap: () {
-                                Navigator.pop(context);
-                                context.router
-                                    .push(ChatRoute(chatType: 'mentors'));
-                              },
-                              leadingIcon: 'assets/icons/chat.png',
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 10,
-                              ),
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Орнотуулар',
-                                style: context.textTheme.bodyMedium,
-                              ),
-                            ),
-                            MenuButton(
-                              title: 'Эскертмелер',
-                              onTap: () {},
-                              leadingIcon: 'assets/icons/notification.png',
-                              trailing: SizedBox(
-                                child: Transform.scale(
-                                  scale: 0.8,
-                                  child: CupertinoSwitch(
-                                    value: true,
-                                    onChanged: (bool value) {},
-                                    activeTrackColor: AppColors.primary,
-                                  ),
+                          ),
+                          MenuButton(
+                            title: 'Эскертмелер',
+                            onTap: () {},
+                            leadingIcon: 'assets/icons/notification.png',
+                            trailing: SizedBox(
+                              child: Transform.scale(
+                                scale: 0.8,
+                                child: CupertinoSwitch(
+                                  value: true,
+                                  onChanged: (bool value) {},
+                                  activeTrackColor: AppColors.primary,
                                 ),
                               ),
-                              onTrailingPressed: () {},
                             ),
-                            MenuButton(
-                              title: 'Сырсөздү өзгөртүү',
-                              onTap: () {
-                                context.router.push(ChangePasswordRoute());
-                              },
-                              leadingIcon: 'assets/icons/password.png',
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
+                            onTrailingPressed: () {},
+                          ),
+                          MenuButton(
+                            title: 'Сырсөздү өзгөртүү',
+                            onTap: () {
+                              context.router.push(ChangePasswordRoute());
+                            },
+                            leadingIcon: 'assets/icons/password.png',
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                       ),
                     ),
                   ],

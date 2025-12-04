@@ -31,10 +31,10 @@ class _ForumDetailsState extends State<ForumDetails> with CommentDialog {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          ForumButton(
-            icon: 'assets/icons/heart.png',
-            count: widget.likesCount,
-          ),
+          // ForumButton(
+          //   icon: 'assets/icons/heart.png',
+          //   count: widget.likesCount,
+          // ),
           const SizedBox(width: spaceBetweenButtons),
           ForumButton(
               icon: 'assets/icons/chat.png',
@@ -42,7 +42,7 @@ class _ForumDetailsState extends State<ForumDetails> with CommentDialog {
                 showCommentBottomSheet(forumId: widget.forumId);
               }),
           const SizedBox(width: spaceBetweenButtons),
-          ForumButton(icon: 'assets/icons/share.png'),
+          // ForumButton(icon: 'assets/icons/share.png'),
         ],
       ),
     );

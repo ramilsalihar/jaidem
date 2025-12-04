@@ -79,6 +79,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           }
           return ListView.builder(
             shrinkWrap: true,
+            padding: const EdgeInsets.only(top: 10, bottom: 20),
             itemCount: state.forums.length,
             itemBuilder: (context, index) {
               return ForumCard(forum: state.forums[index]);

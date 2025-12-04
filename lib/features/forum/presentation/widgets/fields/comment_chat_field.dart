@@ -17,7 +17,6 @@ class _CommentChatFieldState extends State<CommentChatField> {
 
   void onCommentSubmitted(String comment) {
     final cubit = context.read<ForumCubit>();
-    // You may want to set author, id, etc. as needed
     final newComment = CommentEntity(
       id: 0, // or null/auto if your backend assigns it
       post: widget.forumId,
@@ -29,8 +28,7 @@ class _CommentChatFieldState extends State<CommentChatField> {
   }
 
   void onCommentAction(CommentEntity comment, String action) {
-    // Default implementation - override in your widget
-    print('Action $action on comment: ${comment.id}');
+    
   }
 
   @override
@@ -41,11 +39,9 @@ class _CommentChatFieldState extends State<CommentChatField> {
           previous.commentsError != current.commentsError,
       listener: (context, state) {
         if (state.lastPostedComment != null) {
-          // Refetch comments after successful post
           context.read<ForumCubit>().fetchForumComments(widget.forumId);
           _commentController.clear();
         }
-        // Optionally handle error: state.commentsError
       },
       child: Container(
         padding: const EdgeInsets.all(8),
@@ -60,12 +56,12 @@ class _CommentChatFieldState extends State<CommentChatField> {
         ),
         child: Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.emoji_emotions_outlined),
-              onPressed: () {
-                // Handle emoji picker
-              },
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.emoji_emotions_outlined),
+            //   onPressed: () {
+            //     // Handle emoji picker
+            //   },
+            // ),
 
             // Text input
             Expanded(
@@ -94,15 +90,15 @@ class _CommentChatFieldState extends State<CommentChatField> {
               ),
             ),
 
-            GestureDetector(
-              onTap: () {},
-              child: Image.asset(
-                'assets/icons/tag.png',
-                width: 24,
-                height: 24,
-              ),
-            ),
-            const SizedBox(width: 8),
+            // GestureDetector(
+            //   onTap: () {},
+            //   child: Image.asset(
+            //     'assets/icons/tag.png',
+            //     width: 24,
+            //     height: 24,
+            //   ),
+            // ),
+            // const SizedBox(width: 8),
             GestureDetector(
               onTap: () {
                 final comment = _commentController.text.trim();

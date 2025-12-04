@@ -1,3 +1,4 @@
+import 'package:jaidem/features/forum/data/mappers/author_mapper.dart';
 import 'package:jaidem/features/forum/data/models/comment_model.dart';
 import 'package:jaidem/features/forum/domain/entities/comment_entity.dart';
 
@@ -6,6 +7,16 @@ class CommentMapper {
     return CommentModel(
       id: json['id'],
       author: json['author'],
+      post: json['post'],
+      content: json['content'],
+      createdAt: json['date_created'],
+    );
+  }
+
+  static CommentModel fromComment(Map<String, dynamic> json) {
+    return CommentModel(
+      id: json['id'],
+      author: AuthorMapper.fromJson(json['author']),
       post: json['post'],
       content: json['content'],
       createdAt: json['date_created'],

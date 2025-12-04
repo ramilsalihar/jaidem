@@ -25,21 +25,20 @@ class CommentCard extends StatelessWidget {
               CircleAvatar(
                 radius: 20,
                 backgroundColor: Colors.grey[300],
-                // child: (comment.author != null &&
-                //         comment.author!.avatar != null &&
-                //         (comment.author!.avatar as String).isNotEmpty)
-                //     ? ClipOval(
-                //         child: Image.network(
-                //           comment.author!.avatar,
-                //           width: 40,
-                //           height: 40,
-                //           fit: BoxFit.cover,
-                //           errorBuilder: (context, error, stackTrace) =>
-                //               Icon(Icons.person, color: Colors.grey[600]),
-                //         ),
-                //       )
-                //     : Icon(Icons.person, color: Colors.grey[600]),
-                child: Icon(Icons.person, color: Colors.grey[600]),
+                child: (comment.author != null &&
+                        comment.author!.avatar != null &&
+                        (comment.author!.avatar as String).isNotEmpty)
+                    ? ClipOval(
+                        child: Image.network(
+                          comment.author!.avatar,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(Icons.person, color: Colors.grey[600]),
+                        ),
+                      )
+                    : Icon(Icons.person, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -51,7 +50,7 @@ class CommentCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  comment.author  != null ? 'Матвей' : 'Аноним',
+                  comment.author != null ? comment.author!.fullname : 'Аноним',
                   style: context.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                   ),

@@ -20,6 +20,8 @@ class MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return GestureDetector(
       onTap: onTrailingPressed ?? onTap,
       child: Container(
@@ -37,34 +39,28 @@ class MenuButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white24),
         ),
-        child: Expanded(
-          child: Row(
-            children: [
-              Image.asset(
-                leadingIcon,
-                height: 24,
-                color: Colors.black87,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
+        child: Row(
+          children: [
+            Image.asset(
+              leadingIcon,
+              height: 24,
+              color: Colors.black87,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(title,
                   style: context.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w100,
-                    color: Colors.black87
-                  ),
+                      fontWeight: FontWeight.w100, color: Colors.black87),
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis
+                  overflow: TextOverflow.ellipsis),
+            ),
+            trailing ??
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.primary.shade400,
+                  size: 16,
                 ),
-              ),
-              trailing ??
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: AppColors.primary.shade400,
-                    size: 16,
-                  ),
-            ],
-          ),
+          ],
         ),
       ),
     );
