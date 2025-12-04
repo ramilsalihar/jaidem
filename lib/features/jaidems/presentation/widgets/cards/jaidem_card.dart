@@ -53,13 +53,12 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     /// Name
-                    UserNameField(fullname: widget.person.fullname ?? ''),
+                    UserNameField(
+                      fullname: widget.person.fullname ?? '',
+                      flowName: widget.person.flow.name,
+                    ),
 
                     const SizedBox(height: 10),
-
-                    /// Rating — if needed
-                    // if (showRating) RatingField(rating: 2),
-                    // const SizedBox(height: 10),
 
                     /// Details (take remaining space)
                     Expanded(
@@ -79,7 +78,8 @@ class _JaidemCardState extends State<JaidemCard> with JaidemPopUp {
                       instagram: widget.person.socialMedias?['instagram'],
                       whatsapp: widget.person.socialMedias?['whatsapp'],
                       onTap: () {
-                        context.router.push(ProfileRoute(person: widget.person));
+                        context.router
+                            .push(ProfileRoute(person: widget.person));
                       },
                     )
                   ],

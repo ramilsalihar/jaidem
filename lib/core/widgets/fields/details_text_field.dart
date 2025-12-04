@@ -31,7 +31,7 @@ class DetailsTextField extends StatelessWidget {
         );
 
     final defaultValueStyle = valueStyle ??
-        context.textTheme.labelMedium?.copyWith(
+        context.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w400,
           color: Colors.grey,
         );

@@ -6,11 +6,11 @@ class UserNameField extends StatelessWidget {
   const UserNameField({
     super.key,
     required this.fullname,
-    this.rating,
+    this.flowName,
   });
 
   final String fullname;
-  final double? rating;
+  final String? flowName;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class UserNameField extends StatelessWidget {
         ),
 
         // Rating badge
-        if (rating != null)
+        if (flowName != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
             decoration: BoxDecoration(
@@ -49,7 +49,7 @@ class UserNameField extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              rating!.toStringAsFixed(1),
+              flowName!,
               style: context.textTheme.labelMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
