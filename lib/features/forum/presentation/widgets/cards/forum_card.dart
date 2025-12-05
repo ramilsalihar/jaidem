@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/features/forum/domain/entities/forum_entity.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/widgets/utils/forum_details.dart';
 
 class ForumCard extends StatefulWidget {
@@ -29,8 +31,9 @@ class _ForumCardState extends State<ForumCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AnimatedCrossFade(
-            crossFadeState:
-                _expanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            crossFadeState: _expanded
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
             duration: const Duration(milliseconds: 200),
             firstChild: Text(
               widget.forum.content ?? 'Без названия',
@@ -77,6 +80,10 @@ class _ForumCardState extends State<ForumCard> {
           ForumDetails(
             likesCount: widget.forum.likesCount,
             forumId: widget.forum.id,
+            isLiked: widget.forum.isLikedByCurrentUser,
+            onLikeTap: () {
+              context.read<ForumCubit>().likeForumPost(widget.forum.id);
+            },
           ),
         ],
       ),

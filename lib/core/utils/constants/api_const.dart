@@ -11,6 +11,8 @@ abstract class ApiConst {
 
   static const String comments = '/core/forum_comment/';
 
+  static  String likeForum(String forumId) => '/core/forum_post/$forumId/like/';
+
   // Notifications
   static const String notifications = 'notifications';
 

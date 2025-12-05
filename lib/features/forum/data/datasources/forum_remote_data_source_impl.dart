@@ -21,6 +21,8 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
     String? search,
   ) async {
     try {
+      final username = prefs.getString(AppConstants.userLogin);
+
       final Map<String, dynamic> queryParams = {};
 
       if (search != null) {
@@ -33,7 +35,7 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
       if (response.statusCode == 200) {
         final responseModel = ResponseModel<ForumModel>.fromJson(
           response.data,
-          (json) => ForumMapper.fromJson(json),
+          (json) => ForumMapper.fromJson(json, username),
         );
 
         return Right(responseModel.results);
@@ -86,6 +88,24 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
         return Right(CommentMapper.fromJson(response.data));
       } else {
         return Left('Failed to post comment');
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, int>> likeForum(int forumId) async {
+    try {
+      final response = await dio.post(
+        ApiConst.likeForum(forumId.toString()),
+      );
+
+      if (response.statusCode == 200) {
+        final int likesCount = response.data['likes_count'];
+        return Right(likesCount);
+      } else {
+        return Left('Failed to like forum post');
       }
     } catch (e) {
       return Left('Error: $e');

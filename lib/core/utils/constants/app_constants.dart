@@ -9,6 +9,7 @@ class AppConstants {
   static const String userId = 'user_id';
   static const String userData = 'user_data';
   static const String isFirstTime = 'is_first_time';
+  static const String userLogin = 'user_login';
 
   // API
   static const Duration connectionTimeout = Duration(seconds: 30);

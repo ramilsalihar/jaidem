@@ -54,11 +54,13 @@ class AuthRepositoryImpl implements AuthRepository {
     return remoteDataSource.login(username, password).then((result) {
       return result.fold(
         (failure) => Left(failure),
-        (tokensModel) {
-          localDataSource.saveToken(
+        (tokensModel) async {
+          await localDataSource.saveToken(
             tokensModel.accessToken,
             tokensModel.refreshToken,
           );
+
+          await localDataSource.saveUsername(username);
 
           return Right(tokensModel);
         },

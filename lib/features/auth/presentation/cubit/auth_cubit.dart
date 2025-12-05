@@ -17,7 +17,6 @@ class AuthCubit extends Cubit<AuthState> {
     required this.isUserLoggedInUsecase,
   }) : super(AuthInitial());
 
-  /// Check if user is already authenticated on app startup
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
 
@@ -27,7 +26,6 @@ class AuthCubit extends Cubit<AuthState> {
       (failure) => emit(AuthUnauthenticated()),
       (isLoggedIn) {
         if (isLoggedIn) {
-          // You might want to get the access token here as well
           emit(const AuthAuthenticated());
         } else {
           emit(AuthUnauthenticated());
@@ -47,7 +45,6 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthLoginFailure(error: failure));
       },
       (success) {
-        // Login successful, emit authenticated state
         emit(const AuthAuthenticated());
       },
     );

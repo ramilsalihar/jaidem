@@ -9,6 +9,8 @@ abstract class AuthLocalDataSource {
 
   Future<void> saveUserId(String userId);
 
+  Future<void> saveUsername(String username);
+
   Future<String?> getUserId();
 
   Future<bool> logout();

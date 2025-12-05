@@ -10,4 +10,6 @@ abstract class ForumRemoteDataSource {
   });
 
   Future<Either<String, List<CommentModel>>> fetchComments(int postId);
+
+  Future<Either<String, int>> likeForum(int forumId);
 }

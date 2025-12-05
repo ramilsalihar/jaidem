@@ -9,6 +9,7 @@ class ForumEntity {
   final String? photo;
   final int? likesCount;
   final List<String>? likedUsers;
+  final bool isLikedByCurrentUser;
 
   ForumEntity({
     required this.id,
@@ -19,5 +20,6 @@ class ForumEntity {
     this.photo,
     this.likesCount,
     this.likedUsers,
+    this.isLikedByCurrentUser = false,
   });
 }

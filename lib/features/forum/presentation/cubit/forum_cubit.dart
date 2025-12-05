@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/features/forum/domain/entities/forum_entity.dart';
 import 'package:jaidem/features/forum/domain/usecases/get_all_forums.dart';
 import 'package:jaidem/features/forum/domain/usecases/get_forum_comment.dart';
+import 'package:jaidem/features/forum/domain/usecases/like_post_usecase.dart';
 import 'package:jaidem/features/forum/domain/usecases/post_forum_comment.dart';
 import 'package:jaidem/features/forum/domain/entities/comment_entity.dart';
 
@@ -13,11 +14,13 @@ class ForumCubit extends Cubit<ForumState> {
     required this.getAllForums,
     required this.getForumComment,
     required this.postForumComment,
+    required this.likePostUsecase,
   }) : super(const ForumState());
 
   final GetAllForums getAllForums;
   final GetForumComment getForumComment;
   final PostForumComment postForumComment;
+  final LikePostUsecase likePostUsecase;
 
   Future<void> fetchAllForums({String? search}) async {
     emit(state.copyWith(isLoading: true, error: null));
@@ -60,6 +63,19 @@ class ForumCubit extends Cubit<ForumState> {
             isCommentsLoading: false,
             lastPostedComment: comment,
             commentsError: null));
+      },
+    );
+  }
+
+  Future<void> likeForumPost(int forumId) async {
+    emit(state.copyWith(error: null));
+    final result = await likePostUsecase(forumId);
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.toString()));
+      },
+      (likesCount) {
+        emit(state.copyWith(isLoading: false, error: null));
       },
     );
   }

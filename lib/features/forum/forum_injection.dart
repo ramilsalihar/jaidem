@@ -6,6 +6,7 @@ import 'package:jaidem/features/forum/data/repositories/forum_repository_impl.da
 import 'package:jaidem/features/forum/domain/repositories/forum_repository.dart';
 import 'package:jaidem/features/forum/domain/usecases/get_all_forums.dart';
 import 'package:jaidem/features/forum/domain/usecases/get_forum_comment.dart';
+import 'package:jaidem/features/forum/domain/usecases/like_post_usecase.dart';
 import 'package:jaidem/features/forum/domain/usecases/post_forum_comment.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,12 +27,15 @@ void forumInjection() {
 
   sl.registerFactory(() => PostForumComment(sl()));
 
+  sl.registerFactory(() => LikePostUsecase(sl()));
+
   // Cubits
   sl.registerFactory(
     () => ForumCubit(
       getAllForums: sl(),
       getForumComment: sl(),
       postForumComment: sl(),
+      likePostUsecase: sl(),
     ),
   );
 }

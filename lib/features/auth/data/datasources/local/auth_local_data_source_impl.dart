@@ -69,4 +69,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   Future<String?> getUserId() async {
     return prefs.getString(AppConstants.userId);
   }
+
+  @override
+  Future<void> saveUsername(String username) {
+    return prefs.setString(AppConstants.userLogin, username);
+  }
 }
