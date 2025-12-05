@@ -76,12 +76,16 @@ class PersonModel {
       courseYear: json['course_year'] as int,
       speciality: json['speciality'] as String?,
       email: json['email'] as String?,
-      socialMedias: json['social_medias'] as Map<String, dynamic>?,
+      socialMedias: json['social_medias'] is Map ? json['social_medias'] : {},
       interest: json['interest'] as String?,
       skills: json['skills'] as String?,
-      flow: FlowModel.fromJson(json['flow'] as Map<String, dynamic>),
+      flow: json['flow'] != null
+          ? FlowModel.fromJson(json['flow'])
+          : FlowModel.empty(),
       generation: json['generation'] as String?,
-      state: StateModel.fromJson(json['state'] as Map<String, dynamic>),
+      state: json['state'] != null
+          ? StateModel.fromJson(json['state'])
+          : StateModel.empty(),
       aboutMe: json['aboutMe'] as String?,
       isActive: json['is_active'] as bool,
       activity: (json['activity'] as num).toDouble(),

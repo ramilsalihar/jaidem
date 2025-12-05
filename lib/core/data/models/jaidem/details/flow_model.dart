@@ -33,4 +33,13 @@ class FlowModel {
       year: year ?? this.year,
     );
   }
+
+  factory FlowModel.empty() {
+    return FlowModel(
+      id: 0,
+      name: '',
+      description: '',
+      year: 0,
+    );
+  }
 }

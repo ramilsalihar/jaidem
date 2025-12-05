@@ -33,4 +33,13 @@ class StateModel {
       nameKg: nameKg ?? this.nameKg,
     );
   }
+
+  factory StateModel.empty() {
+    return StateModel(
+      id: 0,
+      name: '',
+      nameRu: '',
+      nameKg: '',
+    );
+  }
 }
