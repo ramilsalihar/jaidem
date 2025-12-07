@@ -257,6 +257,22 @@ class ChatRouteArgs {
 }
 
 /// generated route for
+/// [FilesPage]
+class FilesRoute extends PageRouteInfo<void> {
+  const FilesRoute({List<PageRouteInfo>? children})
+      : super(FilesRoute.name, initialChildren: children);
+
+  static const String name = 'FilesRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const FilesPage();
+    },
+  );
+}
+
+/// generated route for
 /// [GoalsPage]
 class GoalsRoute extends PageRouteInfo<void> {
   const GoalsRoute({List<PageRouteInfo>? children})

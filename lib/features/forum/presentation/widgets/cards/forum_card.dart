@@ -79,7 +79,7 @@ class _ForumCardState extends State<ForumCard> {
                 ),
                 if (isLong)
                   TextSpan(
-                    text: _expanded ? '  less' : '…more',
+                    text: _expanded ? '  азыраак' : '...дагы',
                     style: style.copyWith(
                       color: Colors.blue,
                       fontWeight: FontWeight.w600,

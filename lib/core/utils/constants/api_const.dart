@@ -27,4 +27,7 @@ abstract class ApiConst {
   static const String indicators = '/core/indicators/';
 
   static const String tasks = '/core/tasks/';
+
+  // Files
+  static const String files = '/category/file/';
 }

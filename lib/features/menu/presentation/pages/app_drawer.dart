@@ -92,13 +92,14 @@ class AppDrawer extends StatelessWidget {
                     SingleChildScrollView(
                       child: Column(
                         children: [
-                          // MenuButton(
-                          //   title: 'База знаний',
-                          //   onTap: () {
-                          //     Navigator.pop(context);
-                          //   },
-                          //   leadingIcon: 'assets/icons/backpack.png',
-                          // ),
+                          MenuButton(
+                            title: 'База знаний',
+                            onTap: () {
+                              Navigator.pop(context);
+                              context.router.push(FilesRoute());
+                            },
+                            leadingIcon: 'assets/icons/backpack.png',
+                          ),
                           MenuButton(
                             title: 'Чаттардын тизмеси',
                             onTap: () {

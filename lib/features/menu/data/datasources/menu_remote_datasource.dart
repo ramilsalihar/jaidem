@@ -1,4 +1,7 @@
+import 'package:dartz/dartz.dart';
+import 'package:jaidem/core/data/models/response_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_model.dart';
+import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:jaidem/features/menu/data/models/message_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_user_model.dart';
 
@@ -35,4 +38,7 @@ abstract class MenuRemoteDatasource {
   Future<void> sendMessageToUser(String userId, String messageText);
   Future<void> sendMessageToMentor(String messageText);
   Future<void> sendMessageToAdmin(String messageText);
+
+  // Files
+  Future<Either<String, ResponseModel<FileModel>>> getFiles();
 }

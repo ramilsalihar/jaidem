@@ -1,4 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:jaidem/core/data/models/response_model.dart';
+import 'package:jaidem/core/utils/constants/api_const.dart';
+import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource.dart';
@@ -6,13 +11,16 @@ import 'package:jaidem/features/menu/data/models/chat_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_user_model.dart';
 import 'package:jaidem/features/menu/data/models/message_model.dart';
 
-
-
 class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
   final FirebaseFirestore firestore;
   final SharedPreferences sharedPreferences;
+  final Dio dio;
 
-  const MenuRemoteDatasourceImpl(this.firestore, this.sharedPreferences);
+  const MenuRemoteDatasourceImpl(
+    this.firestore,
+    this.sharedPreferences,
+    this.dio,
+  );
 
   Future<void> seedDummyData() async {
     final chatsRef = firestore.collection(AppConstants.chatsCollection);
@@ -21,7 +29,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     final adminRef = firestore.collection(AppConstants.adminCollection);
 
     // Get current user ID from SharedPreferences
-    final currentUserId = sharedPreferences.getString(AppConstants.userId) ?? 'current_user';
+    final currentUserId =
+        sharedPreferences.getString(AppConstants.userId) ?? 'current_user';
 
     // Admin data
     final admin = {
@@ -76,12 +85,12 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     for (final doc in existingUsers.docs) {
       await doc.reference.delete();
     }
-    
+
     final existingMentors = await mentorsRef.get();
     for (final doc in existingMentors.docs) {
       await doc.reference.delete();
     }
-    
+
     final existingAdmins = await adminRef.get();
     for (final doc in existingAdmins.docs) {
       await doc.reference.delete();
@@ -91,10 +100,10 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     for (final user in allUsers) {
       await usersRef.doc(user['id'] as String).set(user);
     }
-    
+
     // Add mentor to mentors collection
     await mentorsRef.doc(mentor['id'] as String).set(mentor);
-    
+
     // Add admin to admin collection
     await adminRef.doc(admin['id'] as String).set(admin);
 
@@ -124,8 +133,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
           senderId: mentor['id'] as String,
           receiverId: currentUser['id'] as String,
           text: "Конечно! Давай обсудим твои цели и составим план развития.",
-          createdAt: DateTime.now()
-              .subtract(const Duration(days: 1, minutes: -5)),
+          createdAt:
+              DateTime.now().subtract(const Duration(days: 1, minutes: -5)),
           readBy: [mentor['id'] as String],
         ),
       ],
@@ -177,7 +186,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
           id: 'msg6',
           senderId: user1['id'] as String,
           receiverId: currentUser['id'] as String,
-          text: "Привет! Все отлично, готовлюсь к экзаменам. А у тебя как дела?",
+          text:
+              "Привет! Все отлично, готовлюсь к экзаменам. А у тебя как дела?",
           createdAt: DateTime.now().subtract(const Duration(minutes: 28)),
           readBy: [user1['id'] as String],
         ),
@@ -214,7 +224,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     };
 
     // Create chat under the appropriate type collection
-    final chatDoc = await chatsRef.doc(chatType).collection('chats').add(chatData);
+    final chatDoc =
+        await chatsRef.doc(chatType).collection('chats').add(chatData);
     final messagesRef = chatDoc.collection("messages");
 
     for (final msg in messages) {
@@ -357,10 +368,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
 
   @override
   Stream<List<ChatUserModel>> getUsers() {
-    return firestore
-        .collection(AppConstants.usersCollection)
-        .snapshots()
-        .map((snapshot) => snapshot.docs
+    return firestore.collection(AppConstants.usersCollection).snapshots().map(
+        (snapshot) => snapshot.docs
             .map((doc) => ChatUserModel.fromFirestore(doc))
             .toList());
   }
@@ -375,7 +384,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     if (currentUserId.isEmpty) return null;
 
     final chatsRef = firestore.collection(AppConstants.chatsCollection);
-    
+
     // Search in users subcollection
     final querySnapshot = await chatsRef
         .doc('users')
@@ -400,7 +409,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     if (currentUserId.isEmpty) return null;
 
     final chatsRef = firestore.collection(AppConstants.chatsCollection);
-    
+
     // Search in mentors subcollection
     final querySnapshot = await chatsRef
         .doc('mentors')
@@ -421,7 +430,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     if (currentUserId.isEmpty) return null;
 
     final chatsRef = firestore.collection(AppConstants.chatsCollection);
-    
+
     // Search in admin subcollection
     final querySnapshot = await chatsRef
         .doc('admin')
@@ -442,7 +451,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
           .collection(AppConstants.usersCollection)
           .doc(userId)
           .get();
-      
+
       if (userDoc.exists) {
         return ChatUserModel.fromFirestore(userDoc);
       }
@@ -458,7 +467,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
           .collection(AppConstants.mentorsCollection)
           .limit(1)
           .get();
-      
+
       if (mentorsSnapshot.docs.isNotEmpty) {
         return ChatUserModel.fromFirestore(mentorsSnapshot.docs.first);
       }
@@ -474,7 +483,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
           .collection(AppConstants.adminCollection)
           .limit(1)
           .get();
-      
+
       if (adminSnapshot.docs.isNotEmpty) {
         return ChatUserModel.fromFirestore(adminSnapshot.docs.first);
       }
@@ -492,7 +501,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     ChatUserModel otherUser,
   ) async {
     final chatsRef = firestore.collection(AppConstants.chatsCollection);
-    
+
     final chatData = {
       'participants': [currentUserId, otherUserId],
       'users': [currentUser.toMap(), otherUser.toMap()],
@@ -502,11 +511,9 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       'updatedAt': FieldValue.serverTimestamp(),
     };
 
-    final docRef = await chatsRef
-        .doc(chatType)
-        .collection('chats')
-        .add(chatData);
-    
+    final docRef =
+        await chatsRef.doc(chatType).collection('chats').add(chatData);
+
     final snap = await docRef.get();
     return ChatModel.fromFirestore(snap);
   }
@@ -518,16 +525,16 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
 
     // Check if chat exists
     ChatModel? chat = await getChatWithUser(userId);
-    
+
     if (chat == null) {
       // Create new chat
       final currentUser = await _getUserById(currentUserId);
       final otherUser = await _getUserById(userId);
-      
+
       if (currentUser == null || otherUser == null) {
         throw Exception('Users not found');
       }
-      
+
       chat = await _createChatIfNotExists(
         currentUserId,
         userId,
@@ -563,14 +570,14 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
 
     // Check if chat exists
     ChatModel? chat = await getChatWithMentor();
-    
+
     if (chat == null) {
       // Create new chat
       final currentUser = await _getUserById(currentUserId);
       if (currentUser == null) {
         throw Exception('Current user not found');
       }
-      
+
       chat = await _createChatIfNotExists(
         currentUserId,
         mentor.id,
@@ -606,14 +613,14 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
 
     // Check if chat exists
     ChatModel? chat = await getChatWithAdmin();
-    
+
     if (chat == null) {
       // Create new chat
       final currentUser = await _getUserById(currentUserId);
       if (currentUser == null) {
         throw Exception('Current user not found');
       }
-      
+
       chat = await _createChatIfNotExists(
         currentUserId,
         admin.id,
@@ -634,5 +641,25 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     );
 
     await sendMessage(chat.id, 'admin', message);
+  }
+
+  @override
+  Future<Either<String, ResponseModel<FileModel>>> getFiles() async {
+    try {
+      final response = await dio.get(ApiConst.files);
+
+      if (response.statusCode == 200) {
+        final data = ResponseModel<FileModel>.fromJson(
+          response.data,
+          (json) => FileModel.fromJson(json),
+        );
+        return Future.value(Right(data));
+      } else {
+        return Future.value(
+            Left('Failed to fetch files. Status code: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Future.value(Left(e.toString()));
+    }
   }
 }
