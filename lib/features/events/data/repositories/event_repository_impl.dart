@@ -27,7 +27,8 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<Either<String, AttendanceModel?>> getAttendance(int eventId, String studentId) {
+  Future<Either<String, AttendanceModel?>> getAttendance(
+      int eventId, String studentId) {
     return remoteDataSource.getAttendance(eventId, studentId);
   }
 
@@ -37,7 +38,7 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<Either<String, void>> updateAttendance(AttendanceModel attendance) {
-    return remoteDataSource.updateAttendance(attendance);
+  Future<Either<String, void>> updateEvent(EventEntity event) {
+    return remoteDataSource.updateEvent(EventMapper.toModel(event));
   }
 }

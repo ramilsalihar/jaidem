@@ -5,7 +5,7 @@ import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 import 'package:jaidem/features/events/domain/repositories/event_repository.dart';
 import 'package:jaidem/features/events/domain/usecases/get_events_usecase.dart';
 import 'package:jaidem/features/events/domain/usecases/send_attendance_usecase.dart';
-import 'package:jaidem/features/events/domain/usecases/update_attendance_usecase.dart';
+import 'package:jaidem/features/events/domain/usecases/update_event_usecase.dart';
 
 part 'events_state.dart';
 
@@ -13,16 +13,12 @@ class EventsCubit extends Cubit<EventsState> {
   EventsCubit({
     required this.getEventsUsecase,
     required this.sendEventRequestUsecase,
-    required this.updateAttendanceUsecase,
-    required this.eventRepository,
-    required this.currentUserId,
+    required this.updateEventUseCase,
   }) : super(EventsState());
 
   final GetEventsUsecase getEventsUsecase;
   final SendAttendanceUsecase sendEventRequestUsecase;
-  final UpdateAttendanceUsecase updateAttendanceUsecase;
-  final EventRepository eventRepository;
-  final String currentUserId;
+  final UpdateEventUseCase updateEventUseCase;
 
   Future<void> fetchEvents() async {
     emit(state.copyWith(eventsStatus: EventsStatus.loading));
@@ -37,8 +33,10 @@ class EventsCubit extends Cubit<EventsState> {
         // Fetch attendance for each event
         final eventsWithAttendance = await _fetchAttendanceForEvents(events);
 
-        final requiredEvents = eventsWithAttendance.where((e) => e.isRequired).toList();
-        final optionalEvents = eventsWithAttendance.where((e) => !e.isRequired).toList();
+        final requiredEvents =
+            eventsWithAttendance.where((e) => e.isRequired).toList();
+        final optionalEvents =
+            eventsWithAttendance.where((e) => !e.isRequired).toList();
         emit(state.copyWith(
           eventsStatus: EventsStatus.loaded,
           requiredEvents: requiredEvents,
@@ -48,28 +46,11 @@ class EventsCubit extends Cubit<EventsState> {
     );
   }
 
-  Future<List<EventEntity>> _fetchAttendanceForEvents(List<EventEntity> events) async {
-    if (currentUserId.isEmpty) return events;
-
-    final List<EventEntity> updatedEvents = [];
-
-    for (final event in events) {
-      final attendanceResult = await eventRepository.getAttendance(
-        event.id,
-        currentUserId,
-      );
-
-      attendanceResult.fold(
-        (failure) => updatedEvents.add(event),
-        (attendance) => updatedEvents.add(event.copyWith(attendance: attendance)),
-      );
-    }
-
-    return updatedEvents;
-  }
-
-  Future<void> sendRequest(AttendanceModel attendance) async {
+  Future<void> sendRequest(
+      AttendanceModel attendance, EventEntity event) async {
     emit(state.copyWith(attendanceStatus: AttendanceStatus.loading));
+
+    // status in model: will go, will not go, maybe
 
     final result = await sendEventRequestUsecase(attendance);
 
@@ -83,29 +64,37 @@ class EventsCubit extends Cubit<EventsState> {
           attendanceStatus: AttendanceStatus.success,
         ));
 
-        // Refresh events to get updated attendance status
-        fetchEvents();
+        if (attendance.status == 'will go') {
+          event = event.copyWith(presentNumber: event.presentNumber ?? 0 + 1);
+        } else if (attendance.status == 'will not go') {
+          event = event.copyWith(absentNumber: event.absentNumber ?? 0 + 1);
+        } else {
+          event =
+              event.copyWith(respectfulNumber: event.respectfulNumber ?? 0 + 1);
+        }
+
+        // updateEvent(event);
       },
     );
   }
 
-  Future<void> updateAttendance(AttendanceModel attendance) async {
-    emit(state.copyWith(attendanceStatus: AttendanceStatus.loading));
+  Future<void> updateEvent(EventEntity event) async {
+    emit(state.copyWith(eventsStatus: EventsStatus.loading));
 
-    final result = await updateAttendanceUsecase(attendance);
+    final result = await updateEventUseCase(event);
 
     result.fold(
       (failure) => emit(state.copyWith(
-        attendanceStatus: AttendanceStatus.error,
+        eventsStatus: EventsStatus.error,
         errorMessage: failure,
       )),
       (successMessage) {
         emit(state.copyWith(
-          attendanceStatus: AttendanceStatus.success,
+          eventsStatus: EventsStatus.loaded,
         ));
 
-        // Refresh events to get updated attendance status
-        fetchEvents();
+        // Optionally refresh events to get updated attendance status
+        // fetchEvents();
       },
     );
   }

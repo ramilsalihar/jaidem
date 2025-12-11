@@ -98,21 +98,16 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
   }
 
   @override
-  Future<Either<String, void>> updateAttendance(
-      AttendanceModel attendance) async {
+  Future<Either<String, void>> updateEvent(EventModel event) async {
     try {
-      final userId = prefs.getString(AppConstants.userId);
-
-      attendance = attendance.copyWith(student: userId);
-
       final response = await dio.patch(
-        '${ApiConst.attendance}${attendance.id}/',
-        data: attendance.toJson(),
+        '${ApiConst.event}${event.id}/',
+        data: EventMapper.toJson(event),
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         return Right(null);
       } else {
-        return Left('Не получилось обновить ответ, попробуйте позже');
+        return Left('Не получилось отправить запрос, попробуйте позже');
       }
     } catch (e) {
       return Left('Error: $e');

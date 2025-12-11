@@ -128,7 +128,8 @@ class _FilesPageState extends State<FilesPage> {
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
@@ -204,11 +205,14 @@ class _FilesPageState extends State<FilesPage> {
                     ),
                     prefixIcon: Icon(
                       Icons.search_rounded,
-                      color: _isSearching ? AppColors.primary : Colors.grey.shade400,
+                      color: _isSearching
+                          ? AppColors.primary
+                          : Colors.grey.shade400,
                     ),
                     suffixIcon: _searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: Icon(Icons.close_rounded, color: Colors.grey.shade400),
+                            icon: Icon(Icons.close_rounded,
+                                color: Colors.grey.shade400),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _isSearching = false);
@@ -216,7 +220,8 @@ class _FilesPageState extends State<FilesPage> {
                           )
                         : null,
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
                   ),
                 ),
               ),
@@ -229,7 +234,8 @@ class _FilesPageState extends State<FilesPage> {
               height: 56,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: _tabs.length,
                 itemBuilder: (context, index) {
                   final tab = _tabs[index];
@@ -247,7 +253,10 @@ class _FilesPageState extends State<FilesPage> {
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? LinearGradient(
-                                  colors: [AppColors.primary, AppColors.primary.shade300],
+                                  colors: [
+                                    AppColors.primary,
+                                    AppColors.primary.shade300
+                                  ],
                                 )
                               : null,
                           color: isSelected ? null : Colors.white,
@@ -258,7 +267,8 @@ class _FilesPageState extends State<FilesPage> {
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.3),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -270,13 +280,17 @@ class _FilesPageState extends State<FilesPage> {
                             Icon(
                               tab.icon,
                               size: 18,
-                              color: isSelected ? Colors.white : Colors.grey.shade600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               tab.title,
                               style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.grey.shade700,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -328,12 +342,11 @@ class _FilesPageState extends State<FilesPage> {
                 }
 
                 if (state is MenuError && state.files == null) {
-                  return SliverFillRemaining(
-                    child: _buildErrorState(state.message),
-                  );
+                  return _buildEmptyState();
                 }
 
-                if (state is MenuLoaded || (state is MenuError && state.files != null)) {
+                if (state is MenuLoaded ||
+                    (state is MenuError && state.files != null)) {
                   final files = state is MenuLoaded
                       ? state.files.results
                       : state is MenuError
@@ -448,86 +461,6 @@ class _FilesPageState extends State<FilesPage> {
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppColors.red.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: AppColors.red,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Ката кетти',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.mediumImpact();
-              context.read<MenuCubit>().fetchFiles();
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppColors.primary, AppColors.primary.shade300],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    'Кайра аракет кылуу',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],

@@ -2,44 +2,53 @@ import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/features/events/data/models/attendance_model.dart';
 
 class EventEntity {
-  final int id;
+  final int? id;
   final String? createdBy;
-  final List<String> participants;
-  final FlowModel flow;
-  final String title;
-  final String description;
-  final String conditions;
-  final DateTime date;
-  final String location;
-  final String phone;
-  final String email;
-  final String generation;
-  final String image;
-  final String video;
+  final List<String>? participants;
+  final FlowModel? flow;
+
+  final String title; // not nullable
+  final String description; // not nullable
+
+  final String? conditions;
+  final DateTime? date;
+  final String? location;
+  final String? phone;
+  final String? email;
+  final String? generation;
+  final String? image;
+  final String? video;
+
   final bool isRequired;
-  final int like;
-  final AttendanceModel? attendance;
+  final int? like;
+
+  final int? presentNumber;
+  final int? absentNumber;
+  final int? respectfulNumber;
 
   const EventEntity({
-    required this.id,
+    this.id,
     this.createdBy,
-    required this.participants,
-    required this.flow,
+    this.participants,
+    this.flow,
     required this.title,
     required this.description,
-    required this.conditions,
-    required this.date,
-    required this.location,
-    required this.phone,
-    required this.email,
-    required this.generation,
-    required this.image,
-    required this.video,
+    this.conditions,
+    this.date,
+    this.location,
+    this.phone,
+    this.email,
+    this.generation,
+    this.image,
+    this.video,
     required this.isRequired,
-    required this.like,
-    this.attendance,
+    this.like,
+    this.presentNumber,
+    this.absentNumber,
+    this.respectfulNumber,
   });
 
+  // add copy with
   EventEntity copyWith({
     int? id,
     String? createdBy,
@@ -57,7 +66,9 @@ class EventEntity {
     String? video,
     bool? isRequired,
     int? like,
-    AttendanceModel? attendance,
+    int? presentNumber,
+    int? absentNumber,
+    int? respectfulNumber,
   }) {
     return EventEntity(
       id: id ?? this.id,
@@ -76,7 +87,9 @@ class EventEntity {
       video: video ?? this.video,
       isRequired: isRequired ?? this.isRequired,
       like: like ?? this.like,
-      attendance: attendance ?? this.attendance,
+      presentNumber: presentNumber ?? this.presentNumber,
+      absentNumber: absentNumber ?? this.absentNumber,
+      respectfulNumber: respectfulNumber ?? this.respectfulNumber,
     );
   }
 }

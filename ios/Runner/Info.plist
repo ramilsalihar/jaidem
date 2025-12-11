@@ -54,7 +54,6 @@
 	<key>LSApplicationQueriesSchemes</key>
     <array>
         <string>tel</string>
-
         <string>whatsapp</string>
         <string>instagram</string>
     </array>

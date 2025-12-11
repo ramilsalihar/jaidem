@@ -6,7 +6,7 @@ import 'package:jaidem/features/events/data/repositories/event_repository_impl.d
 import 'package:jaidem/features/events/domain/repositories/event_repository.dart';
 import 'package:jaidem/features/events/domain/usecases/get_events_usecase.dart';
 import 'package:jaidem/features/events/domain/usecases/send_attendance_usecase.dart';
-import 'package:jaidem/features/events/domain/usecases/update_attendance_usecase.dart';
+import 'package:jaidem/features/events/domain/usecases/update_event_usecase.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,14 +26,12 @@ void eventInjection() {
 
   sl.registerFactory(() => SendAttendanceUsecase(sl()));
 
-  sl.registerFactory(() => UpdateAttendanceUsecase(sl()));
+  sl.registerFactory(() => UpdateEventUseCase(sl()));
 
   // Cubits
   sl.registerFactory(() => EventsCubit(
         getEventsUsecase: sl(),
         sendEventRequestUsecase: sl(),
-        updateAttendanceUsecase: sl(),
-        eventRepository: sl(),
-        currentUserId: sl<SharedPreferences>().getString(AppConstants.userId) ?? '',
+        updateEventUseCase: sl(),
       ));
 }
