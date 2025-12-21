@@ -70,13 +70,14 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
       elevation: 0,
       backgroundColor: AppColors.primary,
       surfaceTintColor: AppColors.primary,
+      leadingWidth: 56,
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
           _scaffoldKey.currentState?.openDrawer();
         },
         child: Container(
-          margin: const EdgeInsets.all(8),
+          margin: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10),
@@ -103,7 +104,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             showNotificationPopup();
           },
           child: Container(
-            margin: const EdgeInsets.all(8),
+            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),

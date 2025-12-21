@@ -29,4 +29,8 @@ class GetJaidemsUsecase {
       search: search,
     );
   }
+
+  Future<Either<String, PersonModel>> getById(int id) {
+    return repository.getJaidemById(id);
+  }
 }

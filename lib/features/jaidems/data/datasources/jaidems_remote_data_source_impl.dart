@@ -53,4 +53,20 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
       return Left('Failed to load user profile');
     }
   }
+
+  @override
+  Future<Either<String, PersonModel>> getJaidemById(int id) async {
+    try {
+      final response = await dio.get('${ApiConst.profile}$id/');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final person = PersonModel.fromJson(response.data);
+        return Right(person);
+      } else {
+        return const Left('Failed to load person');
+      }
+    } catch (e) {
+      return Left('Failed to load person: $e');
+    }
+  }
 }

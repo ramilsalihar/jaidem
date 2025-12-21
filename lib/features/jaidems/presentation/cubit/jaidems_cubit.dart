@@ -120,4 +120,17 @@ class JaidemsCubit extends Cubit<JaidemsState> {
       );
     }
   }
+
+  /// Get a single person by ID
+  Future<PersonModel?> getJaidemById(int id) async {
+    try {
+      final result = await getJaidemsUsecase.getById(id);
+      return result.fold(
+        (failure) => null,
+        (person) => person,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
 }

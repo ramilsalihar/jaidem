@@ -6,6 +6,8 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/domain/entities/forum_entity.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/dialogs/comment_dialog.dart';
+import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
+import 'package:jaidem/features/jaidems/presentation/pages/jaidem_detail_page.dart';
 
 class ForumCard extends StatefulWidget {
   const ForumCard({super.key, required this.forum});
@@ -73,29 +75,70 @@ class _ForumCardState extends State<ForumCard>
       if (diff.inHours < 24) return '${diff.inHours} саат мурун';
       if (diff.inDays < 7) return '${diff.inDays} күн мурун';
 
-      return '${date.day}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+      // Fix: Pad both day and month with leading zero
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+      return '$day.$month.${date.year}';
     } catch (e) {
       return '';
+    }
+  }
+
+  Future<void> _navigateToAuthorProfile() async {
+    final author = widget.forum.author;
+    if (author != null) {
+      HapticFeedback.lightImpact();
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Center(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const CircularProgressIndicator(),
+          ),
+        ),
+      );
+
+      // Fetch person data
+      final person = await context.read<JaidemsCubit>().getJaidemById(author.id);
+
+      // Close loading dialog
+      if (mounted) Navigator.of(context).pop();
+
+      // Navigate to detail page if person data was fetched
+      if (person != null && mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => JaidemDetailPage(person: person),
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final content = widget.forum.content ?? '';
-    final isLongContent = content.length > 120;
+    final isLongContent = content.length > 150;
     final displayContent =
-        _expanded ? content : (isLongContent ? content.substring(0, 120) : content);
+        _expanded ? content : (isLongContent ? content.substring(0, 150) : content);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -105,87 +148,55 @@ class _ForumCardState extends State<ForumCard>
           // Author header
           _buildAuthorHeader(),
 
+          // Content text (before image like Facebook)
+          if (content.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayContent,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.grey.shade800,
+                      height: 1.4,
+                    ),
+                  ),
+                  if (isLongContent)
+                    GestureDetector(
+                      onTap: () => setState(() => _expanded = !_expanded),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          _expanded ? 'Азыраак көрүү' : 'Толук көрүү...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
           // Image
           _buildImage(),
 
-          // Content & Actions
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Actions row
-                _buildActionsRow(),
+          // Reaction summary
+          _buildReactionSummary(),
 
-                const SizedBox(height: 12),
-
-                // Likes count
-                if (_likesCount > 0)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      '$_likesCount жакты',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-
-                // Content
-                if (content.isNotEmpty) ...[
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade800,
-                        height: 1.4,
-                      ),
-                      children: [
-                        if (widget.forum.author != null)
-                          TextSpan(
-                            text: '${widget.forum.author!.fullname} ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        TextSpan(text: displayContent),
-                        if (isLongContent)
-                          WidgetSpan(
-                            child: GestureDetector(
-                              onTap: () => setState(() => _expanded = !_expanded),
-                              child: Text(
-                                _expanded ? ' азыраак' : '...дагы',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade500,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                // Date
-                if (widget.forum.createdAt != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      _formatDate(widget.forum.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
+          // Divider
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            color: Colors.grey.shade200,
           ),
+
+          // Actions row
+          _buildActionsRow(),
         ],
       ),
     );
@@ -193,91 +204,108 @@ class _ForumCardState extends State<ForumCard>
 
   Widget _buildAuthorHeader() {
     final author = widget.forum.author;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-      child: Row(
-        children: [
-          // Avatar
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.shade300,
-                  AppColors.primary,
+    return GestureDetector(
+      onTap: _navigateToAuthorProfile,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            // Avatar
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  width: 2,
+                ),
+              ),
+              child: ClipOval(
+                child: author?.avatar != null
+                    ? Image.network(
+                        author!.avatar!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            _buildDefaultAvatar(author.fullname),
+                      )
+                    : _buildDefaultAvatar(author?.fullname ?? 'U'),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            // Name and time
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    author?.fullname ?? 'Белгисиз',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        _formatDate(widget.forum.createdAt),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.public,
+                        size: 14,
+                        color: Colors.grey.shade400,
+                      ),
+                    ],
+                  ),
                 ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            child: author?.avatar != null
-                ? ClipOval(
-                    child: Image.network(
-                      author!.avatar!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _buildDefaultAvatar(author.fullname),
-                    ),
-                  )
-                : _buildDefaultAvatar(author?.fullname ?? 'U'),
-          ),
 
-          const SizedBox(width: 12),
-
-          // Name and time
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  author?.fullname ?? 'Белгисиз',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+            // More options
+            GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _formatDate(widget.forum.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
+                child: Icon(
+                  Icons.more_horiz_rounded,
+                  color: Colors.grey.shade600,
+                  size: 20,
                 ),
-              ],
+              ),
             ),
-          ),
-
-          // More options
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.more_horiz_rounded,
-              color: Colors.grey.shade400,
-            ),
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDefaultAvatar(String name) {
     final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
-    return Center(
-      child: Text(
-        initial,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+    return Container(
+      color: AppColors.primary.shade200,
+      child: Center(
+        child: Text(
+          initial,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -292,13 +320,13 @@ class _ForumCardState extends State<ForumCard>
       },
       child: SizedBox(
         width: double.infinity,
-        height: 280,
         child: Image.network(
           widget.forum.photo ?? AppConstants.defaultForumPost,
           fit: BoxFit.cover,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
+              height: 300,
               color: Colors.grey.shade100,
               child: Center(
                 child: CircularProgressIndicator(
@@ -314,6 +342,7 @@ class _ForumCardState extends State<ForumCard>
           },
           errorBuilder: (_, __, ___) {
             return Container(
+              height: 300,
               color: Colors.grey.shade100,
               child: Image.network(
                 AppConstants.defaultForumPost,
@@ -326,65 +355,142 @@ class _ForumCardState extends State<ForumCard>
     );
   }
 
-  Widget _buildActionsRow() {
-    return Row(
-      children: [
-        // Like button
-        GestureDetector(
-          onTap: _handleLike,
-          child: ScaleTransition(
-            scale: _likeScaleAnimation,
-            child: Icon(
-              _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              color: _isLiked ? Colors.red : Colors.grey.shade700,
-              size: 26,
+  Widget _buildReactionSummary() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Likes indicator
+          if (_likesCount > 0) ...[
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.red.shade400, Colors.pink.shade400],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.favorite_rounded,
+                size: 12,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$_likesCount',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+
+          const Spacer(),
+
+          // Comments count placeholder
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              showCommentBottomSheet(forumId: widget.forum.id);
+            },
+            child: Text(
+              'Комментарийлер',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
 
-        const SizedBox(width: 16),
-
-        // Comment button
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            showCommentBottomSheet(forumId: widget.forum.id);
-          },
-          child: Icon(
-            Icons.chat_bubble_outline_rounded,
-            color: Colors.grey.shade700,
-            size: 24,
+  Widget _buildActionsRow() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: Row(
+        children: [
+          // Like button
+          Expanded(
+            child: _buildActionButton(
+              icon: _isLiked
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_border_rounded,
+              label: 'Жактырдым',
+              color: _isLiked ? Colors.red : Colors.grey.shade700,
+              onTap: _handleLike,
+              animation: _likeScaleAnimation,
+            ),
           ),
-        ),
 
-        const SizedBox(width: 16),
-
-        // Share button
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-          },
-          child: Icon(
-            Icons.send_outlined,
-            color: Colors.grey.shade700,
-            size: 24,
+          // Comment button
+          Expanded(
+            child: _buildActionButton(
+              icon: Icons.chat_bubble_outline_rounded,
+              label: 'Комментарий',
+              color: Colors.grey.shade700,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                showCommentBottomSheet(forumId: widget.forum.id);
+              },
+            ),
           ),
-        ),
 
-        const Spacer(),
-
-        // Bookmark button
-        GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-          },
-          child: Icon(
-            Icons.bookmark_border_rounded,
-            color: Colors.grey.shade700,
-            size: 26,
+          // Share button
+          Expanded(
+            child: _buildActionButton(
+              icon: Icons.share_outlined,
+              label: 'Бөлүшүү',
+              color: Colors.grey.shade700,
+              onTap: () {
+                HapticFeedback.lightImpact();
+              },
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+    Animation<double>? animation,
+  }) {
+    final iconWidget = Icon(icon, color: color, size: 20);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            animation != null
+                ? ScaleTransition(scale: animation, child: iconWidget)
+                : iconWidget,
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
