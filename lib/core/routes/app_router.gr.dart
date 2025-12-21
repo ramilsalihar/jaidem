@@ -289,6 +289,53 @@ class GoalsRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [JaidemDetailPage]
+class JaidemDetailRoute extends PageRouteInfo<JaidemDetailRouteArgs> {
+  JaidemDetailRoute({
+    Key? key,
+    required PersonModel person,
+    List<PageRouteInfo>? children,
+  }) : super(
+          JaidemDetailRoute.name,
+          args: JaidemDetailRouteArgs(key: key, person: person),
+          initialChildren: children,
+        );
+
+  static const String name = 'JaidemDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<JaidemDetailRouteArgs>();
+      return JaidemDetailPage(key: args.key, person: args.person);
+    },
+  );
+}
+
+class JaidemDetailRouteArgs {
+  const JaidemDetailRouteArgs({this.key, required this.person});
+
+  final Key? key;
+
+  final PersonModel person;
+
+  @override
+  String toString() {
+    return 'JaidemDetailRouteArgs{key: $key, person: $person}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! JaidemDetailRouteArgs) return false;
+    return key == other.key && person == other.person;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ person.hashCode;
+}
+
+/// generated route for
 /// [LoginPage]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -322,48 +369,18 @@ class ProfileEditFormRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [ProfilePage]
-class ProfileRoute extends PageRouteInfo<ProfileRouteArgs> {
-  ProfileRoute({Key? key, PersonModel? person, List<PageRouteInfo>? children})
-      : super(
-          ProfileRoute.name,
-          args: ProfileRouteArgs(key: key, person: person),
-          initialChildren: children,
-        );
+class ProfileRoute extends PageRouteInfo<void> {
+  const ProfileRoute({List<PageRouteInfo>? children})
+      : super(ProfileRoute.name, initialChildren: children);
 
   static const String name = 'ProfileRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      final args = data.argsAs<ProfileRouteArgs>(
-        orElse: () => const ProfileRouteArgs(),
-      );
-      return ProfilePage(key: args.key, person: args.person);
+      return const ProfilePage();
     },
   );
-}
-
-class ProfileRouteArgs {
-  const ProfileRouteArgs({this.key, this.person});
-
-  final Key? key;
-
-  final PersonModel? person;
-
-  @override
-  String toString() {
-    return 'ProfileRouteArgs{key: $key, person: $person}';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other is! ProfileRouteArgs) return false;
-    return key == other.key && person == other.person;
-  }
-
-  @override
-  int get hashCode => key.hashCode ^ person.hashCode;
 }
 
 /// generated route for

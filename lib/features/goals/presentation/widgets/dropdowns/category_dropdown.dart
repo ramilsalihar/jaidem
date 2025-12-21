@@ -48,7 +48,7 @@ class CategoryDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButtonFormField<String>(
-            value: selectedCategory,
+            initialValue: selectedCategory,
             hint: Text(
               hintText,
               style: context.textTheme.bodyMedium?.copyWith(

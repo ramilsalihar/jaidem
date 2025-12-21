@@ -68,8 +68,9 @@ class GoalTaskModel {
   int? get indicatorId {
     if (indicator == null) return null;
     if (indicator is int) return indicator as int;
-    if (indicator is GoalIndicatorModel)
+    if (indicator is GoalIndicatorModel) {
       return (indicator as GoalIndicatorModel).id;
+    }
     return null;
   }
 

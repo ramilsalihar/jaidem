@@ -32,7 +32,7 @@ class _IndicatorCardState extends State<IndicatorCard> with Show {
   bool _isExpanded = false;
   bool _isLoadingTasks = false;
   double? _localProgress;
-  Map<int, bool> _localTaskStates = {};
+  final Map<int, bool> _localTaskStates = {};
   GoalIndicatorModel? _updatedIndicator;
 
   void _toggleExpansion() {

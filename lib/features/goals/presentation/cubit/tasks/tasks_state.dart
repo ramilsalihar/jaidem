@@ -17,14 +17,14 @@ class TasksInitial extends TasksState {
 
 class TasksLoading extends TasksState {
   const TasksLoading({
-    Map<String, List<GoalTaskModel>> goalTasks = const {},
-  }) : super(goalTasks: goalTasks);
+    super.goalTasks,
+  });
 }
 
 class TasksLoaded extends TasksState {
   const TasksLoaded({
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 }
 
 class TasksError extends TasksState {
@@ -32,8 +32,8 @@ class TasksError extends TasksState {
 
   const TasksError({
     required this.message,
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 
   @override
   List<Object> get props => [message, goalTasks];
@@ -41,14 +41,14 @@ class TasksError extends TasksState {
 
 class TaskCreating extends TasksState {
   const TaskCreating({
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 }
 
 class TaskCreated extends TasksState {
   const TaskCreated({
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 }
 
 class TaskCreationError extends TasksState {
@@ -56,8 +56,8 @@ class TaskCreationError extends TasksState {
 
   const TaskCreationError({
     required this.message,
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 
   @override
   List<Object> get props => [message, goalTasks];
@@ -65,14 +65,14 @@ class TaskCreationError extends TasksState {
 
 class TaskUpdating extends TasksState {
   const TaskUpdating({
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 }
 
 class TaskUpdated extends TasksState {
   const TaskUpdated({
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 }
 
 class TaskUpdateError extends TasksState {
@@ -80,8 +80,8 @@ class TaskUpdateError extends TasksState {
 
   const TaskUpdateError({
     required this.message,
-    required Map<String, List<GoalTaskModel>> goalTasks,
-  }) : super(goalTasks: goalTasks);
+    required super.goalTasks,
+  });
 
   @override
   List<Object> get props => [message, goalTasks];

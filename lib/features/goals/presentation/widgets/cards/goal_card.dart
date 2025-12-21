@@ -75,7 +75,6 @@ class _GoalCardState extends State<GoalCard>
             ),
           ));
         }
-        ;
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),

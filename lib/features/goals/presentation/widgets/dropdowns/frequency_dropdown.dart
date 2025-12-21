@@ -49,7 +49,7 @@ class FrequencyDropdown extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: DropdownButtonFormField<String>(
-            value: selectedFrequency,
+            initialValue: selectedFrequency,
             hint: Text(
               hintText,
               style: context.textTheme.bodyMedium?.copyWith(

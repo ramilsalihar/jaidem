@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:jaidem/core/data/models/response_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';

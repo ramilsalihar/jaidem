@@ -31,7 +31,7 @@ class _ProfileBodyState extends State<ProfileBody> {
   }
 
   Future<void> _loadUserId() async {
-    final prefs = await sl<SharedPreferences>();
+    final prefs = sl<SharedPreferences>();
     final userIdStr = prefs.getString(AppConstants.userId);
 
     setState(() {

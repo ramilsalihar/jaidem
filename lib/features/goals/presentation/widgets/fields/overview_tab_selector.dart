@@ -53,7 +53,7 @@ class _HorizontalTabSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 50,
       child: Row(
         children: List.generate(_tabTitles.length, (index) {

@@ -10,6 +10,7 @@ import 'package:jaidem/features/goals/presentation/pages/add_goal_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_indicator_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_task_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
+import 'package:jaidem/features/jaidems/presentation/pages/jaidem_detail_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/change_password_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chats/chat_list_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chats/chat_page.dart';
@@ -93,10 +94,10 @@ class AppRouter extends RootStackRouter {
           duration: const Duration(milliseconds: 300),
         ),
 
-        // profiles
+        // jaidem detail (other user's profile)
         CustomRoute(
-          page: ProfileRoute.page,
-          path: '/profile',
+          page: JaidemDetailRoute.page,
+          path: '/jaidem-detail',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),

@@ -17,14 +17,14 @@ class IndicatorsInitial extends IndicatorsState {
 
 class IndicatorsLoading extends IndicatorsState {
   const IndicatorsLoading({
-    Map<String, List<GoalIndicatorModel>> goalIndicators = const {},
-  }) : super(goalIndicators: goalIndicators);
+    super.goalIndicators,
+  });
 }
 
 class IndicatorsLoaded extends IndicatorsState {
   const IndicatorsLoaded({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorsError extends IndicatorsState {
@@ -32,8 +32,8 @@ class IndicatorsError extends IndicatorsState {
 
   const IndicatorsError({
     required this.message,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [message, goalIndicators];
@@ -41,14 +41,14 @@ class IndicatorsError extends IndicatorsState {
 
 class IndicatorCreating extends IndicatorsState {
   const IndicatorCreating({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorCreated extends IndicatorsState {
   const IndicatorCreated({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorCreationError extends IndicatorsState {
@@ -56,8 +56,8 @@ class IndicatorCreationError extends IndicatorsState {
 
   const IndicatorCreationError({
     required this.message,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [message, goalIndicators];
@@ -65,14 +65,14 @@ class IndicatorCreationError extends IndicatorsState {
 
 class IndicatorUpdating extends IndicatorsState {
   const IndicatorUpdating({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorUpdated extends IndicatorsState {
   const IndicatorUpdated({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorUpdateError extends IndicatorsState {
@@ -80,8 +80,8 @@ class IndicatorUpdateError extends IndicatorsState {
 
   const IndicatorUpdateError({
     required this.message,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [message, goalIndicators];
@@ -89,14 +89,14 @@ class IndicatorUpdateError extends IndicatorsState {
 
 class IndicatorDeleting extends IndicatorsState {
   const IndicatorDeleting({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorDeleted extends IndicatorsState {
   const IndicatorDeleted({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorDeleteError extends IndicatorsState {
@@ -104,8 +104,8 @@ class IndicatorDeleteError extends IndicatorsState {
 
   const IndicatorDeleteError({
     required this.message,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [message, goalIndicators];
@@ -113,8 +113,8 @@ class IndicatorDeleteError extends IndicatorsState {
 
 class IndicatorFetching extends IndicatorsState {
   const IndicatorFetching({
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 }
 
 class IndicatorFetched extends IndicatorsState {
@@ -122,8 +122,8 @@ class IndicatorFetched extends IndicatorsState {
 
   const IndicatorFetched({
     required this.indicator,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [indicator, goalIndicators];
@@ -134,8 +134,8 @@ class IndicatorFetchError extends IndicatorsState {
 
   const IndicatorFetchError({
     required this.message,
-    required Map<String, List<GoalIndicatorModel>> goalIndicators,
-  }) : super(goalIndicators: goalIndicators);
+    required super.goalIndicators,
+  });
 
   @override
   List<Object> get props => [message, goalIndicators];

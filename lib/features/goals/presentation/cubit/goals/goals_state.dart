@@ -17,14 +17,14 @@ class GoalsInitial extends GoalsState {
 
 class GoalsLoading extends GoalsState {
   const GoalsLoading({
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 }
 
 class GoalsLoaded extends GoalsState {
   const GoalsLoaded({
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 }
 
 class GoalsError extends GoalsState {
@@ -32,8 +32,8 @@ class GoalsError extends GoalsState {
 
   const GoalsError({
     required this.message,
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 
   @override
   List<Object> get props => [message, goals];
@@ -42,14 +42,14 @@ class GoalsError extends GoalsState {
 
 class GoalCreating extends GoalsState {
   const GoalCreating({
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 }
 
 class GoalCreated extends GoalsState {
   const GoalCreated({
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 }
 
 class GoalCreationError extends GoalsState {
@@ -57,8 +57,8 @@ class GoalCreationError extends GoalsState {
 
   const GoalCreationError({
     required this.message,
-    required List<GoalModel> goals,
-  }) : super(goals: goals);
+    required super.goals,
+  });
 
   @override
   List<Object> get props => [message, goals];
