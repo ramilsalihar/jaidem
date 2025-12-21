@@ -140,9 +140,12 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
 
   Widget _buildFAB() {
     return FloatingActionButton.extended(
-      onPressed: () {
+      onPressed: () async {
         HapticFeedback.mediumImpact();
-        context.router.push(const AddGoalRoute());
+        final result = await context.router.push<bool>(const AddGoalRoute());
+        if (result == true && mounted) {
+          context.read<GoalsCubit>().fetchGoals();
+        }
       },
       backgroundColor: AppColors.primary,
       elevation: 4,

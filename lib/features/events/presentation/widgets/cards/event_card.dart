@@ -46,7 +46,7 @@ class _EventCardState extends State<EventCard> with EventDialog {
 
           // Content
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -55,16 +55,16 @@ class _EventCardState extends State<EventCard> with EventDialog {
                 Text(
                   widget.event.title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Colors.grey.shade800,
-                    height: 1.3,
+                    height: 1.2,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
 
                 // Info Row
                 _buildInfoRow(
@@ -72,14 +72,14 @@ class _EventCardState extends State<EventCard> with EventDialog {
                   widget.event.date.toReadableDate(),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
 
                 _buildInfoRow(
                   Icons.location_on_outlined,
                   widget.event.location,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 // Action Buttons
                 _buildActionButtons(),

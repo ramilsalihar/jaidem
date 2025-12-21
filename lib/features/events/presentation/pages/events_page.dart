@@ -255,7 +255,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: EventPagination(
               events: state.optionalEvents,
-              label: 'Баары үчүн',
+              label: 'Каалоочуларга',
               isRequired: false,
             ),
           ),

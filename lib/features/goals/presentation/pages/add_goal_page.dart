@@ -90,8 +90,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
       onTimeSelected: (selectedTime) {
         setState(() {
           _selectedReminderTime = selectedTime;
-          _reminderController.text =
-              'Эртең менен ${formatTimeOfDay(selectedTime)}';
+          _reminderController.text = formatTimeOfDay(selectedTime);
         });
       },
     );
@@ -185,7 +184,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true);
                 }
               } else if (state is GoalCreationError) {
                 showErrorMessage(context, message: state.message);
@@ -205,7 +204,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(true);
                 }
               } else if (state is IndicatorCreationError) {
                 showErrorMessage(context,
