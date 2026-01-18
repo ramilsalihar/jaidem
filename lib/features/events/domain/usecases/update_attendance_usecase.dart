@@ -8,6 +8,6 @@ class UpdateAttendanceUsecase {
   const UpdateAttendanceUsecase(this.repository);
 
   Future<Either<String, void>> call(AttendanceModel attendance) {
-    return repository.updateAttendance(attendance);
+    return repository.sendAttendance(attendance);
   }
 }

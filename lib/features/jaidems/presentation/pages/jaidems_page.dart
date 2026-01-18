@@ -209,7 +209,7 @@ class _JaidemsPageState extends State<JaidemsPage>
         ),
       ],
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(56),
+        preferredSize: const Size.fromHeight(66),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Row(
@@ -489,7 +489,7 @@ class _JaidemsPageState extends State<JaidemsPage>
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.58,
+          childAspectRatio: 0.55,
         ),
         itemCount: jaidemList.length + (_isLoadingMore ? 2 : 0),
         itemBuilder: (context, index) {

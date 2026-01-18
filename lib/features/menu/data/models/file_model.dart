@@ -6,7 +6,7 @@ class FileModel {
   final String? file;
   final String usefulLinks;
   final Division? division;
-  final Division? division;
+
   final String subdivision;
 
   FileModel({
@@ -36,7 +36,6 @@ class FileModel {
       'title': title,
       'file': file,
       'useful_links': usefulLinks,
-      'division': division?.toJson(),
       'division': division?.toJson(),
       'subdivision': subdivision,
     };

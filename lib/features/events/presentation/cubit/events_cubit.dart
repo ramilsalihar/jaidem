@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jaidem/features/events/data/models/attendance_model.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 import 'package:jaidem/features/events/domain/repositories/event_repository.dart';
@@ -99,7 +102,16 @@ class EventsCubit extends Cubit<EventsState> {
     );
   }
 
+  Future<List<EventEntity>> _fetchAttendanceForEvents(
+      List<EventEntity> events) async {
+    // TODO: Implement attendance fetching
+    return events;
+  }
+
   void resetAttendanceStatus() {
     emit(state.copyWith(attendanceStatus: AttendanceStatus.initial));
   }
+
+  String get currentUserId =>
+      sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
 }

@@ -164,12 +164,17 @@ class _BottomBarPageState extends State<BottomBarPage> {
                   color: isSelected ? AppColors.primary : Colors.grey.shade500,
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 9,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    color: isSelected ? AppColors.primary : Colors.grey.shade500,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color:
+                          isSelected ? AppColors.primary : Colors.grey.shade500,
+                    ),
                   ),
                 ),
               ],
@@ -201,7 +206,8 @@ class _BottomBarPageState extends State<BottomBarPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: isSelected ? 0.4 : 0.25),
+              color:
+                  AppColors.primary.withValues(alpha: isSelected ? 0.4 : 0.25),
               blurRadius: isSelected ? 12 : 8,
               offset: const Offset(0, 3),
             ),

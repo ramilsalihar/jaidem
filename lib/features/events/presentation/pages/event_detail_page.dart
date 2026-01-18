@@ -29,7 +29,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
   int _likeCount = 0;
   final bool _isLiked = false;
 
-  bool get _isEventInFuture => widget.event.date.isAfter(DateTime.now());
+  bool get _isEventInFuture =>
+      widget.event.date?.isAfter(DateTime.now()) ?? false;
 
   @override
   void initState() {
@@ -38,7 +39,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   }
 
   Future<void> _loadLikeData() async {
-    final count = await _firebaseService.getLikeCount(widget.event.id);
+    final count = await _firebaseService.getLikeCount(widget.event.id ?? 0);
 
     if (mounted) {
       setState(() {
@@ -99,14 +100,14 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 _buildMainInfoCard(),
 
                 // Video Section
-                if (_isValidVideoUrl(widget.event.video))
+                if (_isValidVideoUrl(widget.event.video ?? ''))
                   _buildVideoSection(),
 
                 // Description Card
                 _buildDescriptionCard(),
 
                 // Conditions Card
-                if (widget.event.conditions.isNotEmpty)
+                if ((widget.event.conditions ?? '').isNotEmpty)
                   _buildConditionsCard(),
 
                 // Contact Card
@@ -115,7 +116,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 // Reviews Section - only show for past events
                 if (!_isEventInFuture) ...[
                   const SizedBox(height: 8),
-                  EventReviewsSection(eventId: widget.event.id),
+                  EventReviewsSection(eventId: widget.event.id ?? 0),
                 ] else ...[
                   // Show "Event has not happened yet" message for future events
                   _buildUpcomingEventMessage(),
@@ -170,7 +171,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  _isLiked
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
                   color: _isLiked ? AppColors.red : Colors.white,
                   size: 20,
                 ),
@@ -197,7 +200,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           children: [
             // Image
             Image.network(
-              widget.event.image,
+              widget.event.image ?? '',
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
@@ -240,7 +243,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
                 bottom: 60,
                 left: 20,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(8),
@@ -312,7 +316,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             icon: Icons.calendar_today_rounded,
             iconColor: AppColors.primary,
             label: context.tr('event_date'),
-            value: widget.event.date.toReadableDateWithTime(),
+            value: widget.event.date?.toReadableDateWithTime() ?? '',
           ),
 
           const Divider(height: 24),
@@ -322,7 +326,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             icon: Icons.location_on_rounded,
             iconColor: AppColors.orange,
             label: context.tr('event_location'),
-            value: widget.event.location,
+            value: widget.event.location ?? '',
           ),
 
           const Divider(height: 24),
@@ -332,7 +336,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             icon: Icons.groups_rounded,
             iconColor: AppColors.green,
             label: context.tr('event_generation'),
-            value: widget.event.generation,
+            value: widget.event.generation ?? '',
           ),
         ],
       ),
@@ -419,7 +423,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ],
           ),
           const SizedBox(height: 12),
-          EventVideoPlayer(videoUrl: widget.event.video),
+          EventVideoPlayer(videoUrl: widget.event.video ?? ''),
           const SizedBox(height: 16),
         ],
       ),
@@ -524,7 +528,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            widget.event.conditions,
+            widget.event.conditions ?? '',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade700,
@@ -582,9 +586,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
           const SizedBox(height: 16),
 
           // Phone
-          if (widget.event.phone.isNotEmpty)
+          if ((widget.event.phone ?? '').isNotEmpty)
             GestureDetector(
-              onTap: () => _makePhoneCall(widget.event.phone),
+              onTap: () => _makePhoneCall(widget.event.phone ?? ''),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 10),
@@ -602,7 +606,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        widget.event.phone,
+                        widget.event.phone ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade700,
@@ -621,9 +625,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ),
 
           // Email
-          if (widget.event.email.isNotEmpty)
+          if ((widget.event.email ?? '').isNotEmpty)
             GestureDetector(
-              onTap: () => _sendEmail(widget.event.email),
+              onTap: () => _sendEmail(widget.event.email ?? ''),
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -640,7 +644,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        widget.event.email,
+                        widget.event.email ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade700,

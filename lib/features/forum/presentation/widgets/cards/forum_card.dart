@@ -85,7 +85,8 @@ class _ForumCardState extends State<ForumCard>
     });
 
     // Toggle like in Firebase
-    final isNowLiked = await context.read<ForumCubit>().toggleLike(widget.forum.id);
+    final isNowLiked =
+        await context.read<ForumCubit>().toggleLike(widget.forum.id);
 
     // If the result doesn't match our optimistic update, correct it
     if (mounted && isNowLiked != _isLiked) {
@@ -105,7 +106,8 @@ class _ForumCardState extends State<ForumCard>
     final truncatedContent =
         content.length > 100 ? '${content.substring(0, 100)}...' : content;
 
-    final shareText = '$author жазды:\n\n$truncatedContent\n\nJaidem колдонмосунда көбүрөөк маалымат алыңыз!';
+    final shareText =
+        '$author жазды:\n\n$truncatedContent\n\nJaidem колдонмосунда көбүрөөк маалымат алыңыз!';
 
     try {
       await Share.share(shareText);
@@ -158,7 +160,8 @@ class _ForumCardState extends State<ForumCard>
       );
 
       // Fetch person data
-      final person = await context.read<JaidemsCubit>().getJaidemById(author.id);
+      final person =
+          await context.read<JaidemsCubit>().getJaidemById(author.id);
 
       // Close loading dialog
       if (mounted) Navigator.of(context).pop();
@@ -178,8 +181,9 @@ class _ForumCardState extends State<ForumCard>
   Widget build(BuildContext context) {
     final content = widget.forum.content ?? '';
     final isLongContent = content.length > 150;
-    final displayContent =
-        _expanded ? content : (isLongContent ? content.substring(0, 150) : content);
+    final displayContent = _expanded
+        ? content
+        : (isLongContent ? content.substring(0, 150) : content);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -194,62 +198,65 @@ class _ForumCardState extends State<ForumCard>
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Author header
-          _buildAuthorHeader(),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Author header
+            _buildAuthorHeader(),
 
-          // Content text (before image like Facebook)
-          if (content.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayContent,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.grey.shade800,
-                      height: 1.4,
+            // Content text (before image like Facebook)
+            if (content.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayContent,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade800,
+                        height: 1.4,
+                      ),
                     ),
-                  ),
-                  if (isLongContent)
-                    GestureDetector(
-                      onTap: () => setState(() => _expanded = !_expanded),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          _expanded ? 'Азыраак көрүү' : 'Толук көрүү...',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w600,
+                    if (isLongContent)
+                      GestureDetector(
+                        onTap: () => setState(() => _expanded = !_expanded),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            _expanded ? 'Азыраак көрүү' : 'Толук көрүү...',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
+
+            // Image
+            _buildImage(),
+
+            // Reaction summary
+            _buildReactionSummary(),
+
+            // Divider
+            Container(
+              height: 1,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              color: Colors.grey.shade200,
             ),
 
-          // Image
-          _buildImage(),
-
-          // Reaction summary
-          _buildReactionSummary(),
-
-          // Divider
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            color: Colors.grey.shade200,
-          ),
-
-          // Actions row
-          _buildActionsRow(),
-        ],
+            // Actions row
+            _buildActionsRow(),
+          ],
+        ),
       ),
     );
   }
@@ -299,6 +306,8 @@ class _ForumCardState extends State<ForumCard>
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                   const SizedBox(height: 2),
                   Row(
@@ -515,32 +524,35 @@ class _ForumCardState extends State<ForumCard>
   }) {
     final iconWidget = Icon(icon, color: color, size: 20);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            animation != null
-                ? ScaleTransition(scale: animation, child: iconWidget)
-                : iconWidget,
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: color,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              animation != null
+                  ? ScaleTransition(scale: animation, child: iconWidget)
+                  : iconWidget,
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: color,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

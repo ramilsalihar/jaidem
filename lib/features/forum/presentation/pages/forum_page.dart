@@ -120,7 +120,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         ),
       ],
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(66),
+        preferredSize: const Size.fromHeight(70),
         child: Container(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: _buildSearchBar(),

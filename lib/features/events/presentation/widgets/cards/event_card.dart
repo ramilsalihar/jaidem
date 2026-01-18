@@ -1,17 +1,18 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/extensions/date_extension.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
-import 'package:jaidem/core/utils/helpers/show.dart';
+
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/data/models/attendance_model.dart';
 import 'package:jaidem/features/events/data/services/event_firebase_service.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/dialogs/event_dialog.dart';
+import 'package:jaidem/core/widgets/fields/details_text_field.dart';
+import 'package:jaidem/features/events/presentation/widgets/buttons/event_action_buttons.dart';
 
 class EventCard extends StatefulWidget {
   const EventCard({
@@ -34,7 +35,8 @@ class _EventCardState extends State<EventCard> with EventDialog {
   bool _isLiked = false;
   bool _isLikeLoading = false;
 
-  bool get _isEventInFuture => widget.event.date.isAfter(DateTime.now());
+  bool get _isEventInFuture =>
+      widget.event.date?.isAfter(DateTime.now()) ?? false;
 
   @override
   void initState() {
@@ -46,9 +48,9 @@ class _EventCardState extends State<EventCard> with EventDialog {
     final cubit = context.read<EventsCubit>();
     final userId = cubit.currentUserId;
 
-    final count = await _firebaseService.getLikeCount(widget.event.id);
+    final count = await _firebaseService.getLikeCount(widget.event.id ?? 0);
     final liked = userId.isNotEmpty
-        ? await _firebaseService.hasUserLiked(widget.event.id, userId)
+        ? await _firebaseService.hasUserLiked(widget.event.id ?? 0, userId)
         : false;
 
     if (mounted) {
@@ -73,7 +75,7 @@ class _EventCardState extends State<EventCard> with EventDialog {
     try {
       HapticFeedback.lightImpact();
       final nowLiked =
-          await _firebaseService.toggleLike(widget.event.id, userId);
+          await _firebaseService.toggleLike(widget.event.id ?? 0, userId);
 
       if (mounted) {
         setState(() {
@@ -161,10 +163,11 @@ class _EventCardState extends State<EventCard> with EventDialog {
                     ? EventCardState.decision
                     : EventCardState.share,
                 primaryButtonAction: () {
+                  final userId = context.read<EventsCubit>().currentUserId;
                   var attendance = AttendanceModel(
                     status: 'will go',
                     reason: 'will go',
-                    student: '',
+                    student: userId,
                     event: widget.event.id ?? 0,
                   );
                   if (widget.event.isRequired) {
@@ -180,10 +183,11 @@ class _EventCardState extends State<EventCard> with EventDialog {
                   }
                 },
                 secondaryButtonAction: () {
+                  final userId = context.read<EventsCubit>().currentUserId;
                   var attendance = AttendanceModel(
                     status: 'will not go',
                     reason: '',
-                    student: '',
+                    student: userId,
                     event: widget.event.id ?? 0,
                   );
                   showEventDialog(onConfirm: (val) {
@@ -197,10 +201,11 @@ class _EventCardState extends State<EventCard> with EventDialog {
                   });
                 },
                 tertiaryButtonAction: () {
+                  final userId = context.read<EventsCubit>().currentUserId;
                   var attendance = AttendanceModel(
                     status: 'maybe',
                     reason: 'Думаю',
-                    student: '',
+                    student: userId,
                     event: widget.event.id ?? 0,
                   );
                   context
@@ -216,25 +221,27 @@ class _EventCardState extends State<EventCard> with EventDialog {
   }
 
   void _handleAttendance(String status, String reason) {
+    final userId = context.read<EventsCubit>().currentUserId;
     final attendance = AttendanceModel(
       status: status,
       reason: reason,
-      student: '',
-      event: widget.event.id,
+      student: userId,
+      event: widget.event.id ?? 0,
     );
-    context.read<EventsCubit>().sendRequest(attendance);
+    context.read<EventsCubit>().sendRequest(attendance, widget.event);
   }
 
   void _showDeclineDialog() {
     showEventDialog(onConfirm: (val) {
       if (val != null && val.isNotEmpty) {
+        final userId = context.read<EventsCubit>().currentUserId;
         final attendance = AttendanceModel(
           status: 'will not go',
           reason: val,
-          student: '',
-          event: widget.event.id,
+          student: userId,
+          event: widget.event.id ?? 0,
         );
-        context.read<EventsCubit>().sendRequest(attendance);
+        context.read<EventsCubit>().sendRequest(attendance, widget.event);
       }
     });
   }
