@@ -27,7 +27,17 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
+  Future<Either<String, AttendanceModel?>> getAttendance(int eventId, String studentId) {
+    return remoteDataSource.getAttendance(eventId, studentId);
+  }
+
+  @override
   Future<Either<String, void>> sendAttendance(AttendanceModel attendance) {
     return remoteDataSource.sendAttendance(attendance);
+  }
+
+  @override
+  Future<Either<String, void>> updateAttendance(AttendanceModel attendance) {
+    return remoteDataSource.updateAttendance(attendance);
   }
 }

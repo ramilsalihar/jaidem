@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
@@ -14,7 +15,9 @@ import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_c
 
 @RoutePage()
 class AddGoalPage extends StatefulWidget {
-  const AddGoalPage({super.key});
+  final GoalModel? goal; // For editing existing goal
+
+  const AddGoalPage({super.key, this.goal});
 
   @override
   State<AddGoalPage> createState() => _AddGoalPageState();
@@ -31,12 +34,46 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
   DateTime? _selectedDeadline;
   TimeOfDay? _selectedReminderTime;
   String? _selectedFrequency;
+  int _createdIndicatorsCount = 0;
+  int _totalIndicatorsToCreate = 0;
 
-  final List<Map<String, dynamic>> _frequencies = [
-    {'value': 'daily', 'label': 'Күн сайын', 'icon': Icons.today_rounded},
-    {'value': 'weekly', 'label': 'Жума сайын', 'icon': Icons.view_week_rounded},
-    {'value': 'monthly', 'label': 'Ай сайын', 'icon': Icons.calendar_month_rounded},
+  bool get _isEditMode => widget.goal != null;
+
+  List<Map<String, dynamic>> _getFrequencies(BuildContext context) => [
+    {'value': 'daily', 'label': context.tr('daily'), 'icon': Icons.today_rounded},
+    {'value': 'weekly', 'label': context.tr('weekly'), 'icon': Icons.view_week_rounded},
+    {'value': 'monthly', 'label': context.tr('monthly'), 'icon': Icons.calendar_month_rounded},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeForEdit();
+  }
+
+  void _initializeForEdit() {
+    if (_isEditMode) {
+      final goal = widget.goal!;
+      _titleController.text = goal.title;
+      _descriptionController.text = goal.description ?? '';
+      _selectedDeadline = goal.deadline;
+      if (goal.deadline != null) {
+        _deadlineController.text = formatDate(goal.deadline!);
+      }
+      _selectedFrequency = goal.frequency;
+      if (goal.reminder != null && goal.reminder!.isNotEmpty) {
+        _reminderController.text = goal.reminder!;
+        // Parse reminder time
+        final parts = goal.reminder!.split(':');
+        if (parts.length >= 2) {
+          _selectedReminderTime = TimeOfDay(
+            hour: int.tryParse(parts[0]) ?? 9,
+            minute: int.tryParse(parts[1]) ?? 0,
+          );
+        }
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -96,29 +133,29 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     );
   }
 
-  String? _validateForm() {
+  String? _validateForm(BuildContext context) {
     if (_titleController.text.trim().isEmpty) {
-      return 'Максаттын аты талап кылынат.';
+      return context.tr('goal_name_required');
     }
 
     if (_titleController.text.trim().length < 3) {
-      return 'Аталыш кеминде 3 символдон турушу керек';
+      return context.tr('name_min_length');
     }
 
     if (_selectedDeadline == null) {
-      return 'Максаттуу дата милдеттүү түрдө көрсөтүлөт';
+      return context.tr('deadline_required');
     }
 
     if (_selectedDeadline!.isBefore(DateTime.now())) {
-      return 'Максаттын аткарылуу күнү өткөн чакта болушу мүмкүн эмес.';
+      return context.tr('deadline_past_error');
     }
 
     if (_selectedFrequency == null || _selectedFrequency!.isEmpty) {
-      return 'Жыштыгы милдеттүү';
+      return context.tr('frequency_required');
     }
 
     if (_selectedReminderTime == null) {
-      return 'Эскертүү убактысы милдеттүү түрдө көрсөтүлүшү керек';
+      return context.tr('reminder_time_required');
     }
 
     return null;
@@ -126,7 +163,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
 
   void _saveGoal() {
     HapticFeedback.mediumImpact();
-    String? errorMessage = _validateForm();
+    String? errorMessage = _validateForm(context);
 
     if (errorMessage != null) {
       showErrorMessage(context, message: errorMessage);
@@ -134,22 +171,33 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     }
 
     final goalModel = GoalModel(
+      id: _isEditMode ? widget.goal!.id : null,
       title: _titleController.text.trim(),
       description: _descriptionController.text.trim().isNotEmpty
           ? _descriptionController.text.trim()
           : null,
-      status: 'in_progress',
-      dateCreated: DateTime.now(),
+      status: _isEditMode ? widget.goal!.status : 'in_progress',
+      dateCreated: _isEditMode ? widget.goal!.dateCreated : DateTime.now(),
       dateUpdated: DateTime.now(),
       deadline: _selectedDeadline,
       frequency: _selectedFrequency!,
       reminder: _selectedReminderTime != null
           ? formatTimeOfDay(_selectedReminderTime!)
           : null,
-      progress: 0.0,
+      progress: _isEditMode ? widget.goal!.progress : 0.0,
+      student: _isEditMode ? widget.goal!.student : null,
+      category: _isEditMode ? widget.goal!.category : null,
     );
 
-    context.read<GoalsCubit>().createGoal(goalModel);
+    // Set the count of indicators to create
+    _totalIndicatorsToCreate = _indicators.length;
+    _createdIndicatorsCount = 0;
+
+    if (_isEditMode) {
+      context.read<GoalsCubit>().updateGoal(goalModel);
+    } else {
+      context.read<GoalsCubit>().createGoal(goalModel);
+    }
   }
 
   void _cancelGoal() {
@@ -168,8 +216,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
         listeners: [
           BlocListener<GoalsCubit, GoalsState>(
             listener: (context, state) {
-              if (state is GoalCreated) {
-                if (_indicators.isNotEmpty) {
+              if (state is GoalCreated || state is GoalUpdated) {
+                if (_indicators.isNotEmpty && !_isEditMode) {
                   final goalId = state.goals.first.id;
                   for (final indicator in _indicators) {
                     final updatedIndicator = indicator.copyWith(goal: goalId);
@@ -180,7 +228,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 } else {
                   showMessage(
                     context,
-                    message: 'Максат ийгиликтүү түзүлдү!',
+                    message: _isEditMode
+                        ? context.tr('goal_updated_success')
+                        : context.tr('goal_created_success'),
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
@@ -188,19 +238,19 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 }
               } else if (state is GoalCreationError) {
                 showErrorMessage(context, message: state.message);
+              } else if (state is GoalUpdateError) {
+                showErrorMessage(context, message: state.message);
               }
             },
           ),
           BlocListener<IndicatorsCubit, IndicatorsState>(
             listener: (context, state) {
               if (state is IndicatorCreated) {
-                final createdIndicators = state.goalIndicators.values
-                    .expand((indicators) => indicators)
-                    .length;
-                if (createdIndicators >= _indicators.length) {
+                _createdIndicatorsCount++;
+                if (_createdIndicatorsCount >= _totalIndicatorsToCreate) {
                   showMessage(
                     context,
-                    message: 'Максат жана индикаторлор ийгиликтүү түзүлдү!',
+                    message: context.tr('goal_and_indicators_created'),
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
@@ -208,14 +258,14 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 }
               } else if (state is IndicatorCreationError) {
                 showErrorMessage(context,
-                    message: 'Индикаторду түзүүдө ката кетти: ${state.message}');
+                    message: '${context.tr('indicator_create_error')}: ${state.message}');
               }
             },
           ),
         ],
         child: Scaffold(
           backgroundColor: Colors.grey.shade50,
-          appBar: _buildAppBar(),
+          appBar: _buildAppBar(context),
           body: Form(
             key: _formKey,
             child: SingleChildScrollView(
@@ -224,16 +274,16 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header card
-                  _buildHeaderCard(),
+                  _buildHeaderCard(context),
                   const SizedBox(height: 24),
 
                   // Title field
-                  _buildSectionTitle('Негизги маалымат', Icons.info_outline_rounded),
+                  _buildSectionTitle(context.tr('basic_info'), Icons.info_outline_rounded),
                   const SizedBox(height: 12),
                   _buildModernTextField(
                     controller: _titleController,
-                    label: 'Максаттын аты',
-                    hint: 'Англис тилин үйрөнүү',
+                    label: context.tr('goal_name'),
+                    hint: context.tr('goal_name_hint'),
                     icon: Icons.flag_rounded,
                   ),
                   const SizedBox(height: 16),
@@ -241,22 +291,22 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                   // Description field
                   _buildModernTextField(
                     controller: _descriptionController,
-                    label: 'Сүрөттөмө (милдеттүү эмес)',
-                    hint: 'Максатыңыз жөнүндө кыскача...',
+                    label: context.tr('description_optional'),
+                    hint: context.tr('description_hint'),
                     icon: Icons.description_outlined,
                     maxLines: 3,
                   ),
                   const SizedBox(height: 24),
 
                   // Schedule section
-                  _buildSectionTitle('Мөөнөт жана жыштык', Icons.schedule_rounded),
+                  _buildSectionTitle(context.tr('deadline_and_frequency'), Icons.schedule_rounded),
                   const SizedBox(height: 12),
 
                   // Deadline field
                   _buildModernTextField(
                     controller: _deadlineController,
-                    label: 'Аяктоо күнү',
-                    hint: 'Күндү тандаңыз',
+                    label: context.tr('end_date'),
+                    hint: context.tr('select_date'),
                     icon: Icons.calendar_today_rounded,
                     readOnly: true,
                     onTap: _selectDeadlineDate,
@@ -273,18 +323,18 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                   const SizedBox(height: 24),
 
                   // Indicators section
-                  _buildSectionTitle('Индикаторлор', Icons.track_changes_rounded),
+                  _buildSectionTitle(context.tr('indicators'), Icons.track_changes_rounded),
                   const SizedBox(height: 12),
                   _buildIndicatorsList(),
                   const SizedBox(height: 24),
 
                   // Reminder section
-                  _buildSectionTitle('Эскертме', Icons.notifications_outlined),
+                  _buildSectionTitle(context.tr('reminder'), Icons.notifications_outlined),
                   const SizedBox(height: 12),
                   _buildModernTextField(
                     controller: _reminderController,
-                    label: 'Эскертме убактысы',
-                    hint: 'Убакытты тандаңыз',
+                    label: context.tr('reminder_time'),
+                    hint: context.tr('select_time'),
                     icon: Icons.access_time_rounded,
                     readOnly: true,
                     onTap: _selectReminderTime,
@@ -308,7 +358,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -332,9 +382,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
           ),
         ),
       ),
-      title: const Text(
-        'Максат кошуу',
-        style: TextStyle(
+      title: Text(
+        _isEditMode ? context.tr('edit_goal') : context.tr('add_goal'),
+        style: const TextStyle(
           color: Colors.black87,
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -344,7 +394,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     );
   }
 
-  Widget _buildHeaderCard() {
+  Widget _buildHeaderCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -386,9 +436,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Жаңы максат',
-                  style: TextStyle(
+                Text(
+                  _isEditMode ? context.tr('edit_goal') : context.tr('new_goal'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
@@ -396,7 +446,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Ийгиликке жетүү үчүн максат коюңуз',
+                  _isEditMode
+                      ? context.tr('update_goal_info')
+                      : context.tr('set_goal_for_success'),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 14,
@@ -543,7 +595,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Жыштыгы',
+            context.tr('frequency'),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -552,8 +604,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
           ),
           const SizedBox(height: 12),
           Row(
-            children: _frequencies.map((freq) {
+            children: _getFrequencies(context).map((freq) {
               final isSelected = _selectedFrequency == freq['value'];
+              final frequencies = _getFrequencies(context);
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -565,7 +618,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     margin: EdgeInsets.only(
-                      right: freq != _frequencies.last ? 8 : 0,
+                      right: freq != frequencies.last ? 8 : 0,
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
@@ -731,7 +784,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      'Индикатор кошуу',
+                      context.tr('add_indicator'),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -747,7 +800,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Максимум 3 индикатор кошууга болот',
+                context.tr('max_indicators'),
                 style: TextStyle(
                   fontSize: 13,
                   color: Colors.grey.shade500,
@@ -764,8 +817,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
       builder: (context, goalsState) {
         return BlocBuilder<IndicatorsCubit, IndicatorsState>(
           builder: (context, indicatorsState) {
-            final isLoading =
-                goalsState is GoalCreating || indicatorsState is IndicatorCreating;
+            final isLoading = goalsState is GoalCreating ||
+                goalsState is GoalUpdating ||
+                indicatorsState is IndicatorCreating;
 
             return Column(
               children: [
@@ -804,18 +858,18 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                                     AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Row(
+                          : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_rounded,
                                   color: Colors.white,
                                   size: 22,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Сактоо',
-                                  style: TextStyle(
+                                  context.tr('save'),
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
@@ -842,7 +896,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     ),
                     child: Center(
                       child: Text(
-                        'Жокко чыгаруу',
+                        context.tr('cancel'),
                         style: TextStyle(
                           color: Colors.grey.shade700,
                           fontSize: 16,

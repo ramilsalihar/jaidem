@@ -20,6 +20,7 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
     String? speciality,
     String? age,
     String? search,
+    String? region,
   }) async {
     try {
       final queryParameters = <String, dynamic>{};
@@ -28,10 +29,11 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
       if (previous != null) queryParameters['previous'] = previous;
       if (flow != null) queryParameters['flow'] = flow;
       if (generation != null) queryParameters['generation'] = generation;
-      if (university != null) queryParameters['university'] = university;
+      if (university != null) queryParameters['univer'] = university;
       if (speciality != null) queryParameters['speciality'] = speciality;
       if (age != null) queryParameters['age'] = age;
       if (search != null) queryParameters['search'] = search;
+      if (region != null) queryParameters['region'] = region;
 
       final response = await dio.get(
         ApiConst.profile,

@@ -160,6 +160,181 @@ class _IndicatorCardState extends State<IndicatorCard> with Show {
     );
   }
 
+  void _showProgressUpdateDialog() {
+    if (widget.indicator.id == null) return;
+
+    final currentIndicator = _updatedIndicator ?? widget.indicator;
+    double sliderValue = _localProgress ?? currentIndicator.progress;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Прогрессти жаңыртуу',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    currentIndicator.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      '${sliderValue.toInt()}%',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: AppColors.primary,
+                      inactiveTrackColor: AppColors.primary.withAlpha(50),
+                      thumbColor: AppColors.primary,
+                      overlayColor: AppColors.primary.withAlpha(30),
+                      trackHeight: 8,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 14,
+                      ),
+                    ),
+                    child: Slider(
+                      value: sliderValue,
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      onChanged: (value) {
+                        setModalState(() {
+                          sliderValue = value;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '0%',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '100%',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(bottomSheetContext),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Жокко чыгаруу',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(bottomSheetContext);
+                            _updateIndicatorProgress(sliderValue);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Сактоо',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(bottomSheetContext).padding.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _updateIndicatorProgress(double newProgress) {
+    final currentIndicator = _updatedIndicator ?? widget.indicator;
+    final updatedIndicator = currentIndicator.copyWith(progress: newProgress);
+
+    // Update local progress immediately for smooth UI
+    setState(() {
+      _localProgress = newProgress;
+    });
+
+    // Send update to server
+    context.read<IndicatorsCubit>().updateGoalIndicator(updatedIndicator);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -186,6 +361,30 @@ class _IndicatorCardState extends State<IndicatorCard> with Show {
 
               // Use smooth transition to avoid visual jumps
               _smoothTransitionToServerData(state.indicator.progress);
+            } else if (state is IndicatorUpdated) {
+              // Find the updated indicator in the state
+              for (final indicators in state.goalIndicators.values) {
+                final updated = indicators.where((i) => i.id == widget.indicator.id).firstOrNull;
+                if (updated != null) {
+                  setState(() {
+                    _updatedIndicator = updated;
+                    _localProgress = null;
+                  });
+                  showMessage(
+                    context,
+                    message: 'Прогресс ийгиликтүү жаңыртылды!',
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                  );
+                  break;
+                }
+              }
+            } else if (state is IndicatorUpdateError) {
+              showErrorMessage(context, message: state.message);
+              // Reset local progress on error
+              setState(() {
+                _localProgress = null;
+              });
             }
           },
         ),
@@ -229,6 +428,7 @@ class _IndicatorCardState extends State<IndicatorCard> with Show {
                 progressColor: progressColor,
                 isExpanded: _isExpanded,
                 onToggleExpansion: _toggleExpansion,
+                onProgressTap: _showProgressUpdateDialog,
               ),
             ],
           ),

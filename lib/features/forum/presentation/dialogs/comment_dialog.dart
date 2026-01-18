@@ -57,7 +57,10 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
                       itemCount: state.comments.length,
                       itemBuilder: (context, index) {
                         final comment = state.comments[index];
-                        return CommentCard(comment: comment);
+                        return CommentCard(
+                          comment: comment,
+                          forumId: forumId,
+                        );
                       },
                     );
                   },

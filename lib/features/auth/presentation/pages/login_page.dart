@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
@@ -106,17 +107,17 @@ class _LoginPageState extends State<LoginPage>
             size: 32,
           ),
         ),
-        title: const Text(
-          'Восстановление пароля',
-          style: TextStyle(
+        title: Text(
+          context.tr('password_recovery'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
         ),
-        content: const Text(
-          'Для восстановления пароля обратитесь к вашему ментору. Он поможет вам сбросить пароль и восстановить доступ к аккаунту.',
-          style: TextStyle(
+        content: Text(
+          context.tr('password_recovery_message'),
+          style: const TextStyle(
             fontSize: 15,
             color: Colors.black87,
             height: 1.4,
@@ -137,9 +138,9 @@ class _LoginPageState extends State<LoginPage>
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Понятно',
-                style: TextStyle(
+              child: Text(
+                context.tr('understood'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -264,7 +265,7 @@ class _LoginPageState extends State<LoginPage>
             ),
             const SizedBox(height: 6),
             Text(
-              'Добро пожаловать',
+              context.tr('welcome_message'),
               style: TextStyle(
                 fontSize: 15,
                 color: Colors.white.withValues(alpha: 0.9),
@@ -290,9 +291,9 @@ class _LoginPageState extends State<LoginPage>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-                const Text(
-                  'Войти в аккаунт',
-                  style: TextStyle(
+                Text(
+                  context.tr('login_to_account'),
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.black,
@@ -300,7 +301,7 @@ class _LoginPageState extends State<LoginPage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Введите данные для входа',
+                  context.tr('enter_credentials'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade600,
@@ -311,14 +312,14 @@ class _LoginPageState extends State<LoginPage>
                   controller: _loginController,
                   focusNode: _loginFocusNode,
                   isFocused: _isLoginFocused,
-                  label: 'Email или телефон',
+                  label: context.tr('email_or_phone'),
                   hint: 'example@email.com',
                   prefixIcon: Icons.person_outline_rounded,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Введите email или телефон';
+                      return context.tr('enter_email_or_phone');
                     }
                     return null;
                   },
@@ -331,7 +332,7 @@ class _LoginPageState extends State<LoginPage>
                   controller: _passwordController,
                   focusNode: _passwordFocusNode,
                   isFocused: _isPasswordFocused,
-                  label: 'Пароль',
+                  label: context.tr('password'),
                   hint: '••••••••',
                   prefixIcon: Icons.lock_outline_rounded,
                   obscureText: _obscurePassword,
@@ -352,7 +353,7 @@ class _LoginPageState extends State<LoginPage>
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Введите пароль';
+                      return context.tr('enter_password');
                     }
                     return null;
                   },
@@ -370,9 +371,9 @@ class _LoginPageState extends State<LoginPage>
                         vertical: 4,
                       ),
                     ),
-                    child: const Text(
-                      'Забыли пароль?',
-                      style: TextStyle(
+                    child: Text(
+                      context.tr('forgot_password'),
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -532,19 +533,19 @@ class _LoginPageState extends State<LoginPage>
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : const Row(
+              : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Войти',
-                      style: TextStyle(
+                      context.tr('sign_in'),
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(
+                    const SizedBox(width: 8),
+                    const Icon(
                       Icons.arrow_forward_rounded,
                       size: 20,
                     ),

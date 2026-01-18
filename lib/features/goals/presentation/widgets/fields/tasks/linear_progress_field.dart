@@ -8,33 +8,41 @@ class LinearProgressField extends StatelessWidget {
     required this.progressColor,
     required this.isExpanded,
     required this.onToggleExpansion,
+    this.onProgressTap,
   });
 
   final double progress;
   final Color progressColor;
   final bool isExpanded;
   final VoidCallback onToggleExpansion;
+  final VoidCallback? onProgressTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: progressColor.withAlpha(20),
-              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-              minHeight: 8,
+          child: GestureDetector(
+            onTap: onProgressTap,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: progressColor.withAlpha(20),
+                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                minHeight: 8,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 15),
-        Text(
-          '${(progress * 100).toStringAsFixed(0)}%',
-          style: context.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+        GestureDetector(
+          onTap: onProgressTap,
+          child: Text(
+            '${(progress * 100).toStringAsFixed(0)}%',
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         const SizedBox(width: 8),

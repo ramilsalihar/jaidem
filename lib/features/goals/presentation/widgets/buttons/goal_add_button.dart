@@ -12,7 +12,7 @@ class GoalAddButton extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return InkWell(
       onTap: () {
-        context.router.push(const AddGoalRoute());
+        context.router.push(AddGoalRoute());
       },
       child: Container(
         height: 150,

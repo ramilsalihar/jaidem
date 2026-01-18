@@ -194,7 +194,6 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       ],
     );
 
-    print("✅ Dummy data with current user ($currentUserId) has been seeded!");
   }
 
   Future<void> _createDummyChat(
@@ -455,8 +454,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       if (userDoc.exists) {
         return ChatUserModel.fromFirestore(userDoc);
       }
-    } catch (e) {
-      print('Error fetching user: $e');
+    } catch (_) {
+      // Error fetching user
     }
     return null;
   }
@@ -471,8 +470,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       if (mentorsSnapshot.docs.isNotEmpty) {
         return ChatUserModel.fromFirestore(mentorsSnapshot.docs.first);
       }
-    } catch (e) {
-      print('Error fetching mentor: $e');
+    } catch (_) {
+      // Error fetching mentor
     }
     return null;
   }
@@ -487,8 +486,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       if (adminSnapshot.docs.isNotEmpty) {
         return ChatUserModel.fromFirestore(adminSnapshot.docs.first);
       }
-    } catch (e) {
-      print('Error fetching admin: $e');
+    } catch (_) {
+      // Error fetching admin
     }
     return null;
   }

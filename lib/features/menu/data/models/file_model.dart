@@ -5,7 +5,7 @@ class FileModel {
   final String title;
   final String? file;
   final String usefulLinks;
-  final Division division;
+  final Division? division;
   final String subdivision;
 
   FileModel({
@@ -13,7 +13,7 @@ class FileModel {
     required this.title,
     required this.file,
     required this.usefulLinks,
-    required this.division,
+    this.division,
     required this.subdivision,
   });
 
@@ -22,9 +22,11 @@ class FileModel {
       id: json['id'],
       title: json['title'],
       file: json['file'],
-      usefulLinks: json['useful_links'],
-      division: Division.fromJson(json['division']),
-      subdivision: json['subdivision'],
+      usefulLinks: json['useful_links'] ?? '',
+      division: json['division'] != null
+          ? Division.fromJson(json['division'])
+          : null,
+      subdivision: json['subdivision'] ?? '',
     );
   }
 
@@ -34,7 +36,7 @@ class FileModel {
       'title': title,
       'file': file,
       'useful_links': usefulLinks,
-      'division': division.toJson(),
+      'division': division?.toJson(),
       'subdivision': subdivision,
     };
   }

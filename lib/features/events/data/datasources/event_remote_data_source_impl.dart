@@ -42,6 +42,40 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
   }
 
   @override
+  Future<Either<String, AttendanceModel?>> getAttendance(
+      int eventId, String studentId) async {
+    try {
+      final response = await dio.get(
+        ApiConst.attendance,
+        queryParameters: {
+          'event': eventId,
+          'student': studentId,
+        },
+      );
+      if (response.statusCode == 200) {
+        final results = response.data['results'] as List<dynamic>?;
+        if (results != null && results.isNotEmpty) {
+          final attendanceJson = results.first as Map<String, dynamic>;
+          final attendance = AttendanceModel(
+            id: attendanceJson['id'] as int?,
+            status: attendanceJson['status'] as String? ?? '',
+            reason: attendanceJson['reason'] as String? ?? '',
+            createdAt: attendanceJson['created_at'] as String?,
+            student: studentId,
+            event: eventId,
+          );
+          return Right(attendance);
+        }
+        return const Right(null);
+      } else {
+        return const Right(null);
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
   Future<Either<String, void>> sendAttendance(
       AttendanceModel attendance) async {
     try {
@@ -57,6 +91,28 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
         return Right(null);
       } else {
         return Left('Не получилось отправить запрос, попробуйте позже');
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> updateAttendance(
+      AttendanceModel attendance) async {
+    try {
+      final userId = prefs.getString(AppConstants.userId);
+
+      attendance = attendance.copyWith(student: userId);
+
+      final response = await dio.patch(
+        '${ApiConst.attendance}${attendance.id}/',
+        data: attendance.toJson(),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return Right(null);
+      } else {
+        return Left('Не получилось обновить ответ, попробуйте позже');
       }
     } catch (e) {
       return Left('Error: $e');

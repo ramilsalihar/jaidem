@@ -50,8 +50,8 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
             await saveUserId(rawUserId.toString());
           }
         }
-      } catch (e) {
-        print('Error decoding JWT token: $e');
+      } catch (_) {
+        // Error decoding JWT token
       }
     }
 
@@ -73,5 +73,27 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<void> saveUsername(String username) {
     return prefs.setString(AppConstants.userLogin, username);
+  }
+
+  @override
+  Future<void> saveUserFullname(String fullname) {
+    return prefs.setString(AppConstants.userFullname, fullname);
+  }
+
+  @override
+  Future<void> saveUserAvatar(String? avatar) async {
+    if (avatar != null) {
+      await prefs.setString(AppConstants.userAvatar, avatar);
+    }
+  }
+
+  @override
+  Future<String?> getUserFullname() async {
+    return prefs.getString(AppConstants.userFullname);
+  }
+
+  @override
+  Future<String?> getUserAvatar() async {
+    return prefs.getString(AppConstants.userAvatar);
   }
 }

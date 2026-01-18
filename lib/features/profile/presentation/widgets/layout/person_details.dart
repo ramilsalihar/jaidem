@@ -67,7 +67,7 @@ class PersonDetails extends StatelessWidget {
           ),
           DetailsTextField(
             label: 'Регион:',
-            value: person.region?.name ?? '',
+            value: person.region?.getLocalizedName(Localizations.localeOf(context).languageCode) ?? '',
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(

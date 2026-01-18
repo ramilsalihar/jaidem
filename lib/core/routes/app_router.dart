@@ -4,7 +4,10 @@ import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/features/app/presentation/pages/bottom_bar_page.dart';
 import 'package:jaidem/features/app/presentation/pages/splash_screen.dart';
 import 'package:jaidem/features/auth/presentation/pages/login_page.dart';
+import 'package:jaidem/features/events/domain/entities/event_entity.dart';
+import 'package:jaidem/features/events/presentation/pages/event_detail_page.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
+import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_task_model.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_goal_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/add_indicator_page.dart';
@@ -105,6 +108,14 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: FilesRoute.page,
           path: '/files',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // events
+        CustomRoute(
+          page: EventDetailRoute.page,
+          path: '/event-detail',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),

@@ -8,6 +8,7 @@ import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/dialogs/comment_dialog.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidem_detail_page.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ForumCard extends StatefulWidget {
   const ForumCard({super.key, required this.forum});
@@ -23,12 +24,14 @@ class _ForumCardState extends State<ForumCard>
   bool _expanded = false;
   bool _isLiked = false;
   int _likesCount = 0;
+  int _commentsCount = 0;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
 
   @override
   void initState() {
     super.initState();
+    // Initialize with default values, then load from Firebase
     _isLiked = widget.forum.isLikedByCurrentUser;
     _likesCount = widget.forum.likesCount ?? 0;
 
@@ -43,6 +46,22 @@ class _ForumCardState extends State<ForumCard>
         curve: Curves.easeInOut,
       ),
     );
+
+    // Load like info from Firebase
+    _loadLikeInfo();
+  }
+
+  Future<void> _loadLikeInfo() async {
+    final cubit = context.read<ForumCubit>();
+    final likeInfo = await cubit.getLikeInfo(widget.forum.id);
+    final commentsCount = await cubit.getCommentsCount(widget.forum.id);
+    if (mounted) {
+      setState(() {
+        _isLiked = likeInfo['isLiked'] as bool;
+        _likesCount = likeInfo['count'] as int;
+        _commentsCount = commentsCount;
+      });
+    }
   }
 
   @override
@@ -51,16 +70,49 @@ class _ForumCardState extends State<ForumCard>
     super.dispose();
   }
 
-  void _handleLike() {
+  Future<void> _handleLike() async {
     HapticFeedback.lightImpact();
-    context.read<ForumCubit>().likeForumPost(widget.forum.id);
+
+    // Optimistic update
+    final wasLiked = _isLiked;
     setState(() {
       _isLiked = !_isLiked;
       _likesCount += _isLiked ? 1 : -1;
     });
+
     _likeAnimationController.forward().then((_) {
       _likeAnimationController.reverse();
     });
+
+    // Toggle like in Firebase
+    final isNowLiked = await context.read<ForumCubit>().toggleLike(widget.forum.id);
+
+    // If the result doesn't match our optimistic update, correct it
+    if (mounted && isNowLiked != _isLiked) {
+      setState(() {
+        _isLiked = isNowLiked;
+        _likesCount = wasLiked ? _likesCount : _likesCount;
+      });
+      // Reload to get accurate count
+      _loadLikeInfo();
+    }
+  }
+
+  Future<void> _handleShare() async {
+    HapticFeedback.lightImpact();
+    final author = widget.forum.author?.fullname ?? 'Белгисиз';
+    final content = widget.forum.content ?? '';
+    final truncatedContent =
+        content.length > 100 ? '${content.substring(0, 100)}...' : content;
+
+    final shareText = '$author жазды:\n\n$truncatedContent\n\nJaidem колдонмосунда көбүрөөк маалымат алыңыз!';
+
+    try {
+      await Share.share(shareText);
+    } catch (e) {
+      // Silently handle share errors
+      debugPrint('Share error: $e');
+    }
   }
 
   String _formatDate(String? dateStr) {
@@ -388,14 +440,16 @@ class _ForumCardState extends State<ForumCard>
 
           const Spacer(),
 
-          // Comments count placeholder
+          // Comments count
           GestureDetector(
             onTap: () {
               HapticFeedback.lightImpact();
               showCommentBottomSheet(forumId: widget.forum.id);
             },
             child: Text(
-              'Комментарийлер',
+              _commentsCount > 0
+                  ? '$_commentsCount комментарий'
+                  : 'Комментарийлер',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade600,
@@ -444,9 +498,7 @@ class _ForumCardState extends State<ForumCard>
               icon: Icons.share_outlined,
               label: 'Бөлүшүү',
               color: Colors.grey.shade700,
-              onTap: () {
-                HapticFeedback.lightImpact();
-              },
+              onTap: _handleShare,
             ),
           ),
         ],

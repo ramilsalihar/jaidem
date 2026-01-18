@@ -1,4 +1,5 @@
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
+import 'package:jaidem/features/events/data/models/attendance_model.dart';
 
 class EventModel {
   final int id;
@@ -17,6 +18,7 @@ class EventModel {
   final String video;
   final bool isRequired;
   final int like;
+  final AttendanceModel? attendance;
 
   const EventModel({
     required this.id,
@@ -35,5 +37,6 @@ class EventModel {
     required this.video,
     required this.isRequired,
     required this.like,
+    this.attendance,
   });
 }

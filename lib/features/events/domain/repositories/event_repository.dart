@@ -5,5 +5,9 @@ import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 abstract class EventRepository {
   Future<Either<String, List<EventEntity>>> getEvents();
 
+  Future<Either<String, AttendanceModel?>> getAttendance(int eventId, String studentId);
+
   Future<Either<String, void>> sendAttendance(AttendanceModel attendance);
+
+  Future<Either<String, void>> updateAttendance(AttendanceModel attendance);
 }

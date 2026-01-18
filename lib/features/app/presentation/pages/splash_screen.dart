@@ -13,10 +13,10 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 2), () {
-      context.router.replacePath('/login');
-    });
     super.initState();
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) context.router.replacePath('/login');
+    });
   }
 
   @override

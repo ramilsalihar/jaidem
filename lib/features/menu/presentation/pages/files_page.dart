@@ -1,11 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
-import 'package:jaidem/features/menu/presentation/widgets/buttons/file_tab_button.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/file_card.dart';
 
 @RoutePage()
@@ -18,13 +17,14 @@ class FilesPage extends StatefulWidget {
 
 class _FilesPageState extends State<FilesPage> {
   int _selectedTabIndex = 0;
-  final SearchController _searchController = SearchController();
+  final TextEditingController _searchController = TextEditingController();
   List<FileModel> _filteredFiles = [];
+  bool _isSearching = false;
 
-  final List<String> _tabs = [
-    'Презентации из тренингов',
-    'Рекомендации',
-    // Add more tabs as needed
+  final List<({String title, IconData icon})> _tabs = [
+    (title: 'Баары', icon: Icons.folder_rounded),
+    (title: 'Презентациялар', icon: Icons.slideshow_rounded),
+    (title: 'Сунуштар', icon: Icons.lightbulb_rounded),
   ];
 
   @override
@@ -73,117 +73,308 @@ class _FilesPageState extends State<FilesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => context.router.pop(),
-        ),
-        title: Text(
-          'База знаний',
-          style: context.textTheme.headlineLarge?.copyWith(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: BlocConsumer<MenuCubit, MenuState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          return Column(
-            children: [
-              // Tabs Section
-              SizedBox(
-                height: 50,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: _tabs.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    return FileTabButton(
-                      title: _tabs[index],
-                      isSelected: _selectedTabIndex == index,
-                      onTap: () => setState(() => _selectedTabIndex = index),
-                    );
-                  },
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: CustomScrollView(
+        slivers: [
+          // Modern App Bar
+          SliverAppBar(
+            expandedHeight: 140,
+            floating: false,
+            pinned: true,
+            elevation: 0,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+              ),
+              onPressed: () => context.router.pop(),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.shade50,
+                      Colors.white,
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.primary,
+                                    AppColors.primary.shade300,
+                                  ],
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.menu_book_rounded,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'База знаний',
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                ),
+                                Text(
+                                  'Билим базасы',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
+            ),
+          ),
 
-              // Search Bar
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 16),
-              //   child: AppSearchField(
-              //     controller: _searchController,
-              //     hintText: 'Файлдарды издөңүз',
-              //   ),
-              // ),
-              const SizedBox(height: 16),
-
-              // Files List Content
-              Expanded(
-                child: _buildContent(state),
+          // Search Bar
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onTap: () => setState(() => _isSearching = true),
+                  onTapOutside: (_) {
+                    FocusScope.of(context).unfocus();
+                    if (_searchController.text.isEmpty) {
+                      setState(() => _isSearching = false);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Файлдарды издөө...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 15,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: _isSearching ? AppColors.primary : Colors.grey.shade400,
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.close_rounded, color: Colors.grey.shade400),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _isSearching = false);
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  ),
+                ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+
+          // Category Tabs
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 56,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemCount: _tabs.length,
+                itemBuilder: (context, index) {
+                  final tab = _tabs[index];
+                  final isSelected = _selectedTabIndex == index;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedTabIndex = index);
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          gradient: isSelected
+                              ? LinearGradient(
+                                  colors: [AppColors.primary, AppColors.primary.shade300],
+                                )
+                              : null,
+                          color: isSelected ? null : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: isSelected
+                              ? null
+                              : Border.all(color: Colors.grey.shade200),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.primary.withValues(alpha: 0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              tab.icon,
+                              size: 18,
+                              color: isSelected ? Colors.white : Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              tab.title,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.grey.shade700,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // Files Content
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+            sliver: BlocBuilder<MenuCubit, MenuState>(
+              builder: (context, state) {
+                if (state is MenuLoading) {
+                  return SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Жүктөлүүдө...',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                if (state is MenuError && state.files == null) {
+                  return SliverFillRemaining(
+                    child: _buildErrorState(state.message),
+                  );
+                }
+
+                if (state is MenuLoaded || (state is MenuError && state.files != null)) {
+                  final files = state is MenuLoaded
+                      ? state.files.results
+                      : state is MenuError
+                          ? state.files!.results
+                          : <FileModel>[];
+
+                  if (files.isEmpty) {
+                    return SliverFillRemaining(
+                      child: _buildEmptyState(),
+                    );
+                  }
+
+                  final displayFiles = _searchController.text.isEmpty
+                      ? _getFilesForSelectedTab(files)
+                      : _filteredFiles;
+
+                  if (displayFiles.isEmpty) {
+                    return SliverFillRemaining(
+                      child: _buildNoResultsState(),
+                    );
+                  }
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return FileCard(file: displayFiles[index]);
+                      },
+                      childCount: displayFiles.length,
+                    ),
+                  );
+                }
+
+                return SliverFillRemaining(
+                  child: _buildEmptyState(),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
-  }
-
-  Widget _buildContent(MenuState state) {
-    if (state is MenuLoading) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
-      );
-    }
-
-    if (state is MenuError && state.files == null) {
-      return _buildErrorState(state.message);
-    }
-
-    if (state is MenuLoaded || (state is MenuError && state.files != null)) {
-      final files = state is MenuLoaded
-          ? state.files.results
-          : state is MenuError
-              ? state.files!.results
-              : <FileModel>[];
-
-      if (files.isEmpty) {
-        return _buildEmptyState();
-      }
-
-      final displayFiles = _searchController.text.isEmpty
-          ? _getFilesForSelectedTab(files)
-          : _filteredFiles;
-
-      if (displayFiles.isEmpty) {
-        return _buildNoResultsState();
-      }
-
-      return RefreshIndicator(
-        color: const Color(0xFF5B4298),
-        onRefresh: () async {
-          await context.read<MenuCubit>().fetchFiles();
-        },
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: displayFiles.length,
-          itemBuilder: (context, index) {
-            return FileCard(file: displayFiles[index]);
-          },
-        ),
-      );
-    }
-
-    return _buildEmptyState();
   }
 
   Widget _buildEmptyState() {
@@ -191,15 +382,34 @@ class _FilesPageState extends State<FilesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.folder_open_outlined,
-            size: 64,
-            color: Colors.grey[300],
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.folder_open_rounded,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'Нет доступных файлов',
-            style: context.textTheme.headlineLarge,
+            'Файлдар жок',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Учурда жеткиликтүү файлдар жок',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
           ),
         ],
       ),
@@ -211,25 +421,33 @@ class _FilesPageState extends State<FilesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey[300],
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.orange.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search_off_rounded,
+              size: 64,
+              color: AppColors.orange,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'Ничего не найдено',
+            'Эч нерсе табылган жок',
             style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Попробуйте изменить поисковый запрос',
+            'Издөө сурамыңызды өзгөртүп көрүңүз',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Colors.grey.shade500,
             ),
           ),
         ],
@@ -242,18 +460,25 @@ class _FilesPageState extends State<FilesPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.red[300],
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.red.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              size: 64,
+              color: AppColors.red,
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
           Text(
-            'Произошла ошибка',
+            'Ката кетти',
             style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
+              fontSize: 18,
               fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
             ),
           ),
           const SizedBox(height: 8),
@@ -264,28 +489,45 @@ class _FilesPageState extends State<FilesPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[500],
+                color: Colors.grey.shade500,
               ),
             ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: () {
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.mediumImpact();
               context.read<MenuCubit>().fetchFiles();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF5B4298),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 12,
-              ),
-              shape: RoundedRectangleBorder(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primary.shade300],
+                ),
                 borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ),
-            child: const Text(
-              'Повторить попытку',
-              style: TextStyle(color: Colors.white),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Кайра аракет кылуу',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

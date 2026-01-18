@@ -63,3 +63,27 @@ class GoalCreationError extends GoalsState {
   @override
   List<Object> get props => [message, goals];
 }
+
+class GoalUpdating extends GoalsState {
+  const GoalUpdating({
+    required super.goals,
+  });
+}
+
+class GoalUpdated extends GoalsState {
+  const GoalUpdated({
+    required super.goals,
+  });
+}
+
+class GoalUpdateError extends GoalsState {
+  final String message;
+
+  const GoalUpdateError({
+    required this.message,
+    required super.goals,
+  });
+
+  @override
+  List<Object> get props => [message, goals];
+}

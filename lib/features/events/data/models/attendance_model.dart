@@ -15,6 +15,17 @@ class AttendanceModel {
     required this.event,
   });
 
+  factory AttendanceModel.fromJson(Map<String, dynamic> json) {
+    return AttendanceModel(
+      id: json['id'] as int?,
+      status: json['status'] as String? ?? '',
+      reason: json['reason'] as String? ?? '',
+      createdAt: json['created_at'] as String?,
+      student: json['student']?.toString() ?? '',
+      event: json['event'] is int ? json['event'] : 0,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'status': status,

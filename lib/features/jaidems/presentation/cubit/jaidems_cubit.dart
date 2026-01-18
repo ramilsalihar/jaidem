@@ -24,6 +24,7 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? speciality,
     String? age,
     String? search,
+    String? region,
   }) async {
     try {
       if (next == null && previous == null) emit(JaidemsLoading());
@@ -37,10 +38,8 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         speciality: speciality,
         age: age,
         search: search,
+        region: region,
       );
-
-      print(
-          'JaidemsCubit: getJaidems called with results ${result.toString()}');
 
       result.fold(
         (failure) => emit(JaidemsError(message: failure.toString())),
@@ -85,6 +84,7 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? speciality,
     String? age,
     String? search,
+    String? region,
   }) async {
     if (hasNextPage) {
       await getJaidems(
@@ -95,6 +95,7 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         speciality: speciality,
         age: age,
         search: search,
+        region: region,
       );
     }
   }
@@ -107,6 +108,7 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? speciality,
     String? age,
     String? search,
+    String? region,
   }) async {
     if (hasPreviousPage) {
       await getJaidems(
@@ -117,6 +119,7 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         speciality: speciality,
         age: age,
         search: search,
+        region: region,
       );
     }
   }

@@ -17,6 +17,7 @@ class GetJaidemsUsecase {
     String? speciality,
     String? age,
     String? search,
+    String? region,
   }) {
     return repository.getJaidems(
       next: next,
@@ -27,6 +28,7 @@ class GetJaidemsUsecase {
       speciality: speciality,
       age: age,
       search: search,
+      region: region,
     );
   }
 

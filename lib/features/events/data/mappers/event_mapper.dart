@@ -1,4 +1,5 @@
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
+import 'package:jaidem/features/events/data/models/attendance_model.dart';
 import 'package:jaidem/features/events/data/models/event_model.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 
@@ -30,6 +31,9 @@ class EventMapper {
       video: json['video'],
       isRequired: json['is_required'],
       like: json['like'],
+      attendance: json['attendance'] != null
+          ? AttendanceModel.fromJson(json['attendance'])
+          : null,
     );
   }
 
@@ -84,6 +88,7 @@ class EventMapper {
       video: model.video,
       isRequired: model.isRequired,
       like: model.like,
+      attendance: model.attendance,
     );
   }
 
@@ -110,6 +115,7 @@ class EventMapper {
       video: entity.video,
       isRequired: entity.isRequired,
       like: entity.like,
+      attendance: entity.attendance,
     );
   }
 }

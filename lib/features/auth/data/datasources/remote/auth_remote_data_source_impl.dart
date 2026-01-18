@@ -22,12 +22,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<Either<String, bool>> isAuthenticated() {
-    // TODO: implement isAuthenticated
-    throw UnimplementedError();
-  }
-
-  @override
   Future<Either<String, TokensModel>> login(
     String username,
     String password,

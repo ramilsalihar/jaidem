@@ -39,6 +39,18 @@ class GoalRepositoryImpl implements GoalRepository {
   }
 
   @override
+  Future<Either<String, GoalModel>> updateGoal(GoalModel goal) {
+    return remoteDataSource.updateGoal(goal).then((result) {
+      return result.fold(
+        (failure) => Left(failure),
+        (responseModel) {
+          return Right(responseModel);
+        },
+      );
+    });
+  }
+
+  @override
   Future<Either<String, GoalIndicatorModel>> createGoalIndicator(
     GoalIndicatorModel indicator,
   ) {

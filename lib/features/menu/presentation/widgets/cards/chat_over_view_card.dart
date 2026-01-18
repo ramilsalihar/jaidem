@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
 class ChatOverViewCard extends StatelessWidget {
@@ -20,49 +19,80 @@ class ChatOverViewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.orange,
-                          width: 3,
-                        ),
-                      ),
-                      child: ClipOval(
-                        child: Image.network(
-                          profileImageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: Icon(
-                                Icons.person,
-                                color: Colors.grey[600],
-                                size: 32,
+                // Profile Avatar with gradient border
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary,
+                        AppColors.primary.shade300,
+                      ],
+                    ),
+                  ),
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    padding: const EdgeInsets.all(2),
+                    child: ClipOval(
+                      child: Image.network(
+                        profileImageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppColors.primary.shade100,
+                                  AppColors.primary.shade50,
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                            child: Icon(
+                              Icons.person_rounded,
+                              color: AppColors.primary,
+                              size: 28,
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ],
+                  ),
                 ),
-        
-                const SizedBox(width: 16),
-        
+
+                const SizedBox(width: 14),
+
                 // Chat content
                 Expanded(
                   child: Column(
@@ -70,36 +100,47 @@ class ChatOverViewCard extends StatelessWidget {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
                               name,
-                              style: context.textTheme.bodyMedium?.copyWith(
+                              style: TextStyle(
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade800,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-        
                           const SizedBox(width: 8),
-        
-                          Text(
-                            date,
-                            style: context.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.grey,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              date,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.primary.shade700,
+                              ),
                             ),
                           ),
                         ],
                       ),
-        
-                      const SizedBox(height: 4),
-        
+                      const SizedBox(height: 6),
                       // Message preview
                       Text(
                         messagePreview,
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: AppColors.grey
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                          height: 1.3,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -107,11 +148,25 @@ class ChatOverViewCard extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                const SizedBox(width: 8),
+
+                // Arrow indicator
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            const Divider(color: AppColors.grey)
-          ],
+          ),
         ),
       ),
     );

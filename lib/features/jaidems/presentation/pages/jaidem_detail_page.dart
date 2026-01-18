@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -31,26 +32,26 @@ class JaidemDetailPage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Stats Row
-                  _buildStatsRow(),
+                  _buildStatsRow(context),
 
                   const SizedBox(height: 24),
 
                   // Quick Actions
-                  _buildQuickActions(),
+                  _buildQuickActions(context),
 
                   const SizedBox(height: 24),
 
                   // About Section
                   if (person.aboutMe != null && person.aboutMe!.isNotEmpty)
-                    _buildAboutSection(),
+                    _buildAboutSection(context),
 
                   // Info List
-                  _buildInfoList(),
+                  _buildInfoList(context),
 
                   const SizedBox(height: 24),
 
                   // Contact Section
-                  _buildContactSection(),
+                  _buildContactSection(context),
 
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
                 ],
@@ -103,9 +104,9 @@ class JaidemDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    'Профиль',
-                    style: TextStyle(
+                  Text(
+                    context.tr('profile'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -152,7 +153,7 @@ class JaidemDetailPage extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                person.fullname ?? 'Белгисиз',
+                person.fullname ?? context.tr('unknown'),
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -191,7 +192,7 @@ class JaidemDetailPage extends StatelessWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   if (person.flow.name.isNotEmpty)
-                    _buildTag('Агым ${person.flow.name}'),
+                    _buildTag('${context.tr('flow')} ${person.flow.name}'),
                   if (person.generation != null && person.generation!.isNotEmpty)
                     _buildTag(person.generation!),
                   if (person.state.nameKg != null && person.state.nameKg!.isNotEmpty)
@@ -248,7 +249,7 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
@@ -260,7 +261,7 @@ class JaidemDetailPage extends StatelessWidget {
           // Age
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${person.age}', 'Жашы'),
+            child: _buildStatItem('${person.age}', context.tr('age')),
           ),
           Container(
             width: 1,
@@ -270,7 +271,7 @@ class JaidemDetailPage extends StatelessWidget {
           // Course year
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${person.courseYear}', 'Курс'),
+            child: _buildStatItem('${person.courseYear}', context.tr('course_year')),
           ),
           if (person.university != null && person.university!.isNotEmpty) ...[
             Container(
@@ -282,7 +283,7 @@ class JaidemDetailPage extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: _buildUniversityItem(person.university!, 'Окуу жайы'),
+                child: _buildUniversityItem(person.university!, context.tr('university')),
               ),
             ),
           ],
@@ -344,7 +345,7 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     final hasWhatsApp = person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
     final hasInstagram = person.socialMedias?['instagram']?.isNotEmpty ?? false;
     final hasPhone = person.phone?.isNotEmpty ?? false;
@@ -387,7 +388,7 @@ class JaidemDetailPage extends StatelessWidget {
           Expanded(
             child: _buildActionButton(
               iconData: Icons.phone_rounded,
-              label: 'Чалуу',
+              label: context.tr('call'),
               color: AppColors.primary,
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -444,7 +445,7 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutSection() {
+  Widget _buildAboutSection(BuildContext context) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 24),
@@ -460,7 +461,7 @@ class JaidemDetailPage extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'Мен жөнүндө',
+                context.tr('about_me'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -491,20 +492,20 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoList() {
+  Widget _buildInfoList(BuildContext context) {
     final items = <_InfoItem>[];
 
     if (person.region?.nameKg != null && person.region!.nameKg!.isNotEmpty) {
-      items.add(_InfoItem(Icons.map_outlined, 'Район', person.region!.nameKg!));
+      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), person.region!.nameKg!));
     }
     if (person.village != null && person.village!.name.isNotEmpty) {
-      items.add(_InfoItem(Icons.location_city_outlined, 'Айыл/Шаар', person.village!.name));
+      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), person.village!.name));
     }
     if (person.interest != null && person.interest!.isNotEmpty) {
-      items.add(_InfoItem(Icons.favorite_outline_rounded, 'Кызыкчылыктар', person.interest!));
+      items.add(_InfoItem(Icons.favorite_outline_rounded, context.tr('interests'), person.interest!));
     }
     if (person.skills != null && person.skills!.isNotEmpty) {
-      items.add(_InfoItem(Icons.psychology_outlined, 'Көндүмдөр', person.skills!));
+      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), person.skills!));
     }
 
     // Social media info
@@ -531,7 +532,7 @@ class JaidemDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Маалымат',
+              context.tr('information'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -601,7 +602,7 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildContactSection() {
+  Widget _buildContactSection(BuildContext context) {
     final hasPhone = person.phone != null && person.phone!.isNotEmpty;
     final hasEmail = person.email != null && person.email!.isNotEmpty;
 
@@ -619,7 +620,7 @@ class JaidemDetailPage extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              'Байланыш',
+              context.tr('contact'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -632,7 +633,7 @@ class JaidemDetailPage extends StatelessWidget {
         if (hasPhone)
           _buildContactRow(
             icon: Icons.phone_rounded,
-            label: 'Телефон',
+            label: context.tr('phone'),
             value: person.phone!,
             color: AppColors.primary,
             onTap: () {

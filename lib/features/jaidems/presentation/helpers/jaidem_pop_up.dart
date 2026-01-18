@@ -191,7 +191,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
           ),
 
           // Stats row
-          if (person.age != null ||
+          if (person.age > 0 ||
               person.university != null ||
               person.state.nameKg != null) ...[
             const SizedBox(height: 20),
@@ -204,9 +204,9 @@ class _JaidemDetailsSheet extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  if (person.age != null)
+                  if (person.age > 0)
                     _buildStatItem('${person.age}', 'жаш'),
-                  if (person.age != null &&
+                  if (person.age > 0 &&
                       (person.university != null ||
                           person.state.nameKg != null))
                     Container(
@@ -448,7 +448,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
       ));
     }
 
-    if (person.courseYear != null) {
+    if (person.courseYear > 0) {
       infoItems.add(_InfoCardData(
         icon: Icons.calendar_today_rounded,
         title: 'Окуу жылы',

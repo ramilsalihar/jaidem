@@ -1,4 +1,4 @@
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jaidem/features/menu/data/models/message_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_model.dart';

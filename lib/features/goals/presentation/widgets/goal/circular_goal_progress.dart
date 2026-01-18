@@ -14,8 +14,6 @@ class CircularGoalProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Rendering CircularGoalProgress with progress: $progress');
-
     // Normalize progress: if it's > 1.0, treat it as percentage (e.g., 75.0 = 75%)
     // if it's <= 1.0, treat it as fraction (e.g., 0.75 = 75%)
     final normalizedProgress = progress > 1.0 ? progress / 100.0 : progress;

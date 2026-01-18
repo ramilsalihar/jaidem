@@ -34,6 +34,9 @@ class GoalIndicatorModel {
   }
 
   Map<String, dynamic> toJson() {
+    // Always send goal as ID (primary key), not as object
+    final goalValue = goal is GoalModel ? (goal as GoalModel).id : goal;
+
     return {
       'id': id,
       'title': title,
@@ -41,7 +44,7 @@ class GoalIndicatorModel {
       'end_time': endTime,
       'reminder': reminder,
       'progress': progress,
-      'goal': goal,
+      'goal': goalValue,
     };
   }
 

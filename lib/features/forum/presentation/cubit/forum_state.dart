@@ -9,6 +9,9 @@ class ForumState extends Equatable {
   final String? error;
   final String? commentsError;
   final CommentEntity? lastPostedComment;
+  final int? currentForumId;
+  final String? replyToCommentId;
+  final String? replyToAuthorName;
 
   const ForumState({
     this.forums = const [],
@@ -18,6 +21,9 @@ class ForumState extends Equatable {
     this.error,
     this.commentsError,
     this.lastPostedComment,
+    this.currentForumId,
+    this.replyToCommentId,
+    this.replyToAuthorName,
   });
 
   ForumState copyWith({
@@ -28,6 +34,9 @@ class ForumState extends Equatable {
     String? error,
     String? commentsError,
     CommentEntity? lastPostedComment,
+    int? currentForumId,
+    String? replyToCommentId,
+    String? replyToAuthorName,
   }) {
     return ForumState(
       forums: forums ?? this.forums,
@@ -37,9 +46,12 @@ class ForumState extends Equatable {
       error: error,
       commentsError: commentsError,
       lastPostedComment: lastPostedComment,
+      currentForumId: currentForumId ?? this.currentForumId,
+      replyToCommentId: replyToCommentId,
+      replyToAuthorName: replyToAuthorName,
     );
   }
 
   @override
-  List<Object?> get props => [forums, comments, isLoading, isCommentsLoading, error, commentsError, lastPostedComment];
+  List<Object?> get props => [forums, comments, isLoading, isCommentsLoading, error, commentsError, lastPostedComment, currentForumId, replyToCommentId, replyToAuthorName];
 }

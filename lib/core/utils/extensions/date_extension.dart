@@ -1,30 +1,29 @@
 import 'package:intl/intl.dart';
 
 extension DateTimeExtension on DateTime {
+  static const _monthShortMapper = {
+    'January': 'янв',
+    'February': 'фев',
+    'March': 'мар',
+    'April': 'апр',
+    'May': 'май',
+    'June': 'июн',
+    'July': 'июл',
+    'August': 'авг',
+    'September': 'сен',
+    'October': 'окт',
+    'November': 'ноя',
+    'December': 'дек',
+  };
+
   String toReadableDate() {
     final formatted = DateFormat("d MMMM yyyy").format(this);
 
-    final monthShortMapper = {
-      'January': 'янв',
-      'February': 'фев',
-      'March': 'мар',
-      'April': 'апр',
-      'May': 'май',
-      'June': 'июн',
-      'July': 'июл',
-      'August': 'авг',
-      'September': 'сен',
-      'October': 'окт',
-      'November': 'ноя',
-      'December': 'дек',
-    };
-
-    // Split the formatted string to get the month name
     final parts = formatted.split(' ');
 
     if (parts.length == 3) {
       final monthName = parts[1];
-      final shortenedMonth = monthShortMapper[monthName];
+      final shortenedMonth = _monthShortMapper[monthName];
 
       if (shortenedMonth != null) {
         return "${parts[0]} $shortenedMonth ${parts[2]} года";
@@ -32,6 +31,28 @@ extension DateTimeExtension on DateTime {
     }
 
     return formatted;
+  }
+
+  String toReadableDateWithTime() {
+    final formatted = DateFormat("d MMMM yyyy").format(this);
+    final timeFormatted = DateFormat("HH:mm").format(this);
+
+    final parts = formatted.split(' ');
+
+    if (parts.length == 3) {
+      final monthName = parts[1];
+      final shortenedMonth = _monthShortMapper[monthName];
+
+      if (shortenedMonth != null) {
+        return "${parts[0]} $shortenedMonth, $timeFormatted";
+      }
+    }
+
+    return "$formatted, $timeFormatted";
+  }
+
+  String toTimeOnly() {
+    return DateFormat("HH:mm").format(this);
   }
 
   String formatDeadline(DateTime? deadline) {

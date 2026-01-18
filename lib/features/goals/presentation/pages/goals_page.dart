@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
@@ -112,9 +113,9 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const Text(
-                    'Менин максаттарым',
-                    style: TextStyle(
+                  Text(
+                    context.tr('my_goals'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -123,7 +124,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Өзүңүздүн максаттарыңызды башкарыңыз',
+                    context.tr('manage_goals'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 14,
@@ -142,7 +143,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
     return FloatingActionButton.extended(
       onPressed: () async {
         HapticFeedback.mediumImpact();
-        final result = await context.router.push<bool>(const AddGoalRoute());
+        final result = await context.router.push<bool>(AddGoalRoute());
         if (result == true && mounted) {
           context.read<GoalsCubit>().fetchGoals();
         }
@@ -150,9 +151,9 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
       backgroundColor: AppColors.primary,
       elevation: 4,
       icon: const Icon(Icons.add_rounded, color: Colors.white),
-      label: const Text(
-        'Максат кошуу',
-        style: TextStyle(
+      label: Text(
+        context.tr('add_goal'),
+        style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),
@@ -167,7 +168,7 @@ class _GoalsContent extends StatelessWidget {
     return BlocBuilder<GoalsCubit, GoalsState>(
       builder: (context, state) {
         if (state is GoalsLoading && state.goals.isEmpty) {
-          return _buildLoadingState();
+          return _buildLoadingState(context);
         }
 
         if (state is GoalsError && state.goals.isEmpty) {
@@ -175,7 +176,7 @@ class _GoalsContent extends StatelessWidget {
         }
 
         if (state.goals.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState(context);
         }
 
         return _buildGoalsList(context, state.goals);
@@ -183,7 +184,7 @@ class _GoalsContent extends StatelessWidget {
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +199,7 @@ class _GoalsContent extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 14,
@@ -230,7 +231,7 @@ class _GoalsContent extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Ката кетти',
+              context.tr('error_occurred'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -252,7 +253,7 @@ class _GoalsContent extends StatelessWidget {
                 context.read<GoalsCubit>().fetchGoals();
               },
               icon: const Icon(Icons.refresh_rounded, size: 20),
-              label: const Text('Кайра жүктөө'),
+              label: Text(context.tr('reload')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -271,7 +272,7 @@ class _GoalsContent extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -293,7 +294,7 @@ class _GoalsContent extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Максаттар жок',
+              context.tr('no_goals'),
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w700,
@@ -302,7 +303,7 @@ class _GoalsContent extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Биринчи максатыңызды кошуп баштаңыз!',
+              context.tr('start_adding_goal'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
@@ -326,7 +327,7 @@ class _GoalsContent extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Төмөндөгү баскычты басыңыз',
+                    context.tr('press_button_below'),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w500,
@@ -364,23 +365,23 @@ class _ModernGoalCard extends StatelessWidget {
 
   const _ModernGoalCard({required this.goal});
 
-  String _formatDeadline(DateTime? deadline) {
-    if (deadline == null) return 'Мөөнөт жок';
+  String _formatDeadline(BuildContext context, DateTime? deadline) {
+    if (deadline == null) return context.tr('no_deadline');
     final day = deadline.day.toString().padLeft(2, '0');
     final month = deadline.month.toString().padLeft(2, '0');
     return '$day.$month.${deadline.year}';
   }
 
-  String _getStatusText(String status) {
+  String _getStatusText(BuildContext context, String status) {
     switch (status.toLowerCase()) {
       case 'active':
-        return 'Активдүү';
+        return context.tr('status_active');
       case 'in_progress':
-        return 'Аткарылууда';
+        return context.tr('status_in_progress');
       case 'completed':
-        return 'Аяктаган';
+        return context.tr('status_completed');
       case 'paused':
-        return 'Токтотулган';
+        return context.tr('status_paused');
       default:
         return status;
     }
@@ -484,7 +485,7 @@ class _ModernGoalCard extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
-                                _getStatusText(goal.status),
+                                _getStatusText(context, goal.status),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -516,7 +517,7 @@ class _ModernGoalCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Прогресс',
+                            context.tr('progress'),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -557,8 +558,8 @@ class _ModernGoalCard extends StatelessWidget {
                       Expanded(
                         child: _buildInfoItem(
                           icon: Icons.calendar_today_outlined,
-                          label: 'Мөөнөт',
-                          value: _formatDeadline(goal.deadline),
+                          label: context.tr('deadline'),
+                          value: _formatDeadline(context, goal.deadline),
                           color: daysRemaining >= 0 && daysRemaining <= 7
                               ? Colors.orange
                               : Colors.grey.shade600,
@@ -573,10 +574,10 @@ class _ModernGoalCard extends StatelessWidget {
                       Expanded(
                         child: _buildInfoItem(
                           icon: Icons.timer_outlined,
-                          label: 'Калды',
+                          label: context.tr('remaining'),
                           value: daysRemaining < 0
                               ? '—'
-                              : '$daysRemaining күн',
+                              : '$daysRemaining ${context.tr('days')}',
                           color: daysRemaining >= 0 && daysRemaining <= 3
                               ? Colors.red
                               : Colors.grey.shade600,

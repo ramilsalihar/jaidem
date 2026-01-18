@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/routes/app_router.dart';
+import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
+import 'package:jaidem/features/goals/presentation/widgets/cards/indicator_card.dart';
 
 class GoalOverviewPage extends StatefulWidget {
   final GoalModel goal;
@@ -161,9 +163,14 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
       ),
       actions: [
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             HapticFeedback.lightImpact();
-            // TODO: Add edit functionality
+            final result = await context.router.push<bool>(
+              AddGoalRoute(goal: widget.goal),
+            );
+            if (result == true && mounted) {
+              Navigator.of(context).pop(true);
+            }
           },
           child: Container(
             margin: const EdgeInsets.all(8),
@@ -1083,7 +1090,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
   }
 }
 
-class _ModernIndicatorCard extends StatelessWidget {
+class _ModernIndicatorCard extends StatefulWidget {
   final GoalIndicatorModel indicator;
   final int index;
 
@@ -1092,20 +1099,236 @@ class _ModernIndicatorCard extends StatelessWidget {
     required this.index,
   });
 
+  @override
+  State<_ModernIndicatorCard> createState() => _ModernIndicatorCardState();
+}
+
+class _ModernIndicatorCardState extends State<_ModernIndicatorCard> with Show {
+  bool _isTasksExpanded = false;
+  double? _localProgress;
+
   String _formatDate(String? dateStr) {
     if (dateStr == null) return '';
     return dateStr;
   }
 
+  void _showProgressUpdateDialog() {
+    if (widget.indicator.id == null) return;
+
+    double sliderValue = _localProgress ?? widget.indicator.progress;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Прогрессти жаңыртуу',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.indicator.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: Text(
+                      '${sliderValue.toInt()}%',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: AppColors.primary,
+                      inactiveTrackColor: AppColors.primary.withAlpha(50),
+                      thumbColor: AppColors.primary,
+                      overlayColor: AppColors.primary.withAlpha(30),
+                      trackHeight: 8,
+                      thumbShape: const RoundSliderThumbShape(
+                        enabledThumbRadius: 14,
+                      ),
+                    ),
+                    child: Slider(
+                      value: sliderValue,
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      onChanged: (value) {
+                        setModalState(() {
+                          sliderValue = value;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '0%',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '100%',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(bottomSheetContext),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Жокко чыгаруу',
+                            style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(bottomSheetContext);
+                            _updateIndicatorProgress(sliderValue);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Сактоо',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(bottomSheetContext).padding.bottom),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _updateIndicatorProgress(double newProgress) {
+    final updatedIndicator = widget.indicator.copyWith(progress: newProgress);
+
+    setState(() {
+      _localProgress = newProgress;
+    });
+
+    context.read<IndicatorsCubit>().updateGoalIndicator(updatedIndicator);
+  }
+
+  void _toggleTasksExpanded() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _isTasksExpanded = !_isTasksExpanded;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final progress = indicator.progress.clamp(0.0, 100.0);
+    return BlocListener<IndicatorsCubit, IndicatorsState>(
+      listener: (context, state) {
+        if (state is IndicatorUpdated) {
+          for (final indicators in state.goalIndicators.values) {
+            final updated = indicators.where((i) => i.id == widget.indicator.id).firstOrNull;
+            if (updated != null) {
+              setState(() {
+                _localProgress = null;
+              });
+              showMessage(
+                context,
+                message: 'Прогресс ийгиликтүү жаңыртылды!',
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+              );
+              break;
+            }
+          }
+        } else if (state is IndicatorUpdateError) {
+          showErrorMessage(context, message: state.message);
+          setState(() {
+            _localProgress = null;
+          });
+        }
+      },
+      child: _buildCard(context),
+    );
+  }
+
+  Widget _buildCard(BuildContext context) {
+    final progress = (_localProgress ?? widget.indicator.progress).clamp(0.0, 100.0);
     final colors = [
       AppColors.primary,
       Colors.orange,
       Colors.purple,
     ];
-    final color = colors[index % colors.length];
+    final color = colors[widget.index % colors.length];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1159,7 +1382,7 @@ class _ModernIndicatorCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        indicator.title,
+                        widget.indicator.title,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -1168,7 +1391,7 @@ class _ModernIndicatorCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (indicator.endTime != null) ...[
+                      if (widget.indicator.endTime != null) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -1179,7 +1402,7 @@ class _ModernIndicatorCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              _formatDate(indicator.endTime),
+                              _formatDate(widget.indicator.endTime),
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12,
@@ -1191,37 +1414,40 @@ class _ModernIndicatorCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Progress circle
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        width: 42,
-                        height: 42,
-                        child: CircularProgressIndicator(
-                          value: progress / 100,
-                          strokeWidth: 4,
-                          backgroundColor: Colors.white.withValues(alpha: 0.3),
-                          valueColor:
-                              const AlwaysStoppedAnimation<Color>(Colors.white),
+                // Progress circle - now tappable
+                GestureDetector(
+                  onTap: _showProgressUpdateDialog,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 42,
+                          height: 42,
+                          child: CircularProgressIndicator(
+                            value: progress / 100,
+                            strokeWidth: 4,
+                            backgroundColor: Colors.white.withValues(alpha: 0.3),
+                            valueColor:
+                                const AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${progress.toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                        Text(
+                          '${progress.toInt()}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -1233,30 +1459,33 @@ class _ModernIndicatorCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Progress bar
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progress / 100,
-                          minHeight: 8,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
+                // Progress bar - now tappable
+                GestureDetector(
+                  onTap: _showProgressUpdateDialog,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: progress / 100,
+                            minHeight: 8,
+                            backgroundColor: Colors.grey.shade200,
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      '${progress.toInt()}%',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: color,
+                      const SizedBox(width: 12),
+                      Text(
+                        '${progress.toInt()}%',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: color,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
 
@@ -1265,10 +1494,7 @@ class _ModernIndicatorCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          // View tasks
-                        },
+                        onTap: _toggleTasksExpanded,
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
@@ -1279,7 +1505,9 @@ class _ModernIndicatorCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.visibility_outlined,
+                                _isTasksExpanded
+                                    ? Icons.keyboard_arrow_up
+                                    : Icons.visibility_outlined,
                                 size: 18,
                                 color: color,
                               ),
@@ -1303,7 +1531,7 @@ class _ModernIndicatorCard extends StatelessWidget {
                         HapticFeedback.lightImpact();
                         // Edit indicator
                         context.router.push(
-                          AddIndicatorRoute(existingIndicator: indicator),
+                          AddIndicatorRoute(existingIndicator: widget.indicator),
                         );
                       },
                       child: Container(
@@ -1324,6 +1552,10 @@ class _ModernIndicatorCard extends StatelessWidget {
               ],
             ),
           ),
+
+          // Tasks section - expanded view
+          if (_isTasksExpanded)
+            IndicatorCard(indicator: widget.indicator),
         ],
       ),
     );

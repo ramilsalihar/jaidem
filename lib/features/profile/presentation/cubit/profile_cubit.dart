@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:jaidem/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'profile_state.dart';
 
@@ -14,6 +17,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   final GetProfileUsecase getProfileUsecase;
   final UpdateProfileUsecase updateProfileUsecase;
+  SharedPreferences get _prefs => sl<SharedPreferences>();
 
   PersonModel? _currentUser;
 
@@ -30,11 +34,23 @@ class ProfileCubit extends Cubit<ProfileState> {
         (failure) => emit(ProfileError(message: failure.toString())),
         (user) {
           _currentUser = user;
+          // Save user data to SharedPreferences for use in comments/forums
+          _saveUserDataToPrefs(user);
           emit(ProfileLoaded(user: user));
         },
       );
     } catch (e) {
       emit(ProfileError(message: e.toString()));
+    }
+  }
+
+  /// Save user fullname and avatar to SharedPreferences
+  void _saveUserDataToPrefs(PersonModel user) {
+    if (user.fullname != null) {
+      _prefs.setString(AppConstants.userFullname, user.fullname!);
+    }
+    if (user.avatar != null) {
+      _prefs.setString(AppConstants.userAvatar, user.avatar!);
     }
   }
 

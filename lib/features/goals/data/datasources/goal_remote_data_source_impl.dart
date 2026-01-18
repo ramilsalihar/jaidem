@@ -66,6 +66,25 @@ class GoalRemoteDataSourceImpl implements GoalRemoteDataSource {
   }
 
   @override
+  Future<Either<String, GoalModel>> updateGoal(GoalModel goal) async {
+    try {
+      final response = await dio.patch(
+        '${ApiConst.goals}${goal.id}/',
+        data: goal.toJson(),
+      );
+
+      if ([200, 201].contains(response.statusCode)) {
+        final responseModel = GoalModel.fromJson(response.data);
+        return Right(responseModel);
+      } else {
+        return const Left('Failed to update goal');
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
   Future<Either<String, ResponseModel<GoalIndicatorModel>>> getGoalIndicators(
     String goalId,
   ) async {

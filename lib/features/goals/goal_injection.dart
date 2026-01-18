@@ -11,6 +11,7 @@ import 'package:jaidem/features/goals/domain/usecases/fetch_goals_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/fetch_goal_indicators_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/fetch_goal_indicator_by_id_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/fetch_goal_tasks_usecase.dart';
+import 'package:jaidem/features/goals/domain/usecases/update_goal_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/update_goal_indicator_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/update_goal_task_usecase.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
@@ -65,12 +66,16 @@ void goalInjection() {
   sl.registerLazySingleton(
     () => UpdateGoalIndicatorUseCase(sl()),
   );
+  sl.registerLazySingleton(
+    () => UpdateGoalUseCase(sl()),
+  );
 
   // Cubits
   sl.registerFactory(
     () => GoalsCubit(
       fetchGoalsUseCase: sl(),
       createGoalUseCase: sl(),
+      updateGoalUseCase: sl(),
     ),
   );
   

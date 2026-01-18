@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
@@ -89,9 +90,9 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           ),
         ),
       ),
-      title: const Text(
-        'Лента',
-        style: TextStyle(
+      title: Text(
+        context.tr('feed'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -119,9 +120,9 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         ),
       ],
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
+        preferredSize: const Size.fromHeight(66),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: _buildSearchBar(),
         ),
       ),
@@ -149,7 +150,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
         focusNode: _searchFocusNode,
         style: const TextStyle(fontSize: 15),
         decoration: InputDecoration(
-          hintText: 'Издөө...',
+          hintText: context.tr('search_hint'),
           hintStyle: TextStyle(
             color: Colors.grey.shade400,
             fontSize: 15,
@@ -204,7 +205,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 14,
@@ -236,7 +237,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             ),
             const SizedBox(height: 20),
             Text(
-              'Ката кетти',
+              context.tr('error_occurred'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -258,7 +259,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
                 context.read<ForumCubit>().fetchAllForums();
               },
               icon: const Icon(Icons.refresh_rounded, size: 20),
-              label: const Text('Кайра жүктөө'),
+              label: Text(context.tr('reload')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -298,7 +299,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             ),
             const SizedBox(height: 24),
             Text(
-              'Посттор жок',
+              context.tr('no_posts'),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -307,7 +308,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             ),
             const SizedBox(height: 8),
             Text(
-              'Азырынча эч кандай пост жок',
+              context.tr('no_posts_yet'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

@@ -30,4 +30,9 @@ abstract class ApiConst {
 
   // Files
   static const String files = '/category/file/';
+
+  // Filters
+  static const String regions = '/category/region/';
+  static const String universities = '/core/university/';
+  static const String specialities = '/category/speciality/';
 }

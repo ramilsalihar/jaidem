@@ -11,7 +11,15 @@ abstract class AuthLocalDataSource {
 
   Future<void> saveUsername(String username);
 
+  Future<void> saveUserFullname(String fullname);
+
+  Future<void> saveUserAvatar(String? avatar);
+
   Future<String?> getUserId();
+
+  Future<String?> getUserFullname();
+
+  Future<String?> getUserAvatar();
 
   Future<bool> logout();
 }

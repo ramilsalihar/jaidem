@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/layout/event_pagination.dart';
@@ -17,50 +18,60 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Future<void> _onRefresh() async {
+    await context.read<EventsCubit>().fetchEvents();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
       drawer: const AppDrawer(),
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Modern Header
-          SliverToBoxAdapter(
-            child: _buildHeader(),
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        backgroundColor: Colors.white,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
           ),
-
-          // Content
-          SliverToBoxAdapter(
-            child: BlocConsumer<EventsCubit, EventsState>(
-              listener: (context, state) {
-                if (state.attendanceStatus == AttendanceStatus.success) {
-                  _showSuccessSnackbar('Сурам ийгиликтүү жөнөтүлдү!');
-                } else if (state.attendanceStatus == AttendanceStatus.error) {
-                  _showErrorSnackbar(
-                      'Жөнөтүү ишке ашкан жок, кийинчерээк кайра аракет кылыңыз.');
-                }
-                context.read<EventsCubit>().resetAttendanceStatus();
-              },
-              builder: (context, state) {
-                if (state.eventsStatus == EventsStatus.loading) {
-                  return _buildLoadingState();
-                }
-
-                if (state.eventsStatus == EventsStatus.error) {
-                  return _buildErrorState(state.errorMessage);
-                }
-
-                if (state.eventsStatus == EventsStatus.loaded) {
-                  return _buildContent(state);
-                }
-
-                return const SizedBox.shrink();
-              },
+          slivers: [
+            // Modern Header
+            SliverToBoxAdapter(
+              child: _buildHeader(),
             ),
-          ),
-        ],
+
+            // Content
+            SliverToBoxAdapter(
+              child: BlocConsumer<EventsCubit, EventsState>(
+                listener: (context, state) {
+                  if (state.attendanceStatus == AttendanceStatus.success) {
+                    _showSuccessSnackbar(context.tr('attendance_success'));
+                  } else if (state.attendanceStatus == AttendanceStatus.error) {
+                    _showErrorSnackbar(context.tr('attendance_error'));
+                  }
+                  context.read<EventsCubit>().resetAttendanceStatus();
+                },
+                builder: (context, state) {
+                  if (state.eventsStatus == EventsStatus.loading) {
+                    return _buildLoadingState();
+                  }
+
+                  if (state.eventsStatus == EventsStatus.error) {
+                    return _buildErrorState(state.errorMessage);
+                  }
+
+                  if (state.eventsStatus == EventsStatus.loaded) {
+                    return _buildContent(state);
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,10 +117,10 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
               const SizedBox(width: 16),
 
               // Title
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Иш-чаралар',
-                  style: TextStyle(
+                  context.tr('events'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
@@ -161,7 +172,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Иш-чаралар жүктөлүүдө...',
+            context.tr('loading_events'),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 14,
@@ -195,7 +206,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
           ),
           const SizedBox(height: 20),
           Text(
-            errorMessage ?? 'Иш-чараларды жүктөөдө ката кетти',
+            errorMessage ?? context.tr('events_load_error'),
             style: TextStyle(
               color: Colors.grey.shade700,
               fontSize: 16,
@@ -215,9 +226,9 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Text(
-                'Кайра аракет',
-                style: TextStyle(
+              child: Text(
+                context.tr('retry'),
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -242,7 +253,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: EventPagination(
               events: state.requiredEvents,
-              label: 'Милдеттүү иш-чаралар',
+              label: context.tr('required_events'),
               isRequired: true,
             ),
           ),
@@ -255,7 +266,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: EventPagination(
               events: state.optionalEvents,
-              label: 'Каалоочуларга',
+              label: context.tr('optional_events'),
               isRequired: false,
             ),
           ),

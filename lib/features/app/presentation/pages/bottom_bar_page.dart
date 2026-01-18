@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/pages/events_page.dart';
@@ -27,7 +28,9 @@ class _BottomBarPageState extends State<BottomBarPage> {
   void initState() {
     super.initState();
     context.read<EventsCubit>().fetchEvents();
-    Future.microtask(() => context.read<ForumCubit>().fetchAllForums());
+    Future.microtask(() {
+      if (mounted) context.read<ForumCubit>().fetchAllForums();
+    });
     _pageController = PageController(initialPage: _selectedIndex);
   }
 
@@ -96,26 +99,26 @@ class _BottomBarPageState extends State<BottomBarPage> {
                 index: 0,
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home_rounded,
-                label: 'Башкы',
+                label: context.tr('nav_home'),
               ),
               _buildNavItem(
                 index: 1,
                 icon: Icons.people_outline_rounded,
                 activeIcon: Icons.people_rounded,
-                label: 'Жайдем',
+                label: context.tr('nav_jaidem'),
               ),
               _buildCenterButton(),
               _buildNavItem(
                 index: 3,
                 icon: Icons.event_outlined,
                 activeIcon: Icons.event_rounded,
-                label: 'Иш-чара',
+                label: context.tr('nav_events'),
               ),
               _buildNavItem(
                 index: 4,
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
-                label: 'Профиль',
+                label: context.tr('nav_profile'),
               ),
             ],
           ),

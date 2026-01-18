@@ -12,18 +12,48 @@ part of 'app_router.dart';
 
 /// generated route for
 /// [AddGoalPage]
-class AddGoalRoute extends PageRouteInfo<void> {
-  const AddGoalRoute({List<PageRouteInfo>? children})
-      : super(AddGoalRoute.name, initialChildren: children);
+class AddGoalRoute extends PageRouteInfo<AddGoalRouteArgs> {
+  AddGoalRoute({Key? key, GoalModel? goal, List<PageRouteInfo>? children})
+      : super(
+          AddGoalRoute.name,
+          args: AddGoalRouteArgs(key: key, goal: goal),
+          initialChildren: children,
+        );
 
   static const String name = 'AddGoalRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const AddGoalPage();
+      final args = data.argsAs<AddGoalRouteArgs>(
+        orElse: () => const AddGoalRouteArgs(),
+      );
+      return AddGoalPage(key: args.key, goal: args.goal);
     },
   );
+}
+
+class AddGoalRouteArgs {
+  const AddGoalRouteArgs({this.key, this.goal});
+
+  final Key? key;
+
+  final GoalModel? goal;
+
+  @override
+  String toString() {
+    return 'AddGoalRouteArgs{key: $key, goal: $goal}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! AddGoalRouteArgs) return false;
+    return key == other.key && goal == other.goal;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ goal.hashCode;
 }
 
 /// generated route for
@@ -254,6 +284,53 @@ class ChatRouteArgs {
 
   @override
   int get hashCode => key.hashCode ^ chatType.hashCode ^ userId.hashCode;
+}
+
+/// generated route for
+/// [EventDetailPage]
+class EventDetailRoute extends PageRouteInfo<EventDetailRouteArgs> {
+  EventDetailRoute({
+    Key? key,
+    required EventEntity event,
+    List<PageRouteInfo>? children,
+  }) : super(
+          EventDetailRoute.name,
+          args: EventDetailRouteArgs(key: key, event: event),
+          initialChildren: children,
+        );
+
+  static const String name = 'EventDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<EventDetailRouteArgs>();
+      return EventDetailPage(key: args.key, event: args.event);
+    },
+  );
+}
+
+class EventDetailRouteArgs {
+  const EventDetailRouteArgs({this.key, required this.event});
+
+  final Key? key;
+
+  final EventEntity event;
+
+  @override
+  String toString() {
+    return 'EventDetailRouteArgs{key: $key, event: $event}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! EventDetailRouteArgs) return false;
+    return key == other.key && event == other.event;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ event.hashCode;
 }
 
 /// generated route for

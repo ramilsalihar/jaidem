@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_filters.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
@@ -71,6 +72,7 @@ class _JaidemsPageState extends State<JaidemsPage>
         speciality: filters['speciality'],
         age: filters['age'],
         search: searchQuery,
+        region: filters['region'],
       )
           .whenComplete(() {
         if (mounted) {
@@ -90,6 +92,7 @@ class _JaidemsPageState extends State<JaidemsPage>
           speciality: filters['speciality'],
           age: filters['age'],
           search: searchQuery,
+          region: filters['region'],
         );
   }
 
@@ -176,9 +179,9 @@ class _JaidemsPageState extends State<JaidemsPage>
           ),
         ),
       ),
-      title: const Text(
-        'Жайдемчилер',
-        style: TextStyle(
+      title: Text(
+        context.tr('jaidems'),
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 18,
           fontWeight: FontWeight.w600,
@@ -242,7 +245,7 @@ class _JaidemsPageState extends State<JaidemsPage>
         focusNode: _searchFocusNode,
         style: const TextStyle(fontSize: 15),
         decoration: InputDecoration(
-          hintText: 'Жайдемчилерди издөө...',
+          hintText: context.tr('search_jaidems'),
           hintStyle: TextStyle(
             color: Colors.grey.shade400,
             fontSize: 15,
@@ -342,10 +345,7 @@ class _JaidemsPageState extends State<JaidemsPage>
   }
 
   int _getActiveFilterCount() {
-    int count = 0;
-    if (selectedFlow != null) count++;
-    if (selectedAge != null) count++;
-    return count;
+    return getActiveFilterCount();
   }
 
   Widget _buildLoadingState() {
@@ -363,7 +363,7 @@ class _JaidemsPageState extends State<JaidemsPage>
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 14,
@@ -395,7 +395,7 @@ class _JaidemsPageState extends State<JaidemsPage>
             ),
             const SizedBox(height: 20),
             Text(
-              'Ката кетти',
+              context.tr('error_occurred'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -415,7 +415,7 @@ class _JaidemsPageState extends State<JaidemsPage>
             ElevatedButton.icon(
               onPressed: _fetchJaidems,
               icon: const Icon(Icons.refresh_rounded, size: 20),
-              label: const Text('Кайра жүктөө'),
+              label: Text(context.tr('reload')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -455,7 +455,7 @@ class _JaidemsPageState extends State<JaidemsPage>
             ),
             const SizedBox(height: 24),
             Text(
-              'Жайдемчилер табылган жок',
+              context.tr('jaidems_not_found'),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -464,7 +464,7 @@ class _JaidemsPageState extends State<JaidemsPage>
             ),
             const SizedBox(height: 8),
             Text(
-              'Издөө критерийлерин өзгөртүп көрүңүз',
+              context.tr('change_search_criteria'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,

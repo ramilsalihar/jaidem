@@ -1,84 +1,226 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
-import 'package:jaidem/core/widgets/buttons/app_button.dart';
-import 'package:jaidem/core/widgets/fields/app_text_form_field.dart';
 
 mixin EventDialog<T extends StatefulWidget> on State<T> {
   void showEventDialog({
     required Function(String?) onConfirm,
   }) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext bottomSheetContext) {
         final controller = TextEditingController();
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Title
-                Text(
-                  'Иш-чарага катышпай турганыңыздын себебин көрсөтүңүз.',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w300,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
+        final focusNode = FocusNode();
 
-                // Text Field
-                AppTextFormField(
-                  label: '',
-                  hintText: 'Сиздин себебиңиз',
-                  controller: controller,
-                  maxLines: 5,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                 ),
-                const SizedBox(height: 20),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Handle bar
+                        Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
 
-                // Confirm Button
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    text: 'Жөнөтүү',
-                    borderRadius: 10,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onConfirm(controller.text);
-                    },
-                    backgroundColor: AppColors.primary,
-                    textColor: Colors.white,
+                        const SizedBox(height: 24),
+
+                        // Icon
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.red.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.event_busy_rounded,
+                            color: AppColors.red,
+                            size: 36,
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Title
+                        Text(
+                          'Катышпай турганыңыздын себеби',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade800,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        // Subtitle
+                        Text(
+                          'Иш-чарага катышпай турганыңыздын себебин көрсөтүңүз',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Text Field
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            maxLines: 4,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: Colors.grey.shade800,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Себебиңизди жазыңыз...',
+                              hintStyle: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 15,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.all(16),
+                            ),
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Buttons Row
+                        Row(
+                          children: [
+                            // Cancel Button
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  HapticFeedback.lightImpact();
+                                  Navigator.of(bottomSheetContext).pop();
+                                  onConfirm(null);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(14),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Жокко чыгаруу',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            // Submit Button
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  if (controller.text.trim().isEmpty) {
+                                    HapticFeedback.heavyImpact();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: const Text('Себебиңизди жазыңыз'),
+                                        backgroundColor: AppColors.red,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    );
+                                    return;
+                                  }
+                                  HapticFeedback.mediumImpact();
+                                  Navigator.of(bottomSheetContext).pop();
+                                  onConfirm(controller.text.trim());
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.red,
+                                        AppColors.red.withValues(alpha: 0.8),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(14),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.red.withValues(alpha: 0.3),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Жөнөтүү',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        SizedBox(
+                          height: MediaQuery.of(bottomSheetContext).padding.bottom + 8,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 12),
-
-                // Cancel Button
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    text: 'Жокко чыгаруу',
-                    borderRadius: 10,
-                    isOutlined: true,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      onConfirm(null);
-                    },
-                    backgroundColor: Colors.transparent,
-                    textColor: AppColors.primary,
-                    borderColor: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
@@ -96,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 14,
@@ -130,9 +131,9 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Профиль',
-                    style: TextStyle(
+                  Text(
+                    context.tr('profile'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -226,7 +227,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
               alignment: WrapAlignment.center,
               children: [
                 if (user.flow.name.isNotEmpty)
-                  _buildTag('Агым ${user.flow.name}'),
+                  _buildTag('${context.tr('flow')} ${user.flow.name}'),
                 if (user.generation != null && user.generation!.isNotEmpty)
                   _buildTag(user.generation!),
                 if (user.state.nameKg != null && user.state.nameKg!.isNotEmpty)
@@ -292,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
           // Age
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${user.age}', 'Жашы'),
+            child: _buildStatItem('${user.age}', context.tr('age')),
           ),
           Container(
             width: 1,
@@ -302,7 +303,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
           // Course year
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${user.courseYear}', 'Курс'),
+            child: _buildStatItem('${user.courseYear}', context.tr('course_year')),
           ),
           if (user.university != null && user.university!.isNotEmpty) ...[
             Container(
@@ -314,7 +315,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: _buildUniversityItem(user.university!, 'Окуу жайы'),
+                child: _buildUniversityItem(user.university!, context.tr('university')),
               ),
             ),
           ],
@@ -392,7 +393,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
               ),
               const SizedBox(width: 8),
               Text(
-                'Мен жөнүндө',
+                context.tr('about_me'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -427,16 +428,16 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
     final items = <_InfoItem>[];
 
     if (user.region?.nameKg != null && user.region!.nameKg!.isNotEmpty) {
-      items.add(_InfoItem(Icons.map_outlined, 'Район', user.region!.nameKg!));
+      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), user.region!.nameKg!));
     }
     if (user.village != null && user.village!.name.isNotEmpty) {
-      items.add(_InfoItem(Icons.location_city_outlined, 'Айыл/Шаар', user.village!.name));
+      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), user.village!.name));
     }
     if (user.interest != null && user.interest!.isNotEmpty) {
-      items.add(_InfoItem(Icons.favorite_outline_rounded, 'Кызыкчылыктар', user.interest!));
+      items.add(_InfoItem(Icons.favorite_outline_rounded, context.tr('interests'), user.interest!));
     }
     if (user.skills != null && user.skills!.isNotEmpty) {
-      items.add(_InfoItem(Icons.psychology_outlined, 'Көндүмдөр', user.skills!));
+      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), user.skills!));
     }
 
     // Social media
@@ -463,7 +464,7 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
             ),
             const SizedBox(width: 8),
             Text(
-              'Маалымат',
+              context.tr('information'),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -559,14 +560,14 @@ class _ProfilePageState extends State<ProfilePage> with NotificationMixin {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.edit_rounded, color: Colors.white, size: 20),
-            SizedBox(width: 10),
+            const Icon(Icons.edit_rounded, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
             Text(
-              'Профилди түзөтүү',
-              style: TextStyle(
+              context.tr('edit_profile'),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
