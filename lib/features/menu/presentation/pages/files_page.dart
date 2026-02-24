@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/data/models/division_model.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/file_card.dart';
@@ -16,20 +17,14 @@ class FilesPage extends StatefulWidget {
 }
 
 class _FilesPageState extends State<FilesPage> {
-  int _selectedTabIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   List<FileModel> _filteredFiles = [];
   bool _isSearching = false;
 
-  final List<({String title, IconData icon})> _tabs = [
-    (title: 'Баары', icon: Icons.folder_rounded),
-    (title: 'Презентациялар', icon: Icons.slideshow_rounded),
-    (title: 'Сунуштар', icon: Icons.lightbulb_rounded),
-  ];
-
   @override
   void initState() {
     super.initState();
+    context.read<MenuCubit>().fetchDivisions();
     context.read<MenuCubit>().fetchFiles();
     _searchController.addListener(_onSearchChanged);
   }
@@ -64,10 +59,6 @@ class _FilesPageState extends State<FilesPage> {
       return titleLower.contains(queryLower) ||
           subdivisionLower.contains(queryLower);
     }).toList();
-  }
-
-  List<FileModel> _getFilesForSelectedTab(List<FileModel> files) {
-    return files;
   }
 
   @override
@@ -223,71 +214,89 @@ class _FilesPageState extends State<FilesPage> {
             ),
           ),
 
-          // Category Tabs
+          // Division Filter
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 56,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                itemCount: _tabs.length,
-                itemBuilder: (context, index) {
-                  final tab = _tabs[index];
-                  final isSelected = _selectedTabIndex == index;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        setState(() => _selectedTabIndex = index);
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          gradient: isSelected
-                              ? LinearGradient(
-                                  colors: [AppColors.primary, AppColors.primary.shade300],
-                                )
-                              : null,
-                          color: isSelected ? null : Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: isSelected
-                              ? null
-                              : Border.all(color: Colors.grey.shade200),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: AppColors.primary.withValues(alpha: 0.3),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+            child: BlocBuilder<MenuCubit, MenuState>(
+              buildWhen: (previous, current) {
+                final prevDivisions = previous.divisions;
+                final currDivisions = current.divisions;
+                final prevSelected = previous.selectedDivisionId;
+                final currSelected = current.selectedDivisionId;
+                return prevDivisions != currDivisions || prevSelected != currSelected;
+              },
+              builder: (context, state) {
+                final divisions = state.divisions?.results ?? [];
+                final selectedDivisionId = state.selectedDivisionId;
+
+                return SizedBox(
+                  height: 56,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: divisions.length + 1, // +1 for "All" option
+                    itemBuilder: (context, index) {
+                      final isAllOption = index == 0;
+                      final Division? division = isAllOption ? null : divisions[index - 1];
+                      final isSelected = isAllOption
+                          ? selectedDivisionId == null
+                          : selectedDivisionId == division?.id;
+
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            context.read<MenuCubit>().selectDivision(division?.id);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              gradient: isSelected
+                                  ? LinearGradient(
+                                      colors: [AppColors.primary, AppColors.primary.shade300],
+                                    )
+                                  : null,
+                              color: isSelected ? null : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: isSelected
+                                  ? null
+                                  : Border.all(color: Colors.grey.shade200),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.primary.withValues(alpha: 0.3),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isAllOption ? Icons.folder_rounded : Icons.category_rounded,
+                                  size: 18,
+                                  color: isSelected ? Colors.white : Colors.grey.shade600,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  isAllOption ? 'Баары' : (division?.name ?? ''),
+                                  style: TextStyle(
+                                    color: isSelected ? Colors.white : Colors.grey.shade700,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
                                   ),
-                                ]
-                              : null,
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              tab.icon,
-                              size: 18,
-                              color: isSelected ? Colors.white : Colors.grey.shade600,
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            Text(
-                              tab.title,
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.grey.shade700,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
           ),
 
@@ -347,7 +356,7 @@ class _FilesPageState extends State<FilesPage> {
                   }
 
                   final displayFiles = _searchController.text.isEmpty
-                      ? _getFilesForSelectedTab(files)
+                      ? files
                       : _filteredFiles;
 
                   if (displayFiles.isEmpty) {

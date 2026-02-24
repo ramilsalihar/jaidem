@@ -5,6 +5,7 @@ import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/profile/presentation/widgets/birthday_congrats_widget.dart';
 
 class JaidemCard extends StatelessWidget {
   const JaidemCard({
@@ -144,6 +145,27 @@ class JaidemCard extends StatelessWidget {
               ),
             ),
           ),
+        // Birthday badge
+        if (isTodayBirthday(person.birthday))
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pink.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Text('🎂', style: TextStyle(fontSize: 14)),
+            ),
+          ),
       ],
     );
   }
@@ -187,19 +209,21 @@ class JaidemCard extends StatelessWidget {
   Widget _buildDetailsSection() {
     final items = <Widget>[];
 
-    if (person.speciality != null &&
-        person.speciality!.isNotEmpty) {
+    // Use spec object first, fallback to speciality string
+    final specName = person.spec?.name ?? person.speciality;
+    if (specName != null && specName.isNotEmpty) {
       items.add(_buildDetailItem(
         Icons.work_outline_rounded,
-        person.speciality!,
+        specName,
       ));
     }
 
-    if (person.university != null &&
-        person.university!.isNotEmpty) {
+    // Use univer object first, fallback to university string
+    final univerName = person.univer?.name ?? person.university;
+    if (univerName != null && univerName.isNotEmpty) {
       items.add(_buildDetailItem(
         Icons.school_outlined,
-        person.university!,
+        univerName,
         maxLines: 2,
       ));
     }

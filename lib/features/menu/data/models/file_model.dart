@@ -18,6 +18,16 @@ class FileModel {
   });
 
   factory FileModel.fromJson(Map<String, dynamic> json) {
+    // Handle subdivision which can be either a String or an object
+    String subdivisionName = '';
+    if (json['subdivision'] != null) {
+      if (json['subdivision'] is String) {
+        subdivisionName = json['subdivision'];
+      } else if (json['subdivision'] is Map) {
+        subdivisionName = json['subdivision']['name'] ?? '';
+      }
+    }
+
     return FileModel(
       id: json['id'],
       title: json['title'],
@@ -26,7 +36,7 @@ class FileModel {
       division: json['division'] != null
           ? Division.fromJson(json['division'])
           : null,
-      subdivision: json['subdivision'] ?? '',
+      subdivision: subdivisionName,
     );
   }
 

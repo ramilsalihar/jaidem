@@ -36,6 +36,7 @@ void forumInjection() {
       getForumComment: sl(),
       postForumComment: sl(),
       likePostUsecase: sl(),
+      forumRemoteDataSource: sl(),
     ),
   );
 }

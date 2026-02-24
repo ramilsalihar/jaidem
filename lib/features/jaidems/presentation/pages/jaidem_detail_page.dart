@@ -1,398 +1,466 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/routes/app_router.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource.dart';
+import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
+import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
+import 'package:jaidem/features/profile/presentation/widgets/birthday_congrats_widget.dart';
+import 'package:jaidem/features/birthday/domain/usecases/send_birthday_reaction_usecase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
-class JaidemDetailPage extends StatelessWidget {
+class JaidemDetailPage extends StatefulWidget {
   const JaidemDetailPage({super.key, required this.person});
 
   final PersonModel person;
 
   @override
+  State<JaidemDetailPage> createState() => _JaidemDetailPageState();
+}
+
+class _JaidemDetailPageState extends State<JaidemDetailPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  bool _isOwnProfile = false;
+  bool _isBirthday = false;
+  bool _hasReacted = false;
+  bool _isSendingReaction = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _isBirthday = isTodayBirthday(widget.person.birthday);
+    _checkIfOwnProfile();
+  }
+
+  Future<void> _sendBirthdayReaction() async {
+    if (_hasReacted || _isSendingReaction) return;
+    setState(() => _isSendingReaction = true);
+
+    final useCase = sl<SendBirthdayReactionUseCase>();
+    final result = await useCase(toUserId: widget.person.id);
+
+    if (mounted) {
+      result.fold(
+        (error) {
+          setState(() => _isSendingReaction = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error), backgroundColor: Colors.red),
+          );
+        },
+        (_) {
+          setState(() {
+            _hasReacted = true;
+            _isSendingReaction = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.tr('birthday_send_reaction')),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _checkIfOwnProfile() {
+    final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+
+    // If viewing own profile, redirect to profile page
+    if (currentUserId == widget.person.id.toString()) {
+      _isOwnProfile = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          // Replace with BottomBarRoute showing profile tab (index 4)
+          context.router.replaceAll([BottomBarRoute(initialIndex: 4)]);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            // Header with gradient and avatar
-            _buildHeader(context),
+    // Don't fetch forums if redirecting to own profile
+    if (_isOwnProfile) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-            // Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-
-                  // Stats Row
-                  _buildStatsRow(context),
-
-                  const SizedBox(height: 24),
-
-                  // Quick Actions
-                  _buildQuickActions(context),
-
-                  const SizedBox(height: 24),
-
-                  // About Section
-                  if (person.aboutMe != null && person.aboutMe!.isNotEmpty)
-                    _buildAboutSection(context),
-
-                  // Info List
-                  _buildInfoList(context),
-
-                  const SizedBox(height: 24),
-
-                  // Contact Section
-                  _buildContactSection(context),
-
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
-                ],
+    return BlocProvider(
+      create: (context) => sl<ForumCubit>()..fetchAllForums(authorId: widget.person.id),
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              _buildSliverAppBar(context),
+            ];
+          },
+          body: Column(
+            children: [
+              _buildTabBar(context),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildPostsTab(context),
+                    _buildAboutTab(context),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primary,
-            AppColors.primary.shade700,
-          ],
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Top bar with back button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    context.tr('profile'),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Avatar
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  width: 3,
-                ),
-              ),
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white24,
-                ),
-                child: ClipOval(
-                  child: person.avatar != null && person.avatar!.isNotEmpty
-                      ? Image.network(
-                          person.avatar!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _buildDefaultAvatar(),
-                        )
-                      : _buildDefaultAvatar(),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Name
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text(
-                person.fullname ?? context.tr('unknown'),
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: -0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            // Specialty
-            if (person.speciality != null && person.speciality!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  person.speciality!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.85),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-            const SizedBox(height: 16),
-
-            // Tags
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  if (person.flow.name.isNotEmpty)
-                    _buildTag('${context.tr('flow')} ${person.flow.name}'),
-                  if (person.generation != null && person.generation!.isNotEmpty)
-                    _buildTag(person.generation!),
-                  if (person.state.nameKg != null && person.state.nameKg!.isNotEmpty)
-                    _buildTag(person.state.nameKg!),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 28),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDefaultAvatar() {
-    final initial = (person.fullname?.isNotEmpty ?? false)
-        ? person.fullname![0].toUpperCase()
-        : 'U';
-    return Container(
-      color: Colors.white24,
-      child: Center(
-        child: Text(
-          initial,
-          style: const TextStyle(
+  Widget _buildSliverAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 340,
+      pinned: true,
+      backgroundColor: AppColors.primary,
+      leading: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          Navigator.of(context).pop();
+        },
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.3),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.arrow_back_rounded,
             color: Colors.white,
-            fontSize: 40,
-            fontWeight: FontWeight.bold,
+            size: 22,
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsRow(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          // Age
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${person.age}', context.tr('age')),
-          ),
-          Container(
-            width: 1,
-            height: 36,
-            color: Colors.grey.shade300,
-          ),
-          // Course year
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${person.courseYear}', context.tr('course_year')),
-          ),
-          if (person.university != null && person.university!.isNotEmpty) ...[
+      actions: const [],
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          children: [
+            // Cover photo
             Container(
-              width: 1,
-              height: 36,
-              color: Colors.grey.shade300,
-            ),
-            // University - expanded to take remaining space
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: _buildUniversityItem(person.university!, context.tr('university')),
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.shade700,
+                  ],
+                ),
               ),
+              child: widget.person.avatar != null
+                  ? ShaderMask(
+                      shaderCallback: (rect) {
+                        return LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.black.withValues(alpha: 0.1),
+                          ],
+                        ).createShader(rect);
+                      },
+                      blendMode: BlendMode.darken,
+                      child: Image.network(
+                        widget.person.avatar!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const SizedBox(),
+                      ),
+                    )
+                  : null,
+            ),
+            // Profile info card
+            Positioned(
+              top: 130,
+              left: 16,
+              right: 16,
+              child: _buildProfileCard(context),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundColor: AppColors.primary.shade100,
+                  backgroundImage: widget.person.avatar != null
+                      ? NetworkImage(widget.person.avatar!)
+                      : null,
+                  child: widget.person.avatar == null
+                      ? Text(
+                          (widget.person.fullname?.isNotEmpty ?? false)
+                              ? widget.person.fullname![0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Name and headline
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.person.fullname ?? context.tr('unknown'),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    // Use spec object first, fallback to speciality string
+                    Builder(
+                      builder: (context) {
+                        final specName = widget.person.spec?.name ?? widget.person.speciality;
+                        if (specName != null && specName.isNotEmpty) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              specName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    // Tags
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        if (widget.person.flow.name.isNotEmpty)
+                          _buildSmallTag('${context.tr('flow')} ${widget.person.flow.name}'),
+                        if (widget.person.generation != null &&
+                            widget.person.generation!.isNotEmpty)
+                          _buildSmallTag(widget.person.generation!),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          // Birthday congrats button
+          if (_isBirthday) ...[
+            const SizedBox(height: 12),
+            _buildBirthdayCongrats(context),
+          ],
+          const SizedBox(height: 16),
+          // Quick actions
+          _buildQuickActions(context),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.grey.shade800,
+  Widget _buildBirthdayCongrats(BuildContext context) {
+    return GestureDetector(
+      onTap: _hasReacted ? null : _sendBirthdayReaction,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: _hasReacted
+                ? [Colors.grey.shade100, Colors.grey.shade50]
+                : [Colors.pink.shade50, Colors.purple.shade50],
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w500,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _hasReacted
+                ? Colors.grey.withValues(alpha: 0.3)
+                : Colors.pink.withValues(alpha: 0.3),
           ),
         ),
-      ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_isSendingReaction)
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink.shade400),
+                ),
+              )
+            else ...[
+              Text(
+                _hasReacted ? '✓' : '🎂',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _hasReacted
+                    ? context.tr('birthday_already_reacted')
+                    : context.tr('birthday_congrats_button'),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: _hasReacted ? Colors.grey.shade500 : Colors.pink.shade600,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildUniversityItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
-            height: 1.3,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
+  Widget _buildSmallTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary,
         ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildQuickActions(BuildContext context) {
-    final hasWhatsApp = person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
-    final hasInstagram = person.socialMedias?['instagram']?.isNotEmpty ?? false;
-    final hasPhone = person.phone?.isNotEmpty ?? false;
-
-    if (!hasWhatsApp && !hasInstagram && !hasPhone) {
-      return const SizedBox();
-    }
+    final hasWhatsApp = widget.person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
+    final hasInstagram = widget.person.socialMedias?['instagram']?.isNotEmpty ?? false;
 
     return Row(
       children: [
+        // Write message button - always show as primary action
+        Expanded(
+          child: _buildActionButton(
+            icon: Icons.message_rounded,
+            label: context.tr('write_message'),
+            color: AppColors.primary,
+            isPrimary: true,
+            onTap: () async {
+              HapticFeedback.lightImpact();
+              final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+
+              // If viewing own profile, go to profile page
+              if (currentUserId == widget.person.id.toString()) {
+                context.router.replaceAll([BottomBarRoute(initialIndex: 4)]);
+                return;
+              }
+
+              // Ensure target user exists in Firebase with proper data
+              await sl<MenuRemoteDatasource>().ensureUserExists(
+                id: widget.person.id.toString(),
+                name: widget.person.fullname ?? 'User',
+                photoUrl: widget.person.avatar,
+              );
+
+              if (!context.mounted) return;
+
+              context.router.push(
+                ChatRoute(
+                  chatType: 'users',
+                  userId: widget.person.id.toString(),
+                  userName: widget.person.fullname,
+                  userAvatar: widget.person.avatar,
+                ),
+              );
+            },
+          ),
+        ),
+        if (hasWhatsApp) const SizedBox(width: 8),
         if (hasWhatsApp)
           Expanded(
             child: _buildActionButton(
-              icon: 'assets/icons/whatsapp.png',
+              icon: Icons.chat_rounded,
               label: 'WhatsApp',
               color: const Color(0xFF25D366),
               onTap: () {
                 HapticFeedback.lightImpact();
-                ContactService().openWhatsapp(person.socialMedias!['whatsapp']!);
+                ContactService().openWhatsapp(widget.person.socialMedias!['whatsapp']!);
               },
             ),
           ),
-        if (hasWhatsApp && (hasInstagram || hasPhone))
-          const SizedBox(width: 12),
+        if (hasInstagram) const SizedBox(width: 8),
         if (hasInstagram)
           Expanded(
             child: _buildActionButton(
-              icon: 'assets/icons/insta.png',
+              icon: Icons.camera_alt_rounded,
               label: 'Instagram',
               color: const Color(0xFFE4405F),
               onTap: () {
                 HapticFeedback.lightImpact();
-                ContactService().openInstagram(person.socialMedias!['instagram']!);
-              },
-            ),
-          ),
-        if (hasInstagram && hasPhone)
-          const SizedBox(width: 12),
-        if (hasPhone)
-          Expanded(
-            child: _buildActionButton(
-              iconData: Icons.phone_rounded,
-              label: context.tr('call'),
-              color: AppColors.primary,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                ContactService().callToPhone(person.phone!);
+                ContactService().openInstagram(widget.person.socialMedias!['instagram']!);
               },
             ),
           ),
@@ -401,46 +469,210 @@ class JaidemDetailPage extends StatelessWidget {
   }
 
   Widget _buildActionButton({
-    String? icon,
-    IconData? iconData,
+    required IconData icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
+    bool isPrimary = false,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.2),
-            width: 1,
-          ),
+          color: isPrimary ? color : color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null)
-              Image.asset(
-                icon,
-                width: 20,
-                height: 20,
-              )
-            else
-              Icon(iconData, color: color, size: 20),
-            const SizedBox(width: 8),
+            Icon(icon, color: isPrimary ? Colors.white : color, size: 18),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: color,
+                color: isPrimary ? Colors.white : color,
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.grey.shade700,
+          indicatorSize: TabBarIndicatorSize.tab,
+          dividerColor: Colors.transparent,
+          indicator: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          labelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.article_outlined, size: 18),
+                  const SizedBox(width: 6),
+                  Text(context.tr('posts')),
+                ],
+              ),
+            ),
+            Tab(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.info_outline, size: 18),
+                  const SizedBox(width: 6),
+                  Text(context.tr('profile_tab')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostsTab(BuildContext context) {
+    return BlocBuilder<ForumCubit, ForumState>(
+      builder: (context, state) {
+        if (state.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          );
+        }
+
+        if (state.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.tr('error_loading_posts'),
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<ForumCubit>().fetchAllForums(authorId: widget.person.id);
+                  },
+                  child: Text(context.tr('retry')),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (state.forums.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.article_outlined,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.tr('no_posts_yet'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.tr('user_has_no_posts'),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            await context.read<ForumCubit>().fetchAllForums(authorId: widget.person.id);
+          },
+          child: ListView.builder(
+            padding: EdgeInsets.zero,
+            itemCount: state.forums.length,
+            itemBuilder: (context, index) {
+              return Container(
+                color: Colors.white,
+                child: ForumCard(forum: state.forums[index]),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAboutTab(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // About section
+          if (widget.person.aboutMe != null && widget.person.aboutMe!.isNotEmpty)
+            _buildAboutSection(context),
+
+          // Info section
+          _buildInfoSection(context),
+
+          // Contact section
+          _buildContactSection(context),
+
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }
@@ -448,43 +680,35 @@ class JaidemDetailPage extends StatelessWidget {
   Widget _buildAboutSection(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.format_quote_rounded,
-                color: AppColors.primary,
-                size: 22,
-              ),
+              Icon(Icons.person_outline, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 context.tr('about_me'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.grey.shade800,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              person.aboutMe!,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-                height: 1.6,
-              ),
+          Text(
+            widget.person.aboutMe!,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.5,
             ),
           ),
         ],
@@ -492,86 +716,68 @@ class JaidemDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoList(BuildContext context) {
+  Widget _buildInfoSection(BuildContext context) {
     final items = <_InfoItem>[];
 
-    if (person.region?.nameKg != null && person.region!.nameKg!.isNotEmpty) {
-      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), person.region!.nameKg!));
+    // Use univer object first, fallback to university string
+    final univerName = widget.person.univer?.name ?? widget.person.university;
+    if (univerName != null && univerName.isNotEmpty) {
+      items.add(_InfoItem(Icons.school_outlined, context.tr('university'), univerName));
     }
-    if (person.village != null && person.village!.name.isNotEmpty) {
-      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), person.village!.name));
+    if (widget.person.region?.nameKg != null && widget.person.region!.nameKg!.isNotEmpty) {
+      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), widget.person.region!.nameKg!));
     }
-    if (person.interest != null && person.interest!.isNotEmpty) {
-      items.add(_InfoItem(Icons.favorite_outline_rounded, context.tr('interests'), person.interest!));
+    if (widget.person.village != null && widget.person.village!.name.isNotEmpty) {
+      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), widget.person.village!.name));
     }
-    if (person.skills != null && person.skills!.isNotEmpty) {
-      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), person.skills!));
+    if (widget.person.interest != null && widget.person.interest!.isNotEmpty) {
+      items.add(_InfoItem(Icons.favorite_outline, context.tr('interests'), widget.person.interest!));
     }
-
-    // Social media info
-    final whatsapp = person.socialMedias?['whatsapp'];
-    final instagram = person.socialMedias?['instagram'];
-    if (whatsapp != null && whatsapp.isNotEmpty) {
-      items.add(_InfoItem(Icons.chat_outlined, 'WhatsApp', whatsapp));
-    }
-    if (instagram != null && instagram.isNotEmpty) {
-      items.add(_InfoItem(Icons.camera_alt_outlined, 'Instagram', instagram));
+    if (widget.person.skills != null && widget.person.skills!.isNotEmpty) {
+      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), widget.person.skills!));
     }
 
     if (items.isEmpty) return const SizedBox();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              color: AppColors.primary,
-              size: 22,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              context.tr('information'),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey.shade800,
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('information'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...items.map((item) => _buildInfoRow(item)),
-      ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => _buildInfoRow(item)),
+        ],
+      ),
     );
   }
 
   Widget _buildInfoRow(_InfoItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(14),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              item.icon,
-              color: AppColors.primary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 14),
+          Icon(item.icon, size: 20, color: Colors.grey.shade500),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,17 +787,15 @@ class JaidemDetailPage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   item.value,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: Colors.grey.shade800,
-                    height: 1.4,
                   ),
                 ),
               ],
@@ -603,143 +807,97 @@ class JaidemDetailPage extends StatelessWidget {
   }
 
   Widget _buildContactSection(BuildContext context) {
-    final hasPhone = person.phone != null && person.phone!.isNotEmpty;
-    final hasEmail = person.email != null && person.email!.isNotEmpty;
+    final hasPhone = widget.person.phone != null && widget.person.phone!.isNotEmpty;
+    final hasEmail = widget.person.email != null && widget.person.email!.isNotEmpty;
 
     if (!hasPhone && !hasEmail) return const SizedBox();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.contact_phone_outlined,
-              color: AppColors.primary,
-              size: 22,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              context.tr('contact'),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey.shade800,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.contact_phone_outlined, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('contact'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (hasPhone)
+            _buildContactRow(
+              icon: Icons.phone_rounded,
+              value: widget.person.phone!,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                ContactService().callToPhone(widget.person.phone!);
+              },
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (hasPhone)
-          _buildContactRow(
-            icon: Icons.phone_rounded,
-            label: context.tr('phone'),
-            value: person.phone!,
-            color: AppColors.primary,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              ContactService().callToPhone(person.phone!);
-            },
-          ),
-        if (hasEmail)
-          _buildContactRow(
-            icon: Icons.email_rounded,
-            label: 'Email',
-            value: person.email!,
-            color: Colors.orange,
-            onTap: () async {
-              HapticFeedback.lightImpact();
-              final url = Uri.parse('mailto:${person.email!}');
-              if (await canLaunchUrl(url)) {
-                await launchUrl(url);
-              }
-            },
-          ),
-      ],
+          if (hasEmail)
+            _buildContactRow(
+              icon: Icons.email_rounded,
+              value: widget.person.email!,
+              onTap: () async {
+                HapticFeedback.lightImpact();
+                final url = Uri.parse('mailto:${widget.person.email!}');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                }
+              },
+            ),
+        ],
+      ),
     );
   }
 
   Widget _buildContactRow({
     required IconData icon,
-    required String label,
     required String value,
-    required Color color,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.08),
-              color.withValues(alpha: 0.04),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withValues(alpha: 0.15),
-            width: 1,
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(12),
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, size: 18, color: AppColors.primary),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                    ),
-                  ),
-                ],
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade800,
+                ),
               ),
             ),
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
+            Icon(Icons.chevron_right, color: Colors.grey.shade400),
           ],
         ),
       ),
     );
   }
+
 }
 
 class _InfoItem {

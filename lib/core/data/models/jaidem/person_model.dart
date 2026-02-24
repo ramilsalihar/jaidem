@@ -1,6 +1,8 @@
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/speciality_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/state_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/university_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/village_model.dart';
 
 class PersonModel {
@@ -31,6 +33,9 @@ class PersonModel {
   final RegionModel? region;
   final VillageModel? village;
   final bool block;
+  final UniversityModel? univer;
+  final SpecialityModel? spec;
+  final String? birthday;
 
   const PersonModel({
     required this.id,
@@ -60,6 +65,9 @@ class PersonModel {
     this.region,
     this.village,
     required this.block,
+    this.univer,
+    this.spec,
+    this.birthday,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -100,6 +108,13 @@ class PersonModel {
           ? VillageModel.fromJson(json['village'] as Map<String, dynamic>)
           : null,
       block: json['block'] as bool,
+      univer: json['univer'] != null
+          ? UniversityModel.fromJson(json['univer'] as Map<String, dynamic>)
+          : null,
+      spec: json['spec'] != null
+          ? SpecialityModel.fromJson(json['spec'] as Map<String, dynamic>)
+          : null,
+      birthday: json['birthday'] as String?,
     );
   }
 
@@ -131,6 +146,9 @@ class PersonModel {
     RegionModel? region,
     VillageModel? village,
     bool? block,
+    UniversityModel? univer,
+    SpecialityModel? spec,
+    String? birthday,
   }) {
     return PersonModel(
       id: id ?? this.id,
@@ -160,6 +178,9 @@ class PersonModel {
       region: region ?? this.region,
       village: village ?? this.village,
       block: block ?? this.block,
+      univer: univer ?? this.univer,
+      spec: spec ?? this.spec,
+      birthday: birthday ?? this.birthday,
     );
   }
 }

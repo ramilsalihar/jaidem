@@ -752,7 +752,7 @@ class _FilterSheetState extends State<_FilterSheet> {
         itemLabel: (item) => item.getLocalizedName(widget.locale),
         searchFilter: (item, query) {
           final lowerQuery = query.toLowerCase();
-          return item.nameRu.toLowerCase().contains(lowerQuery) ||
+          return item.name.toLowerCase().contains(lowerQuery) ||
               (item.nameEn?.toLowerCase().contains(lowerQuery) ?? false) ||
               (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
         },
@@ -1045,9 +1045,11 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
                         final isSelected = widget.selectedItem == item;
 
                         return ListTile(
+                          dense: true,
                           title: Text(
                             widget.itemLabel(item),
                             style: TextStyle(
+                              fontSize: 14,
                               fontWeight: isSelected
                                   ? FontWeight.w600
                                   : FontWeight.normal,
@@ -1057,7 +1059,7 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
                             ),
                           ),
                           trailing: isSelected
-                              ? Icon(Icons.check, color: AppColors.primary)
+                              ? Icon(Icons.check, color: AppColors.primary, size: 20)
                               : null,
                           onTap: () {
                             HapticFeedback.lightImpact();
@@ -1250,9 +1252,11 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
                                 widget.selectedUniversity?.id == item.id;
 
                             return ListTile(
+                              dense: true,
                               title: Text(
                                 item.getLocalizedName(widget.locale),
                                 style: TextStyle(
+                                  fontSize: 14,
                                   fontWeight: isSelected
                                       ? FontWeight.w600
                                       : FontWeight.normal,
@@ -1262,7 +1266,7 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
                                 ),
                               ),
                               trailing: isSelected
-                                  ? Icon(Icons.check, color: AppColors.primary)
+                                  ? Icon(Icons.check, color: AppColors.primary, size: 20)
                                   : null,
                               onTap: () {
                                 HapticFeedback.lightImpact();

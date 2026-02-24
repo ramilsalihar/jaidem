@@ -5,7 +5,7 @@ import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_task_model.dart';
 
 abstract class GoalRemoteDataSource {
-  Future<Either<String, ResponseModel<GoalModel>>> getGoals();
+  Future<Either<String, ResponseModel<GoalModel>>> getGoals({int page = 1, String? status});
 
   Future<Either<String, GoalModel>> createGoal(
     GoalModel goal,

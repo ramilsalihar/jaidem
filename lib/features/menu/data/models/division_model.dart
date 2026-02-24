@@ -13,10 +13,10 @@ class Division {
 
   factory Division.fromJson(Map<String, dynamic> json) {
     return Division(
-      id: json['id'],
-      name: json['name'],
-      nameEn: json['nameEn'],
-      nameKg: json['nameKg'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      nameEn: json['nameEn'] ?? '',
+      nameKg: json['nameKg'] ?? '',
     );
   }
 

@@ -15,6 +15,9 @@ import 'package:jaidem/features/jaidems/jaidem_injection.dart';
 import 'package:jaidem/features/menu/menu_injection.dart';
 import 'package:jaidem/features/notifications/notification_injection.dart';
 import 'package:jaidem/features/profile/profile_injection.dart';
+import 'package:jaidem/features/birthday/birthday_injection.dart';
+import 'package:jaidem/features/opros/opros_injection.dart';
+import 'package:jaidem/features/training/training_injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -45,6 +48,12 @@ Future<void> initInjections() async {
   eventInjection();
 
   jaidemInjection();
+
+  initTrainingDependencies(sl);
+
+  oprosInjection();
+
+  birthdayInjection();
 }
 
 Future<void> setupServices() async {

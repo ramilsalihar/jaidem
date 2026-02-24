@@ -18,8 +18,14 @@ import 'package:jaidem/features/menu/presentation/pages/change_password_page.dar
 import 'package:jaidem/features/menu/presentation/pages/chats/chat_list_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/chats/chat_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/files_page.dart';
+import 'package:jaidem/features/menu/presentation/pages/pdf_viewer_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_edit_form_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
+import 'package:jaidem/features/training/data/models/training_model.dart';
+import 'package:jaidem/features/training/presentation/pages/trainings_page.dart';
+import 'package:jaidem/features/training/presentation/pages/training_detail_page.dart';
+import 'package:jaidem/features/forum/presentation/pages/forum_detail_page.dart';
+import 'package:jaidem/features/opros/presentation/pages/opros_survey_page.dart';
 
 part 'package:jaidem/core/routes/app_router.gr.dart';
 
@@ -111,11 +117,47 @@ class AppRouter extends RootStackRouter {
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),
+        CustomRoute(
+          page: PdfViewerRoute.page,
+          path: '/pdf-viewer',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
 
         // events
         CustomRoute(
           page: EventDetailRoute.page,
           path: '/event-detail',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // trainings
+        CustomRoute(
+          page: TrainingsRoute.page,
+          path: '/trainings',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+        CustomRoute(
+          page: TrainingDetailRoute.page,
+          path: '/training-detail',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // opros survey
+        CustomRoute(
+          page: OprosSurveyRoute.page,
+          path: '/opros-survey',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        // forum deep link
+        CustomRoute(
+          page: ForumDetailRoute.page,
+          path: '/forum/:id',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),

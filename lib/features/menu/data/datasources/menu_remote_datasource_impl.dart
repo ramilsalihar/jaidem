@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:jaidem/core/data/models/response_model.dart';
 import 'package:jaidem/core/utils/constants/api_const.dart';
+import 'package:jaidem/features/menu/data/models/division_model.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
@@ -460,6 +461,47 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     return null;
   }
 
+  /// Get user from Firebase or create if not exists
+  Future<ChatUserModel> _getOrCreateUser(String userId, {bool isCurrentUser = false}) async {
+    // Try to get existing user
+    final existingUser = await _getUserById(userId);
+    if (existingUser != null) {
+      return existingUser;
+    }
+
+    // Create new user in Firebase
+    ChatUserModel newUser;
+
+    if (isCurrentUser) {
+      // Use data from SharedPreferences for current user
+      final name = sharedPreferences.getString(AppConstants.userFullname) ?? 'User';
+      final photoUrl = sharedPreferences.getString(AppConstants.userAvatar) ?? '';
+
+      newUser = ChatUserModel(
+        id: userId,
+        name: name,
+        photoUrl: photoUrl,
+        role: 'user',
+      );
+    } else {
+      // Create minimal user for target user (will be updated later if needed)
+      newUser = ChatUserModel(
+        id: userId,
+        name: 'User',
+        photoUrl: '',
+        role: 'user',
+      );
+    }
+
+    // Save to Firebase
+    await firestore
+        .collection(AppConstants.usersCollection)
+        .doc(userId)
+        .set(newUser.toMap());
+
+    return newUser;
+  }
+
   Future<ChatUserModel?> _getMentor() async {
     try {
       final mentorsSnapshot = await firestore
@@ -526,13 +568,9 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     ChatModel? chat = await getChatWithUser(userId);
 
     if (chat == null) {
-      // Create new chat
-      final currentUser = await _getUserById(currentUserId);
-      final otherUser = await _getUserById(userId);
-
-      if (currentUser == null || otherUser == null) {
-        throw Exception('Users not found');
-      }
+      // Get or create users (creates in Firebase if not exists)
+      final currentUser = await _getOrCreateUser(currentUserId, isCurrentUser: true);
+      final otherUser = await _getOrCreateUser(userId, isCurrentUser: false);
 
       chat = await _createChatIfNotExists(
         currentUserId,
@@ -643,9 +681,13 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
   }
 
   @override
-  Future<Either<String, ResponseModel<FileModel>>> getFiles() async {
+  Future<Either<String, ResponseModel<FileModel>>> getFiles({int? divisionId}) async {
     try {
-      final response = await dio.get(ApiConst.files);
+      String url = '${ApiConst.files}?is_basa=true';
+      if (divisionId != null) {
+        url += '&division=$divisionId';
+      }
+      final response = await dio.get(url);
 
       if (response.statusCode == 200) {
         final data = ResponseModel<FileModel>.fromJson(
@@ -659,6 +701,66 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       }
     } catch (e) {
       return Future.value(Left(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<String, ResponseModel<Division>>> getDivisions() async {
+    try {
+      final response = await dio.get(ApiConst.divisions);
+
+      if (response.statusCode == 200) {
+        final data = ResponseModel<Division>.fromJson(
+          response.data,
+          (json) => Division.fromJson(json),
+        );
+        return Future.value(Right(data));
+      } else {
+        return Future.value(
+            Left('Failed to fetch divisions. Status code: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Future.value(Left(e.toString()));
+    }
+  }
+
+  @override
+  Future<void> ensureUserExists({
+    required String id,
+    required String name,
+    String? photoUrl,
+  }) async {
+    try {
+      final userDoc = await firestore
+          .collection(AppConstants.usersCollection)
+          .doc(id)
+          .get();
+
+      if (!userDoc.exists) {
+        // Create new user
+        final newUser = ChatUserModel(
+          id: id,
+          name: name,
+          photoUrl: photoUrl ?? '',
+          role: 'user',
+        );
+
+        await firestore
+            .collection(AppConstants.usersCollection)
+            .doc(id)
+            .set(newUser.toMap());
+      } else {
+        // Update existing user with new data if name changed
+        final existingData = userDoc.data();
+        if (existingData != null && existingData['name'] != name) {
+          await firestore
+              .collection(AppConstants.usersCollection)
+              .doc(id)
+              .update({'name': name, 'photoUrl': photoUrl ?? ''});
+        }
+      }
+    } catch (_) {
+      // Silently fail - chat will still work with minimal data
     }
   }
 }

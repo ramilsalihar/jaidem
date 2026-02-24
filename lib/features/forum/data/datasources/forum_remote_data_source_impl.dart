@@ -18,15 +18,22 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
 
   @override
   Future<Either<String, List<ForumModel>>> fetchAllForums(
-    String? search,
-  ) async {
+    String? search, {
+    int? authorId,
+  }) async {
     try {
       final username = prefs.getString(AppConstants.userLogin);
 
-      final Map<String, dynamic> queryParams = {};
+      final Map<String, dynamic> queryParams = {
+        'is_publish': true,
+        'ordering': '-created_at',
+      };
 
       if (search != null) {
         queryParams['search'] = search;
+      }
+      if (authorId != null) {
+        queryParams['author'] = authorId;
       }
       final response = await dio.get(
         ApiConst.forum,
@@ -41,6 +48,21 @@ class ForumRemoteDataSourceImpl implements ForumRemoteDataSource {
         return Right(responseModel.results);
       } else {
         return Left('Failed to fetch forums');
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, ForumModel>> fetchForumById(int forumId) async {
+    try {
+      final username = prefs.getString(AppConstants.userLogin);
+      final response = await dio.get('${ApiConst.forum}$forumId/');
+      if (response.statusCode == 200) {
+        return Right(ForumMapper.fromJson(response.data, username));
+      } else {
+        return Left('Failed to fetch forum');
       }
     } catch (e) {
       return Left('Error: $e');

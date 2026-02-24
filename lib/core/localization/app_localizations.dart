@@ -73,6 +73,7 @@ class AppLocalizations {
     // Menu
     'menu': 'Меню',
     'profile': 'Профиль',
+    'profile_info': 'Маалымат',
     'settings': 'Жөндөөлөр',
     'language': 'Тил',
     'change_language': 'Тилди өзгөртүү',
@@ -171,6 +172,8 @@ class AppLocalizations {
     'status_in_progress': 'Аткарылууда',
     'status_completed': 'Аяктаган',
     'status_paused': 'Токтотулган',
+    'status_changed': 'Өзгөртүлгөн',
+    'status_cancelled': 'Жокко чыгарылган',
     'edit_goal': 'Максатты өзгөртүү',
     'new_goal': 'Жаңы максат',
     'update_goal_info': 'Максатыңыздын маалыматтарын жаңыртыңыз',
@@ -214,6 +217,7 @@ class AppLocalizations {
     'information': 'Маалымат',
     'unknown': 'Белгисиз',
     'call': 'Чалуу',
+    'write_message': 'Жазуу',
     'contact': 'Байланыш',
     'phone': 'Телефон',
 
@@ -221,10 +225,14 @@ class AppLocalizations {
     'forum': 'Форум',
     'feed': 'Лента',
     'posts': 'Посттор',
+    'profile_tab': 'Профил',
     'comments': 'Комментарийлер',
     'write_comment': 'Комментарий жазыңыз...',
     'no_posts': 'Посттор жок',
     'no_posts_yet': 'Азырынча эч кандай пост жок',
+    'user_has_no_posts': 'Бул колдонуучуда посттор жок',
+    'error_loading_posts': 'Постторду жүктөөдө ката кетти',
+    'share_profile': 'Профилди бөлүшүү',
     'search_hint': 'Издөө...',
 
     // Video
@@ -244,6 +252,7 @@ class AppLocalizations {
     // Menu / Drawer
     'main_section': 'Негизги',
     'knowledge_base': 'База знаний',
+    'trainings': 'Тренингди баалоо',
     'chat_list': 'Чаттардын тизмеси',
     'chat_with_admin': 'Администратор менен баарлашуу',
     'chat_with_mentor': 'Насаатчы менен баарлашуу',
@@ -263,6 +272,82 @@ class AppLocalizations {
     'nav_jaidem': 'Жайдем',
     'nav_events': 'Иш-чара',
     'nav_profile': 'Профиль',
+
+    // Account Deletion
+    'delete_account': 'Аккаунтту өчүрүү',
+    'delete_account_title': 'Аккаунтту өчүрүү',
+    'delete_account_description': 'Аккаунтуңузду өчүргөнүңүздө, бардык маалыматтарыңыз биротоло жок болот. Бул аракетти кайра кайтаруу мүмкүн эмес.',
+    'delete_account_confirm': 'Чынында эле аккаунтуңузду өчүргүңүз келеби?',
+    'yes_delete': 'Ооба, өчүрүү',
+    'account_deleted': 'Аккаунт ийгиликтүү өчүрүлдү',
+    'delete_account_error': 'Аккаунтту өчүрүү ишке ашкан жок',
+
+    // Content Moderation
+    'report': 'Кабарлоо',
+    'report_content': 'Контентти кабарлоо',
+    'report_reason': 'Кабарлоо себеби',
+    'report_spam': 'Спам',
+    'report_inappropriate': 'Туура эмес контент',
+    'report_harassment': 'Кордоо же тынчсыздандыруу',
+    'report_other': 'Башка',
+    'report_sent': 'Кабарлооңуз жөнөтүлдү',
+    'report_description': 'Кошумча маалымат (милдеттүү эмес)',
+    'report_comment': 'Комментарийди кабарлоо',
+    'content_filtered_warning': 'Билдирүүңүздө туура эмес сөздөр бар. Текстти өзгөртүңүз.',
+    'block_user': 'Колдонуучуну бөгөттөө',
+    'block_user_confirm': 'Бул колдонуучуну бөгөттөөнү каалайсызбы?',
+    'user_blocked': 'Колдонуучу бөгөттөлдү',
+    'unblock_user': 'Бөгөттөн чыгаруу',
+    'user_unblocked': 'Колдонуучу бөгөттөн чыгарылды',
+
+    // Terms and Conditions
+    'terms_title': 'Колдонуу шарттары',
+    'terms_accept': 'Мен колдонуу шарттарын кабыл алам',
+    'terms_must_accept': 'Улантуу үчүн шарттарды кабыл алыңыз',
+    'privacy_policy': 'Купуялык саясаты',
+    'terms_content': 'Jaidem колдонмосун колдонуу менен сиз төмөнкү Колдонуучу лицензия келишимин (EULA) кабыл аласыз:\\n\\nМААНИЛҮҮ: Jaidem туура эмес контентке жана кыянаттык колдонуучуларга ТАКЫР ТОЛЕРАНТТУУЛУК ЖОКТУГУН билдирет.\\n\\n1. Урматтоо: Башка колдонуучуларга урмат менен мамиле кылыңыз. Кордоо, коркутуу жана кемсинтүү катуу тыюу салынат.\\n2. Туура эмес контент: Зыяндуу, кордоочу, порнографиялык же мыйзамсыз контентти жайгаштыруу тыюу салынат. Колдонмо автоматтык түрдө контентти текшерет.\\n3. Кабарлоо жана бөгөттөө: Колдонуучулар туура эмес контентти же кыянаттык колдонуучуларды кабарлоо (жалоба) баскычы аркылуу билдире алышат. Ошондой эле каалаган колдонуучуну бөгөттөп, аларды лентаңыздан алып салууга болот.\\n4. Жеке маалымат: Башкалардын жеке маалыматын уруксатсыз бөлүшпөңүз.\\n5. Спам: Спам же жарнама жайгаштырбаңыз.\\n\\nКЮРЮМДҮК ЧАРАЛАР: Бул эрежелерди бузган колдонуучулар дароо блоктолот жана алардын контенти 24 сааттын ичинде өчүрүлөт. Кабарлоолор иштеп чыгуучу тарабынан текшерилет жана тиешелүү чаралар 24 саат ичинде көрүлөт.\\n\\nКолдонмону улантуу менен сиз бул шарттарды толук кабыл аласыз.',
+
+    // Training
+    'training_rating': 'Баалоо',
+    'training_questions': 'Суроолор',
+    'training_flow_info': 'Поток маалыматы',
+    'training_name': 'Аты',
+    'training_description': 'Сүрөттөмө',
+    'training_year': 'Жыл',
+    'training_attendance_stats': 'Катышуу статистикасы',
+    'training_attendance': 'Катышуу',
+    'training_present': 'Катышты',
+    'training_absent': 'Келбеди',
+    'training_respectful': 'Себептүү',
+    'training_total_participants': 'Жалпы катышуучулар',
+    'training_participants_list': 'Катышуучулар тизмеси',
+    'training_already_answered': 'Сиз мурун жооп бергенсиз',
+    'training_rating_accepted': 'Тренинг боюнча баалооңуз кабыл алынды',
+    'training_rate_training': 'Тренингди баалаңыз',
+    'training_opinion_important': 'Сиздин пикириңиз биз үчүн маанилүү',
+    'training_answer_questions': 'Суроолорго жооп берүү',
+    'training_answer_all_questions': 'Бардык суроолорго жооп бериңиз',
+    'training_answers_sent': 'Жооптор ийгиликтүү жөнөтүлдү',
+    'training_write_comment': 'Пикириңизди жазыңыз...',
+    'training_submit': 'Жөнөтүү',
+
+    // Opros (Survey)
+    'opros_before_survey': 'Алдын ала сурамжылоо',
+    'opros_after_survey': 'Кийинки сурамжылоо',
+    'opros_fill_survey': 'Сурамжылоону толтуруу',
+    'opros_opens_on': 'Ачылуу күнү: ',
+    'opros_submit': 'Жөнөтүү',
+    'opros_answer_required': 'Суроого жооп бериңиз',
+    'opros_submitted_success': 'Сурамжылоо ийгиликтүү жөнөтүлдү!',
+    'opros_write_answer': 'Жообуңузду жазыңыз...',
+    'opros_survey': 'Сурамжылоо',
+
+    // Birthday reactions
+    'birthday_congrats_button': 'Куттуктоо 🎉',
+    'birthday_people_reacted': 'Сизди куттуктагандар',
+    'birthday_already_reacted': 'Куттуктадыңыз ✓',
+    'birthday_today': 'Бүгүн туулган күнү!',
+    'birthday_send_reaction': 'Куттуктоо жөнөтүлдү!',
   };
 
   // Russian strings
@@ -314,6 +399,7 @@ class AppLocalizations {
     // Menu
     'menu': 'Меню',
     'profile': 'Профиль',
+    'profile_info': 'Информация',
     'settings': 'Настройки',
     'language': 'Язык',
     'change_language': 'Изменить язык',
@@ -412,6 +498,8 @@ class AppLocalizations {
     'status_in_progress': 'В процессе',
     'status_completed': 'Завершена',
     'status_paused': 'Приостановлена',
+    'status_changed': 'Изменено',
+    'status_cancelled': 'Отменено',
     'edit_goal': 'Редактировать цель',
     'new_goal': 'Новая цель',
     'update_goal_info': 'Обновите информацию о вашей цели',
@@ -455,6 +543,7 @@ class AppLocalizations {
     'information': 'Информация',
     'unknown': 'Неизвестно',
     'call': 'Позвонить',
+    'write_message': 'Написать',
     'contact': 'Контакты',
     'phone': 'Телефон',
 
@@ -462,10 +551,14 @@ class AppLocalizations {
     'forum': 'Форум',
     'feed': 'Лента',
     'posts': 'Посты',
+    'profile_tab': 'Профиль',
     'comments': 'Комментарии',
     'write_comment': 'Напишите комментарий...',
     'no_posts': 'Нет постов',
     'no_posts_yet': 'Пока нет ни одного поста',
+    'user_has_no_posts': 'У этого пользователя нет постов',
+    'error_loading_posts': 'Ошибка загрузки постов',
+    'share_profile': 'Поделиться профилем',
     'search_hint': 'Поиск...',
 
     // Video
@@ -485,6 +578,7 @@ class AppLocalizations {
     // Menu / Drawer
     'main_section': 'Основное',
     'knowledge_base': 'База знаний',
+    'trainings': 'Оценить тренинг',
     'chat_list': 'Список чатов',
     'chat_with_admin': 'Чат с администратором',
     'chat_with_mentor': 'Чат с наставником',
@@ -504,6 +598,82 @@ class AppLocalizations {
     'nav_jaidem': 'Жайдем',
     'nav_events': 'События',
     'nav_profile': 'Профиль',
+
+    // Account Deletion
+    'delete_account': 'Удалить аккаунт',
+    'delete_account_title': 'Удаление аккаунта',
+    'delete_account_description': 'При удалении аккаунта все ваши данные будут безвозвратно удалены. Это действие нельзя отменить.',
+    'delete_account_confirm': 'Вы действительно хотите удалить свой аккаунт?',
+    'yes_delete': 'Да, удалить',
+    'account_deleted': 'Аккаунт успешно удален',
+    'delete_account_error': 'Не удалось удалить аккаунт',
+
+    // Content Moderation
+    'report': 'Пожаловаться',
+    'report_content': 'Пожаловаться на контент',
+    'report_reason': 'Причина жалобы',
+    'report_spam': 'Спам',
+    'report_inappropriate': 'Неприемлемый контент',
+    'report_harassment': 'Оскорбление или травля',
+    'report_other': 'Другое',
+    'report_sent': 'Ваша жалоба отправлена',
+    'report_description': 'Дополнительная информация (необязательно)',
+    'report_comment': 'Пожаловаться на комментарий',
+    'content_filtered_warning': 'Ваше сообщение содержит недопустимые слова. Измените текст.',
+    'block_user': 'Заблокировать пользователя',
+    'block_user_confirm': 'Вы хотите заблокировать этого пользователя?',
+    'user_blocked': 'Пользователь заблокирован',
+    'unblock_user': 'Разблокировать',
+    'user_unblocked': 'Пользователь разблокирован',
+
+    // Terms and Conditions
+    'terms_title': 'Условия использования',
+    'terms_accept': 'Я принимаю условия использования',
+    'terms_must_accept': 'Для продолжения примите условия',
+    'privacy_policy': 'Политика конфиденциальности',
+    'terms_content': 'Используя приложение Jaidem, вы принимаете следующее Лицензионное соглашение (EULA):\\n\\nВАЖНО: Jaidem придерживается политики АБСОЛЮТНОЙ НЕТЕРПИМОСТИ к неприемлемому контенту и оскорбительному поведению пользователей.\\n\\n1. Уважение: Относитесь к другим пользователям с уважением. Оскорбления, травля и дискриминация строго запрещены.\\n2. Неприемлемый контент: Публикация вредоносного, оскорбительного, порнографического или незаконного контента запрещена. Приложение автоматически фильтрует контент.\\n3. Жалобы и блокировка: Пользователи могут сообщить о неприемлемом контенте или оскорбительных пользователях с помощью кнопки «Пожаловаться». Вы также можете заблокировать любого пользователя, чтобы немедленно убрать его из вашей ленты.\\n4. Личные данные: Не распространяйте чужие личные данные без разрешения.\\n5. Спам: Не публикуйте спам или рекламу.\\n\\nМЕРЫ: Пользователи, нарушающие эти правила, будут немедленно заблокированы, а их контент удалён в течение 24 часов. Все жалобы рассматриваются разработчиком, и соответствующие меры принимаются в течение 24 часов.\\n\\nПродолжая использование приложения, вы полностью принимаете эти условия.',
+
+    // Training
+    'training_rating': 'Оценка',
+    'training_questions': 'Вопросы',
+    'training_flow_info': 'Информация о потоке',
+    'training_name': 'Название',
+    'training_description': 'Описание',
+    'training_year': 'Год',
+    'training_attendance_stats': 'Статистика посещаемости',
+    'training_attendance': 'Посещаемость',
+    'training_present': 'Присутствовал',
+    'training_absent': 'Отсутствовал',
+    'training_respectful': 'Уважительная причина',
+    'training_total_participants': 'Всего участников',
+    'training_participants_list': 'Список участников',
+    'training_already_answered': 'Вы уже ответили',
+    'training_rating_accepted': 'Ваша оценка тренинга принята',
+    'training_rate_training': 'Оцените тренинг',
+    'training_opinion_important': 'Ваше мнение важно для нас',
+    'training_answer_questions': 'Ответить на вопросы',
+    'training_answer_all_questions': 'Ответьте на все вопросы',
+    'training_answers_sent': 'Ответы успешно отправлены',
+    'training_write_comment': 'Напишите ваш комментарий...',
+    'training_submit': 'Отправить',
+
+    // Opros (Survey)
+    'opros_before_survey': 'Опрос ДО',
+    'opros_after_survey': 'Опрос ПОСЛЕ',
+    'opros_fill_survey': 'Пройти опрос',
+    'opros_opens_on': 'Откроется: ',
+    'opros_submit': 'Отправить',
+    'opros_answer_required': 'Ответьте на вопрос',
+    'opros_submitted_success': 'Опрос успешно отправлен!',
+    'opros_write_answer': 'Напишите ваш ответ...',
+    'opros_survey': 'Опрос',
+
+    // Birthday reactions
+    'birthday_congrats_button': 'Поздравить 🎉',
+    'birthday_people_reacted': 'Вас поздравили',
+    'birthday_already_reacted': 'Вы поздравили ✓',
+    'birthday_today': 'Сегодня день рождения!',
+    'birthday_send_reaction': 'Поздравление отправлено!',
   };
 
   // English strings
@@ -555,6 +725,7 @@ class AppLocalizations {
     // Menu
     'menu': 'Menu',
     'profile': 'Profile',
+    'profile_info': 'Profile Info',
     'settings': 'Settings',
     'language': 'Language',
     'change_language': 'Change language',
@@ -653,6 +824,8 @@ class AppLocalizations {
     'status_in_progress': 'In Progress',
     'status_completed': 'Completed',
     'status_paused': 'Paused',
+    'status_changed': 'Changed',
+    'status_cancelled': 'Cancelled',
     'edit_goal': 'Edit Goal',
     'new_goal': 'New Goal',
     'update_goal_info': 'Update your goal information',
@@ -696,6 +869,7 @@ class AppLocalizations {
     'information': 'Information',
     'unknown': 'Unknown',
     'call': 'Call',
+    'write_message': 'Write',
     'contact': 'Contact',
     'phone': 'Phone',
 
@@ -703,10 +877,14 @@ class AppLocalizations {
     'forum': 'Forum',
     'feed': 'Feed',
     'posts': 'Posts',
+    'profile_tab': 'Profile',
     'comments': 'Comments',
     'write_comment': 'Write a comment...',
     'no_posts': 'No posts',
     'no_posts_yet': 'No posts yet',
+    'user_has_no_posts': 'This user has no posts',
+    'error_loading_posts': 'Error loading posts',
+    'share_profile': 'Share profile',
     'search_hint': 'Search...',
 
     // Video
@@ -726,6 +904,7 @@ class AppLocalizations {
     // Menu / Drawer
     'main_section': 'Main',
     'knowledge_base': 'Knowledge Base',
+    'trainings': 'Rate Training',
     'chat_list': 'Chat List',
     'chat_with_admin': 'Chat with Admin',
     'chat_with_mentor': 'Chat with Mentor',
@@ -745,6 +924,82 @@ class AppLocalizations {
     'nav_jaidem': 'Jaidem',
     'nav_events': 'Events',
     'nav_profile': 'Profile',
+
+    // Account Deletion
+    'delete_account': 'Delete Account',
+    'delete_account_title': 'Delete Account',
+    'delete_account_description': 'When you delete your account, all your data will be permanently removed. This action cannot be undone.',
+    'delete_account_confirm': 'Are you sure you want to delete your account?',
+    'yes_delete': 'Yes, Delete',
+    'account_deleted': 'Account successfully deleted',
+    'delete_account_error': 'Failed to delete account',
+
+    // Content Moderation
+    'report': 'Report',
+    'report_content': 'Report Content',
+    'report_reason': 'Reason for Report',
+    'report_spam': 'Spam',
+    'report_inappropriate': 'Inappropriate Content',
+    'report_harassment': 'Harassment or Bullying',
+    'report_other': 'Other',
+    'report_sent': 'Your report has been sent',
+    'report_description': 'Additional information (optional)',
+    'report_comment': 'Report Comment',
+    'content_filtered_warning': 'Your message contains inappropriate language. Please modify the text.',
+    'block_user': 'Block User',
+    'block_user_confirm': 'Do you want to block this user?',
+    'user_blocked': 'User blocked',
+    'unblock_user': 'Unblock',
+    'user_unblocked': 'User unblocked',
+
+    // Terms and Conditions
+    'terms_title': 'Terms of Use',
+    'terms_accept': 'I accept the terms of use',
+    'terms_must_accept': 'Please accept the terms to continue',
+    'privacy_policy': 'Privacy Policy',
+    'terms_content': 'By using the Jaidem app, you accept the following End User License Agreement (EULA):\\n\\nIMPORTANT: Jaidem maintains a ZERO TOLERANCE policy for objectionable content and abusive users.\\n\\n1. Respect: Treat other users with respect. Harassment, bullying, and discrimination are strictly prohibited.\\n2. Objectionable Content: Posting harmful, offensive, pornographic, or illegal content is prohibited. The app automatically filters content for inappropriate language.\\n3. Reporting and Blocking: Users can report objectionable content or abusive users using the "Report" button. You can also block any user to instantly remove their content from your feed.\\n4. Personal Data: Do not share other people\\\'s personal information without permission.\\n5. Spam: Do not post spam or advertisements.\\n\\nENFORCEMENT: Users who violate these rules will be immediately blocked and their content removed within 24 hours. All reports are reviewed by the developer and appropriate action is taken within 24 hours.\\n\\nBy continuing to use the app, you fully accept these terms.',
+
+    // Training
+    'training_rating': 'Rating',
+    'training_questions': 'Questions',
+    'training_flow_info': 'Flow Information',
+    'training_name': 'Name',
+    'training_description': 'Description',
+    'training_year': 'Year',
+    'training_attendance_stats': 'Attendance Statistics',
+    'training_attendance': 'Attendance',
+    'training_present': 'Present',
+    'training_absent': 'Absent',
+    'training_respectful': 'Excused',
+    'training_total_participants': 'Total Participants',
+    'training_participants_list': 'Participants List',
+    'training_already_answered': 'You have already answered',
+    'training_rating_accepted': 'Your training rating has been accepted',
+    'training_rate_training': 'Rate the training',
+    'training_opinion_important': 'Your opinion is important to us',
+    'training_answer_questions': 'Answer questions',
+    'training_answer_all_questions': 'Please answer all questions',
+    'training_answers_sent': 'Answers sent successfully',
+    'training_write_comment': 'Write your comment...',
+    'training_submit': 'Submit',
+
+    // Opros (Survey)
+    'opros_before_survey': 'Before Survey',
+    'opros_after_survey': 'After Survey',
+    'opros_fill_survey': 'Take Survey',
+    'opros_opens_on': 'Opens: ',
+    'opros_submit': 'Submit',
+    'opros_answer_required': 'Please answer the question',
+    'opros_submitted_success': 'Survey submitted successfully!',
+    'opros_write_answer': 'Write your answer...',
+    'opros_survey': 'Survey',
+
+    // Birthday reactions
+    'birthday_congrats_button': 'Congratulate 🎉',
+    'birthday_people_reacted': 'People congratulated you',
+    'birthday_already_reacted': 'Congratulated ✓',
+    'birthday_today': 'Birthday today!',
+    'birthday_send_reaction': 'Congratulation sent!',
   };
 }
 

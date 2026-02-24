@@ -16,6 +16,7 @@ import 'package:jaidem/features/goals/domain/usecases/update_goal_indicator_usec
 import 'package:jaidem/features/goals/domain/usecases/update_goal_task_usecase.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
+import 'package:jaidem/features/goals/presentation/cubit/goal_statistics/goal_statistics_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/tasks/tasks_cubit.dart';
 
 void goalInjection() {
@@ -94,6 +95,12 @@ void goalInjection() {
       fetchGoalTasksUseCase: sl(),
       createGoalTaskUseCase: sl(),
       updateGoalTaskUseCase: sl(),
+    ),
+  );
+
+  sl.registerFactory(
+    () => GoalStatisticsCubit(
+      fetchGoalTasksUseCase: sl(),
     ),
   );
 }

@@ -184,18 +184,51 @@ class AddTaskRouteArgs {
 
 /// generated route for
 /// [BottomBarPage]
-class BottomBarRoute extends PageRouteInfo<void> {
-  const BottomBarRoute({List<PageRouteInfo>? children})
-      : super(BottomBarRoute.name, initialChildren: children);
+class BottomBarRoute extends PageRouteInfo<BottomBarRouteArgs> {
+  BottomBarRoute({
+    Key? key,
+    int initialIndex = 0,
+    List<PageRouteInfo>? children,
+  }) : super(
+          BottomBarRoute.name,
+          args: BottomBarRouteArgs(key: key, initialIndex: initialIndex),
+          initialChildren: children,
+        );
 
   static const String name = 'BottomBarRoute';
 
   static PageInfo page = PageInfo(
     name,
     builder: (data) {
-      return const BottomBarPage();
+      final args = data.argsAs<BottomBarRouteArgs>(
+        orElse: () => const BottomBarRouteArgs(),
+      );
+      return BottomBarPage(key: args.key, initialIndex: args.initialIndex);
     },
   );
+}
+
+class BottomBarRouteArgs {
+  const BottomBarRouteArgs({this.key, this.initialIndex = 0});
+
+  final Key? key;
+
+  final int initialIndex;
+
+  @override
+  String toString() {
+    return 'BottomBarRouteArgs{key: $key, initialIndex: $initialIndex}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! BottomBarRouteArgs) return false;
+    return key == other.key && initialIndex == other.initialIndex;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ initialIndex.hashCode;
 }
 
 /// generated route for
@@ -237,10 +270,18 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
     Key? key,
     required String chatType,
     String? userId,
+    String? userName,
+    String? userAvatar,
     List<PageRouteInfo>? children,
   }) : super(
           ChatRoute.name,
-          args: ChatRouteArgs(key: key, chatType: chatType, userId: userId),
+          args: ChatRouteArgs(
+            key: key,
+            chatType: chatType,
+            userId: userId,
+            userName: userName,
+            userAvatar: userAvatar,
+          ),
           initialChildren: children,
         );
 
@@ -254,13 +295,21 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
         key: args.key,
         chatType: args.chatType,
         userId: args.userId,
+        userName: args.userName,
+        userAvatar: args.userAvatar,
       );
     },
   );
 }
 
 class ChatRouteArgs {
-  const ChatRouteArgs({this.key, required this.chatType, this.userId});
+  const ChatRouteArgs({
+    this.key,
+    required this.chatType,
+    this.userId,
+    this.userName,
+    this.userAvatar,
+  });
 
   final Key? key;
 
@@ -268,9 +317,13 @@ class ChatRouteArgs {
 
   final String? userId;
 
+  final String? userName;
+
+  final String? userAvatar;
+
   @override
   String toString() {
-    return 'ChatRouteArgs{key: $key, chatType: $chatType, userId: $userId}';
+    return 'ChatRouteArgs{key: $key, chatType: $chatType, userId: $userId, userName: $userName, userAvatar: $userAvatar}';
   }
 
   @override
@@ -279,11 +332,18 @@ class ChatRouteArgs {
     if (other is! ChatRouteArgs) return false;
     return key == other.key &&
         chatType == other.chatType &&
-        userId == other.userId;
+        userId == other.userId &&
+        userName == other.userName &&
+        userAvatar == other.userAvatar;
   }
 
   @override
-  int get hashCode => key.hashCode ^ chatType.hashCode ^ userId.hashCode;
+  int get hashCode =>
+      key.hashCode ^
+      chatType.hashCode ^
+      userId.hashCode ^
+      userName.hashCode ^
+      userAvatar.hashCode;
 }
 
 /// generated route for
@@ -347,6 +407,57 @@ class FilesRoute extends PageRouteInfo<void> {
       return const FilesPage();
     },
   );
+}
+
+/// generated route for
+/// [ForumDetailPage]
+class ForumDetailRoute extends PageRouteInfo<ForumDetailRouteArgs> {
+  ForumDetailRoute({
+    Key? key,
+    required int forumId,
+    List<PageRouteInfo>? children,
+  }) : super(
+          ForumDetailRoute.name,
+          args: ForumDetailRouteArgs(key: key, forumId: forumId),
+          rawPathParams: {'id': forumId},
+          initialChildren: children,
+        );
+
+  static const String name = 'ForumDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<ForumDetailRouteArgs>(
+        orElse: () => ForumDetailRouteArgs(forumId: pathParams.getInt('id')),
+      );
+      return ForumDetailPage(key: args.key, forumId: args.forumId);
+    },
+  );
+}
+
+class ForumDetailRouteArgs {
+  const ForumDetailRouteArgs({this.key, required this.forumId});
+
+  final Key? key;
+
+  final int forumId;
+
+  @override
+  String toString() {
+    return 'ForumDetailRouteArgs{key: $key, forumId: $forumId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! ForumDetailRouteArgs) return false;
+    return key == other.key && forumId == other.forumId;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ forumId.hashCode;
 }
 
 /// generated route for
@@ -429,6 +540,111 @@ class LoginRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [OprosSurveyPage]
+class OprosSurveyRoute extends PageRouteInfo<OprosSurveyRouteArgs> {
+  OprosSurveyRoute({
+    Key? key,
+    required String surveyType,
+    List<PageRouteInfo>? children,
+  }) : super(
+          OprosSurveyRoute.name,
+          args: OprosSurveyRouteArgs(key: key, surveyType: surveyType),
+          initialChildren: children,
+        );
+
+  static const String name = 'OprosSurveyRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<OprosSurveyRouteArgs>();
+      return OprosSurveyPage(key: args.key, surveyType: args.surveyType);
+    },
+  );
+}
+
+class OprosSurveyRouteArgs {
+  const OprosSurveyRouteArgs({this.key, required this.surveyType});
+
+  final Key? key;
+
+  final String surveyType;
+
+  @override
+  String toString() {
+    return 'OprosSurveyRouteArgs{key: $key, surveyType: $surveyType}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! OprosSurveyRouteArgs) return false;
+    return key == other.key && surveyType == other.surveyType;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ surveyType.hashCode;
+}
+
+/// generated route for
+/// [PdfViewerPage]
+class PdfViewerRoute extends PageRouteInfo<PdfViewerRouteArgs> {
+  PdfViewerRoute({
+    Key? key,
+    required String pdfUrl,
+    required String title,
+    List<PageRouteInfo>? children,
+  }) : super(
+          PdfViewerRoute.name,
+          args: PdfViewerRouteArgs(key: key, pdfUrl: pdfUrl, title: title),
+          initialChildren: children,
+        );
+
+  static const String name = 'PdfViewerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<PdfViewerRouteArgs>();
+      return PdfViewerPage(
+        key: args.key,
+        pdfUrl: args.pdfUrl,
+        title: args.title,
+      );
+    },
+  );
+}
+
+class PdfViewerRouteArgs {
+  const PdfViewerRouteArgs({
+    this.key,
+    required this.pdfUrl,
+    required this.title,
+  });
+
+  final Key? key;
+
+  final String pdfUrl;
+
+  final String title;
+
+  @override
+  String toString() {
+    return 'PdfViewerRouteArgs{key: $key, pdfUrl: $pdfUrl, title: $title}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! PdfViewerRouteArgs) return false;
+    return key == other.key && pdfUrl == other.pdfUrl && title == other.title;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ pdfUrl.hashCode ^ title.hashCode;
+}
+
+/// generated route for
 /// [ProfileEditFormPage]
 class ProfileEditFormRoute extends PageRouteInfo<void> {
   const ProfileEditFormRoute({List<PageRouteInfo>? children})
@@ -472,6 +688,69 @@ class SplashRoute extends PageRouteInfo<void> {
     name,
     builder: (data) {
       return const SplashScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [TrainingDetailPage]
+class TrainingDetailRoute extends PageRouteInfo<TrainingDetailRouteArgs> {
+  TrainingDetailRoute({
+    Key? key,
+    required TrainingModel training,
+    List<PageRouteInfo>? children,
+  }) : super(
+          TrainingDetailRoute.name,
+          args: TrainingDetailRouteArgs(key: key, training: training),
+          initialChildren: children,
+        );
+
+  static const String name = 'TrainingDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<TrainingDetailRouteArgs>();
+      return TrainingDetailPage(key: args.key, training: args.training);
+    },
+  );
+}
+
+class TrainingDetailRouteArgs {
+  const TrainingDetailRouteArgs({this.key, required this.training});
+
+  final Key? key;
+
+  final TrainingModel training;
+
+  @override
+  String toString() {
+    return 'TrainingDetailRouteArgs{key: $key, training: $training}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! TrainingDetailRouteArgs) return false;
+    return key == other.key && training == other.training;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ training.hashCode;
+}
+
+/// generated route for
+/// [TrainingsPage]
+class TrainingsRoute extends PageRouteInfo<void> {
+  const TrainingsRoute({List<PageRouteInfo>? children})
+      : super(TrainingsRoute.name, initialChildren: children);
+
+  static const String name = 'TrainingsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const TrainingsPage();
     },
   );
 }

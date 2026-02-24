@@ -23,17 +23,11 @@ class GoalRepositoryImpl implements GoalRepository {
   }
 
   @override
-  Future<Either<String, List<GoalModel>>> fetchGoals() {
-    return remoteDataSource.getGoals().then((result) {
+  Future<Either<String, ResponseModel<GoalModel>>> fetchGoals({int page = 1, String? status}) {
+    return remoteDataSource.getGoals(page: page, status: status).then((result) {
       return result.fold(
         (failure) => Left(failure),
-        (responseModel) {
-          if (responseModel.results.isNotEmpty) {
-            return Right(responseModel.results);
-          } else {
-            return const Left('No goals returned from server');
-          }
-        },
+        (responseModel) => Right(responseModel),
       );
     });
   }

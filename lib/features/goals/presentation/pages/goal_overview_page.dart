@@ -2,12 +2,15 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
+import 'package:jaidem/features/goals/presentation/cubit/goal_statistics/goal_statistics_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
+import 'package:jaidem/features/goals/presentation/helpers/goal_statistics_calculator.dart';
 import 'package:jaidem/features/goals/presentation/widgets/cards/indicator_card.dart';
 
 class GoalOverviewPage extends StatefulWidget {
@@ -105,33 +108,47 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     final progress = widget.goal.progress.clamp(0.0, 100.0);
     final daysRemaining = _getDaysRemaining(widget.goal.deadline);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            _buildSliverAppBar(progress),
-          ];
+    return BlocProvider(
+      create: (_) => sl<GoalStatisticsCubit>(),
+      child: BlocListener<IndicatorsCubit, IndicatorsState>(
+        listener: (context, state) {
+          if (state is IndicatorsLoaded) {
+            final goalId = widget.goal.id.toString();
+            final indicators = state.goalIndicators[goalId] ?? [];
+            context.read<GoalStatisticsCubit>().loadStatistics(
+              indicators: indicators,
+            );
+          }
         },
-        body: Column(
-          children: [
-            // Goal info card
-            _buildGoalInfoCard(progress, daysRemaining),
+        child: Scaffold(
+          backgroundColor: Colors.grey.shade50,
+          body: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                _buildSliverAppBar(progress),
+              ];
+            },
+            body: Column(
+              children: [
+                // Goal info card
+                _buildGoalInfoCard(progress, daysRemaining),
 
-            // Tab bar
-            _buildTabBar(),
+                // Tab bar
+                _buildTabBar(),
 
-            // Tab content
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildIndicatorsTab(),
-                  _buildStatisticsTab(),
-                ],
-              ),
+                // Tab content
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildIndicatorsTab(),
+                      _buildStatisticsTab(),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -720,26 +737,102 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
   }
 
   Widget _buildStatisticsTab() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Mode selector
-          _buildStatisticsModeSelector(),
-          const SizedBox(height: 20),
+    return BlocBuilder<GoalStatisticsCubit, GoalStatisticsState>(
+      builder: (context, statisticsState) {
+        if (statisticsState is GoalStatisticsLoading) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Статистика жүктөлүүдө...',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
 
-          // Chart card
-          _buildStatisticsChart(),
-          const SizedBox(height: 16),
+        if (statisticsState is GoalStatisticsLoaded) {
+          final summary = GoalStatisticsCalculator.computeSummary(
+            allTasks: statisticsState.allTasks,
+            indicatorMap: statisticsState.indicatorMap,
+          );
+          final chartData = GoalStatisticsCalculator.computeChartData(
+            mode: _statisticsMode,
+            allTasks: statisticsState.allTasks,
+            indicatorMap: statisticsState.indicatorMap,
+          );
 
-          // Legend card
-          _buildStatisticsLegend(),
-          const SizedBox(height: 16),
+          if (statisticsState.allTasks.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.bar_chart_rounded,
+                      size: 56,
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Тапшырмалар жок',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Статистика үчүн тапшырмаларды кошуңуз',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
 
-          // Summary cards
-          _buildStatisticsSummary(),
-        ],
-      ),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                _buildStatisticsModeSelector(),
+                const SizedBox(height: 20),
+                _buildStatisticsChart(chartData),
+                const SizedBox(height: 16),
+                _buildStatisticsLegend(),
+                const SizedBox(height: 16),
+                _buildStatisticsSummary(summary),
+              ],
+            ),
+          );
+        }
+
+        return const SizedBox();
+      },
     );
   }
 
@@ -797,9 +890,9 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     );
   }
 
-  Widget _buildStatisticsChart() {
-    final labels = _getLabelsForMode(_statisticsMode);
-    final data = _getMockDataForMode(_statisticsMode);
+  Widget _buildStatisticsChart(GoalStatisticsChartData chartData) {
+    final labels = chartData.labels;
+    final data = chartData.data;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -958,14 +1051,14 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     );
   }
 
-  Widget _buildStatisticsSummary() {
+  Widget _buildStatisticsSummary(GoalStatisticsSummary summary) {
     return Row(
       children: [
         Expanded(
           child: _buildSummaryCard(
             icon: Icons.check_circle_rounded,
             label: 'Аткарылды',
-            value: '12',
+            value: '${summary.completed}',
             color: Colors.green,
           ),
         ),
@@ -974,7 +1067,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
           child: _buildSummaryCard(
             icon: Icons.pending_rounded,
             label: 'Аткарылууда',
-            value: '5',
+            value: '${summary.inProgress}',
             color: Colors.amber.shade700,
           ),
         ),
@@ -983,7 +1076,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
           child: _buildSummaryCard(
             icon: Icons.schedule_rounded,
             label: 'Күтүүдө',
-            value: '3',
+            value: '${summary.notStarted}',
             color: Colors.red.shade400,
           ),
         ),
@@ -1043,51 +1136,6 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     );
   }
 
-  List<String> _getLabelsForMode(String mode) {
-    switch (mode) {
-      case 'week':
-        return ['Дш', 'Ше', 'Ша', 'Бш', 'Жм', 'Иш', 'Жк'];
-      case 'month':
-        return ['1-жума', '2-жума', '3-жума', '4-жума'];
-      case 'year':
-        return ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн'];
-      default:
-        return [];
-    }
-  }
-
-  List<Map<String, int>> _getMockDataForMode(String mode) {
-    switch (mode) {
-      case 'week':
-        return [
-          {'completed': 3, 'inProgress': 1, 'notStarted': 1},
-          {'completed': 2, 'inProgress': 2, 'notStarted': 0},
-          {'completed': 4, 'inProgress': 0, 'notStarted': 1},
-          {'completed': 1, 'inProgress': 3, 'notStarted': 1},
-          {'completed': 3, 'inProgress': 1, 'notStarted': 0},
-          {'completed': 2, 'inProgress': 1, 'notStarted': 2},
-          {'completed': 0, 'inProgress': 2, 'notStarted': 3},
-        ];
-      case 'month':
-        return [
-          {'completed': 8, 'inProgress': 3, 'notStarted': 2},
-          {'completed': 6, 'inProgress': 4, 'notStarted': 3},
-          {'completed': 10, 'inProgress': 2, 'notStarted': 1},
-          {'completed': 5, 'inProgress': 5, 'notStarted': 2},
-        ];
-      case 'year':
-        return [
-          {'completed': 20, 'inProgress': 5, 'notStarted': 3},
-          {'completed': 18, 'inProgress': 8, 'notStarted': 2},
-          {'completed': 25, 'inProgress': 3, 'notStarted': 4},
-          {'completed': 15, 'inProgress': 10, 'notStarted': 5},
-          {'completed': 22, 'inProgress': 6, 'notStarted': 2},
-          {'completed': 12, 'inProgress': 8, 'notStarted': 8},
-        ];
-      default:
-        return [];
-    }
-  }
 }
 
 class _ModernIndicatorCard extends StatefulWidget {

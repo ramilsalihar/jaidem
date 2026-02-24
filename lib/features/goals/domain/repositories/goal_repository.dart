@@ -6,7 +6,7 @@ import 'package:jaidem/features/goals/data/models/goal_task_model.dart';
 
 abstract class GoalRepository {
   // Goals
-  Future<Either<String, List<GoalModel>>> fetchGoals();
+  Future<Either<String, ResponseModel<GoalModel>>> fetchGoals({int page = 1, String? status});
   Future<Either<String, GoalModel>> createGoal(GoalModel goal);
   Future<Either<String, GoalModel>> updateGoal(GoalModel goal);
 

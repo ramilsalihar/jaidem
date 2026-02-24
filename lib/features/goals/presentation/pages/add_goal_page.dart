@@ -161,7 +161,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     return null;
   }
 
-  void _saveGoal() {
+  void _saveGoal(BuildContext blocContext) {
     HapticFeedback.mediumImpact();
     String? errorMessage = _validateForm(context);
 
@@ -194,9 +194,9 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     _createdIndicatorsCount = 0;
 
     if (_isEditMode) {
-      context.read<GoalsCubit>().updateGoal(goalModel);
+      blocContext.read<GoalsCubit>().updateGoal(goalModel);
     } else {
-      context.read<GoalsCubit>().createGoal(goalModel);
+      blocContext.read<GoalsCubit>().createGoal(goalModel);
     }
   }
 
@@ -234,7 +234,10 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
-                  Navigator.of(context).pop(true);
+                  // Navigate back to goals page
+                  if (context.mounted) {
+                    context.router.maybePop(true);
+                  }
                 }
               } else if (state is GoalCreationError) {
                 showErrorMessage(context, message: state.message);
@@ -254,7 +257,10 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
-                  Navigator.of(context).pop(true);
+                  // Navigate back to goals page
+                  if (context.mounted) {
+                    context.router.maybePop(true);
+                  }
                 }
               } else if (state is IndicatorCreationError) {
                 showErrorMessage(context,
@@ -814,7 +820,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
 
   Widget _buildActionButtons() {
     return BlocBuilder<GoalsCubit, GoalsState>(
-      builder: (context, goalsState) {
+      builder: (blocContext, goalsState) {
         return BlocBuilder<IndicatorsCubit, IndicatorsState>(
           builder: (context, indicatorsState) {
             final isLoading = goalsState is GoalCreating ||
@@ -825,7 +831,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
               children: [
                 // Save button
                 GestureDetector(
-                  onTap: isLoading ? null : _saveGoal,
+                  onTap: isLoading ? null : () => _saveGoal(blocContext),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: double.infinity,

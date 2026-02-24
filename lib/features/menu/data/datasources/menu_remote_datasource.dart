@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:jaidem/core/data/models/response_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_model.dart';
+import 'package:jaidem/features/menu/data/models/division_model.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:jaidem/features/menu/data/models/message_model.dart';
 import 'package:jaidem/features/menu/data/models/chat_user_model.dart';
@@ -39,6 +40,14 @@ abstract class MenuRemoteDatasource {
   Future<void> sendMessageToMentor(String messageText);
   Future<void> sendMessageToAdmin(String messageText);
 
+  /// Ensure user exists in Firebase with proper data
+  Future<void> ensureUserExists({
+    required String id,
+    required String name,
+    String? photoUrl,
+  });
+
   // Files
-  Future<Either<String, ResponseModel<FileModel>>> getFiles();
+  Future<Either<String, ResponseModel<FileModel>>> getFiles({int? divisionId});
+  Future<Either<String, ResponseModel<Division>>> getDivisions();
 }

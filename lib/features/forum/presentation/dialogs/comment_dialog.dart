@@ -22,56 +22,61 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.5),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: initialChildSize,
-        minChildSize: minChildSize,
-        maxChildSize: maxChildSize,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            children: [
-              // Header with handle bar and title
-              _buildHeader(context),
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+        ),
+        child: DraggableScrollableSheet(
+          initialChildSize: initialChildSize,
+          minChildSize: minChildSize,
+          maxChildSize: maxChildSize,
+          builder: (context, scrollController) => Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              children: [
+                // Header with handle bar and title
+                _buildHeader(context),
 
-              // Divider
-              Container(
-                height: 1,
-                color: Colors.grey.shade200,
-              ),
-
-              // Comments list
-              Expanded(
-                child: BlocBuilder<ForumCubit, ForumState>(
-                  builder: (context, state) {
-                    if (state.isCommentsLoading) {
-                      return _buildLoadingState();
-                    } else if (state.comments.isEmpty) {
-                      return _buildEmptyState();
-                    }
-                    return ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                      itemCount: state.comments.length,
-                      itemBuilder: (context, index) {
-                        final comment = state.comments[index];
-                        return CommentCard(
-                          comment: comment,
-                          forumId: forumId,
-                        );
-                      },
-                    );
-                  },
+                // Divider
+                Container(
+                  height: 1,
+                  color: Colors.grey.shade200,
                 ),
-              ),
 
-              // Comment input
-              CommentChatField(
-                forumId: forumId,
-              )
-            ],
+                // Comments list
+                Expanded(
+                  child: BlocBuilder<ForumCubit, ForumState>(
+                    builder: (context, state) {
+                      if (state.isCommentsLoading) {
+                        return _buildLoadingState();
+                      } else if (state.comments.isEmpty) {
+                        return _buildEmptyState();
+                      }
+                      return ListView.builder(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                        itemCount: state.comments.length,
+                        itemBuilder: (context, index) {
+                          final comment = state.comments[index];
+                          return CommentCard(
+                            comment: comment,
+                            forumId: forumId,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+
+                // Comment input
+                CommentChatField(
+                  forumId: forumId,
+                )
+              ],
+            ),
           ),
         ),
       ),

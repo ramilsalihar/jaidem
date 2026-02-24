@@ -125,6 +125,8 @@ class ForumFirebaseService {
   /// Get comments for a forum post (one-time fetch)
   Future<List<CommentEntity>> getComments(int forumId) async {
     try {
+      final blockedUserIds = await getBlockedUserIds();
+
       final snapshot = await _firestore
           .collection('forums')
           .doc(forumId.toString())
@@ -137,6 +139,12 @@ class ForumFirebaseService {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
+
+        // Skip comments from blocked users
+        final authorId = (data['author'] as Map<String, dynamic>?)?['id']?.toString();
+        if (authorId != null && blockedUserIds.contains(authorId)) {
+          continue;
+        }
 
         // Get like info for this comment
         int likesCount = 0;
@@ -172,7 +180,7 @@ class ForumFirebaseService {
       final parentComments = allComments.where((c) => c.parentId == null).toList();
       final replies = allComments.where((c) => c.parentId != null).toList();
 
-      // Attach replies to their parent comments
+      // Attach replies to their parent comments (already filtered by blocked users above)
       return parentComments.map((parent) {
         final parentReplies = replies.where((r) => r.parentId == parent.documentId).toList();
         return parent.copyWith(replies: parentReplies);
@@ -381,6 +389,174 @@ class ForumFirebaseService {
       );
     } catch (_) {
       return null;
+    }
+  }
+
+  // ==================== CONTENT MODERATION ====================
+
+  /// Report a post for inappropriate content
+  Future<void> reportPost(int forumId, String reason, {int? authorId, String? authorName}) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await _firestore.collection('reports').add({
+        'type': 'post',
+        'forumId': forumId,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'reportedUserId': authorId?.toString(),
+        'reportedUserName': authorName,
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'requiresAdminAction': true,
+      });
+
+      await _firestore.collection('admin_notifications').add({
+        'type': 'content_reported',
+        'contentType': 'post',
+        'forumId': forumId,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'createdAt': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+    } catch (_) {}
+  }
+
+  /// Report a comment for inappropriate content
+  Future<void> reportComment({
+    required int forumId,
+    required String commentId,
+    required String reason,
+    String? reportedUserId,
+    String? reportedUserName,
+  }) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await _firestore.collection('reports').add({
+        'type': 'comment',
+        'forumId': forumId,
+        'commentId': commentId,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'reportedUserId': reportedUserId,
+        'reportedUserName': reportedUserName,
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'requiresAdminAction': true,
+      });
+
+      await _firestore.collection('admin_notifications').add({
+        'type': 'content_reported',
+        'contentType': 'comment',
+        'forumId': forumId,
+        'commentId': commentId,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'createdAt': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+    } catch (_) {}
+  }
+
+  /// Block a user with developer notification
+  Future<void> blockUser(int blockedUserId, {String? blockedUserName}) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('blocked_users')
+          .doc(blockedUserId.toString())
+          .set({
+        'blockedUserId': blockedUserId,
+        'blockedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Notify developer
+      await _firestore.collection('reports').add({
+        'type': 'user_block',
+        'blockedUserId': blockedUserId,
+        'blockedUserName': blockedUserName,
+        'blockedByUserId': userId,
+        'blockedByUserName': _userFullname,
+        'reason': 'user_blocked_by_another_user',
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'requiresAdminAction': true,
+      });
+
+      await _firestore.collection('admin_notifications').add({
+        'type': 'user_blocked',
+        'blockedUserId': blockedUserId,
+        'blockedUserName': blockedUserName,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'createdAt': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+    } catch (_) {}
+  }
+
+  /// Get set of blocked user IDs for the current user
+  Future<Set<String>> getBlockedUserIds() async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return {};
+
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('blocked_users')
+          .get();
+
+      return snapshot.docs.map((doc) => doc.id).toSet();
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Check if a user is blocked
+  Future<bool> isUserBlocked(int checkUserId) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return false;
+
+    try {
+      final doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('blocked_users')
+          .doc(checkUserId.toString())
+          .get();
+      return doc.exists;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Unblock a user
+  Future<void> unblockUser(int blockedUserId) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('blocked_users')
+          .doc(blockedUserId.toString())
+          .delete();
+    } catch (_) {
+      // Silently handle error
     }
   }
 }

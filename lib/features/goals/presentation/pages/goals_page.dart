@@ -21,11 +21,25 @@ class GoalsPage extends StatefulWidget {
 
 class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? _selectedStatus;
+
+  static const _statusFilters = [
+    (value: null, labelKey: 'all'),
+    (value: 'in_progress', labelKey: 'status_in_progress'),
+    (value: 'changed', labelKey: 'status_changed'),
+    (value: 'completed', labelKey: 'status_completed'),
+    (value: 'cancelled', labelKey: 'status_cancelled'),
+  ];
 
   @override
   void initState() {
     super.initState();
     context.read<GoalsCubit>().fetchGoals();
+  }
+
+  void _onStatusChanged(String? status) {
+    setState(() => _selectedStatus = status);
+    context.read<GoalsCubit>().fetchGoals(status: status, refresh: true);
   }
 
   @override
@@ -40,7 +54,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
             _buildSliverAppBar(innerBoxIsScrolled),
           ];
         },
-        body: _GoalsContent(),
+        body: _GoalsContent(selectedStatus: _selectedStatus),
       ),
       floatingActionButton: _buildFAB(),
     );
@@ -53,7 +67,45 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
       elevation: 0,
       backgroundColor: AppColors.primary,
       surfaceTintColor: AppColors.primary,
-      expandedHeight: 140,
+      expandedHeight: 188,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(48),
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.only(bottom: 8),
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _statusFilters.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final filter = _statusFilters[index];
+              final isSelected = _selectedStatus == filter.value;
+              return GestureDetector(
+                onTap: () => _onStatusChanged(filter.value),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    context.tr(filter.labelKey),
+                    style: TextStyle(
+                      color: isSelected ? AppColors.primary : Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
       leadingWidth: 56,
       leading: GestureDetector(
         onTap: () {
@@ -108,7 +160,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
           ),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
+              padding: const EdgeInsets.fromLTRB(16, 60, 16, 60),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -145,7 +197,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
         HapticFeedback.mediumImpact();
         final result = await context.router.push<bool>(AddGoalRoute());
         if (result == true && mounted) {
-          context.read<GoalsCubit>().fetchGoals();
+          context.read<GoalsCubit>().fetchGoals(status: _selectedStatus);
         }
       },
       backgroundColor: AppColors.primary,
@@ -163,6 +215,10 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
 }
 
 class _GoalsContent extends StatelessWidget {
+  final String? selectedStatus;
+
+  const _GoalsContent({this.selectedStatus});
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<GoalsCubit, GoalsState>(
@@ -250,7 +306,7 @@ class _GoalsContent extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<GoalsCubit>().fetchGoals();
+                context.read<GoalsCubit>().fetchGoals(status: selectedStatus);
               },
               icon: const Icon(Icons.refresh_rounded, size: 20),
               label: Text(context.tr('reload')),
@@ -343,19 +399,49 @@ class _GoalsContent extends StatelessWidget {
   }
 
   Widget _buildGoalsList(BuildContext context, List<GoalModel> goals) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        await context.read<GoalsCubit>().fetchGoals();
+    return BlocBuilder<GoalsCubit, GoalsState>(
+      builder: (context, state) {
+        return NotificationListener<ScrollNotification>(
+          onNotification: (scrollInfo) {
+            if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+              context.read<GoalsCubit>().loadMoreGoals();
+            }
+            return false;
+          },
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await context.read<GoalsCubit>().fetchGoals(
+                    refresh: true,
+                    status: selectedStatus,
+                  );
+            },
+            color: AppColors.primary,
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+              itemCount: goals.length + (state.isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index >= goals.length) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                final goal = goals[index];
+                return _ModernGoalCard(goal: goal);
+              },
+            ),
+          ),
+        );
       },
-      color: AppColors.primary,
-      child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-        itemCount: goals.length,
-        itemBuilder: (context, index) {
-          final goal = goals[index];
-          return _ModernGoalCard(goal: goal);
-        },
-      ),
     );
   }
 }
@@ -382,6 +468,10 @@ class _ModernGoalCard extends StatelessWidget {
         return context.tr('status_completed');
       case 'paused':
         return context.tr('status_paused');
+      case 'changed':
+        return context.tr('status_changed');
+      case 'cancelled':
+        return context.tr('status_cancelled');
       default:
         return status;
     }

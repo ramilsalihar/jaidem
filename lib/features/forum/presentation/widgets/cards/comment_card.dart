@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/domain/entities/comment_entity.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
@@ -182,6 +183,183 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
     }
   }
 
+  void _showCommentOptionsBottomSheet() {
+    final authorName = _getAuthorProperty('fullname') ?? 'Аноним';
+    final authorId = _getAuthorProperty('id');
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.flag_outlined, color: Colors.orange.shade600),
+                title: Text(context.tr('report_comment')),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showReportDialog();
+                },
+              ),
+              if (authorId != null)
+                ListTile(
+                  leading: Icon(Icons.block_rounded, color: Colors.red.shade600),
+                  title: Text(context.tr('block_user')),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    _showBlockUserDialog(authorName, int.tryParse(authorId));
+                  },
+                ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showReportDialog() {
+    String? selectedReason;
+    final reasons = [
+      {'key': 'report_spam', 'value': context.tr('report_spam')},
+      {'key': 'report_inappropriate', 'value': context.tr('report_inappropriate')},
+      {'key': 'report_harassment', 'value': context.tr('report_harassment')},
+      {'key': 'report_other', 'value': context.tr('report_other')},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            context.tr('report_comment'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.tr('report_reason'),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 12),
+              ...reasons.map((reason) => RadioListTile<String>(
+                    title: Text(reason['value']!, style: const TextStyle(fontSize: 14)),
+                    value: reason['key']!,
+                    groupValue: selectedReason,
+                    activeColor: AppColors.primary,
+                    contentPadding: EdgeInsets.zero,
+                    onChanged: (value) => setState(() => selectedReason = value),
+                  )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(context.tr('cancel'), style: TextStyle(color: Colors.grey.shade600)),
+            ),
+            ElevatedButton(
+              onPressed: selectedReason != null
+                  ? () {
+                      Navigator.pop(ctx);
+                      final documentId = widget.comment.documentId;
+                      if (documentId != null) {
+                        context.read<ForumCubit>().reportComment(
+                              forumId: widget.forumId,
+                              commentId: documentId,
+                              reason: selectedReason!,
+                              userId: _getAuthorProperty('id'),
+                              userName: _getAuthorProperty('fullname'),
+                            );
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.tr('report_sent')),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text(context.tr('send')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showBlockUserDialog(String userName, int? authorId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.block_rounded, color: Colors.red.shade400, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.tr('block_user'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          '${context.tr('block_user_confirm')}\n\n$userName',
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.tr('cancel'), style: TextStyle(color: Colors.grey.shade600)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              if (authorId != null) {
+                context.read<ForumCubit>().blockUser(authorId, userName: userName);
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.tr('user_blocked')),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade500,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(context.tr('block_user')),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authorName = _getAuthorProperty('fullname') ?? 'Аноним';
@@ -234,11 +412,16 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Comment content bubble
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
+                    GestureDetector(
+                      onLongPress: () {
+                        HapticFeedback.mediumImpact();
+                        _showCommentOptionsBottomSheet();
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade100,
                         borderRadius: const BorderRadius.only(
@@ -299,6 +482,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
                           ),
                         ],
                       ),
+                    ),
                     ),
 
                     const SizedBox(height: 6),

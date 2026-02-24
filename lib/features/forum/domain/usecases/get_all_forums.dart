@@ -7,7 +7,7 @@ class GetAllForums {
 
   GetAllForums(this.repository);
 
-  Future<Either<String, List<ForumEntity>>> call(String? search) {
-    return repository.fetchAllForums(search);
+  Future<Either<String, List<ForumEntity>>> call(String? search, {int? authorId}) {
+    return repository.fetchAllForums(search, authorId: authorId);
   }
 }

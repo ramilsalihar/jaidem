@@ -1,12 +1,12 @@
 class SpecialityModel {
   final int id;
-  final String nameRu;
+  final String name;
   final String? nameEn;
   final String? nameKg;
 
   const SpecialityModel({
     required this.id,
-    required this.nameRu,
+    required this.name,
     this.nameEn,
     this.nameKg,
   });
@@ -14,7 +14,7 @@ class SpecialityModel {
   factory SpecialityModel.fromJson(Map<String, dynamic> json) {
     return SpecialityModel(
       id: json['id'] as int,
-      nameRu: json['name'] as String,
+      name: json['name'] as String? ?? '',
       nameEn: json['nameEn'] as String?,
       nameKg: json['nameKg'] as String?,
     );
@@ -23,23 +23,23 @@ class SpecialityModel {
   String getLocalizedName(String locale) {
     switch (locale) {
       case 'en':
-        return nameEn ?? nameRu;
+        return nameEn?.isNotEmpty == true ? nameEn! : name;
       case 'ky':
-        return nameKg ?? nameRu;
+        return nameKg?.isNotEmpty == true ? nameKg! : name;
       default:
-        return nameRu;
+        return name;
     }
   }
 
   SpecialityModel copyWith({
     int? id,
-    String? nameRu,
+    String? name,
     String? nameEn,
     String? nameKg,
   }) {
     return SpecialityModel(
       id: id ?? this.id,
-      nameRu: nameRu ?? this.nameRu,
+      name: name ?? this.name,
       nameEn: nameEn ?? this.nameEn,
       nameKg: nameKg ?? this.nameKg,
     );

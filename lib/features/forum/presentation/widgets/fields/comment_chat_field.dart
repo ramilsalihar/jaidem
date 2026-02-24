@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/utils/helpers/content_filter.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/domain/entities/comment_entity.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,6 +45,17 @@ class _CommentChatFieldState extends State<CommentChatField> {
 
   void _onSubmitted(String comment, ForumState state) {
     if (comment.isEmpty) return;
+
+    if (ContentFilter().containsObjectionableContent(comment)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('content_filtered_warning')),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     HapticFeedback.lightImpact();
     final cubit = context.read<ForumCubit>();
 
@@ -149,9 +162,7 @@ class _CommentChatFieldState extends State<CommentChatField> {
                 left: 16,
                 right: 16,
                 top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                    ? 12
-                    : MediaQuery.of(context).padding.bottom + 12,
+                bottom: MediaQuery.of(context).padding.bottom + 12,
               ),
               decoration: BoxDecoration(
                 color: Colors.white,

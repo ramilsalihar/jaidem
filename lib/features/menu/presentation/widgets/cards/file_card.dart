@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -8,6 +10,20 @@ class FileCard extends StatelessWidget {
   const FileCard({super.key, required this.file});
 
   final FileModel file;
+
+  bool _isPdfFile() {
+    final fileName = file.file?.toLowerCase() ?? '';
+    return fileName.endsWith('.pdf');
+  }
+
+  void _openPdfViewer(BuildContext context) {
+    if (file.file != null && file.file!.isNotEmpty) {
+      context.router.push(PdfViewerRoute(
+        pdfUrl: file.file!,
+        title: file.title,
+      ));
+    }
+  }
 
   Future<void> _openUrl(BuildContext context, String url) async {
     try {
@@ -87,7 +103,11 @@ class FileCard extends StatelessWidget {
         if (file.usefulLinks.isNotEmpty) {
           _openUrl(context, file.usefulLinks);
         } else if (file.file != null && file.file!.isNotEmpty) {
-          _openUrl(context, file.file!);
+          if (_isPdfFile()) {
+            _openPdfViewer(context);
+          } else {
+            _openUrl(context, file.file!);
+          }
         }
       },
       child: Container(

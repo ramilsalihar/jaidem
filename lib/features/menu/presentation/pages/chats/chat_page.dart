@@ -4,7 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/services/usage_service.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
+import 'package:jaidem/core/utils/helpers/content_filter.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/message_card.dart';
@@ -15,11 +17,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ChatPage extends StatefulWidget {
   final String chatType;
   final String? userId;
+  final String? userName;
+  final String? userAvatar;
 
   const ChatPage({
     super.key,
     required this.chatType,
     this.userId,
+    this.userName,
+    this.userAvatar,
   });
 
   @override
@@ -76,6 +82,21 @@ class _ChatPageState extends State<ChatPage> {
     if (_messageController.text.trim().isEmpty) return;
 
     final messageText = _messageController.text.trim();
+
+    if (ContentFilter().containsObjectionableContent(messageText)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('content_filtered_warning')),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
     final chatCubit = context.read<ChatCubit>();
 
     try {
@@ -136,7 +157,7 @@ class _ChatPageState extends State<ChatPage> {
   String _getContactName() {
     switch (widget.chatType.toLowerCase()) {
       case 'users':
-        return widget.userId != null ? 'Колдонуучу' : 'Чат';
+        return widget.userName ?? 'Колдонуучу';
       case 'mentors':
         return 'Насаатчы';
       case 'admin':
@@ -234,24 +255,30 @@ class _ChatPageState extends State<ChatPage> {
                           color: Colors.white,
                         ),
                         padding: const EdgeInsets.all(2),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                contactColor.withValues(alpha: 0.1),
-                                contactColor.withValues(alpha: 0.05),
-                              ],
-                            ),
-                          ),
-                          child: Icon(
-                            _getContactIcon(),
-                            color: contactColor,
-                            size: 22,
-                          ),
-                        ),
+                        child: widget.userAvatar != null && widget.userAvatar!.isNotEmpty
+                            ? CircleAvatar(
+                                radius: 20,
+                                backgroundImage: NetworkImage(widget.userAvatar!),
+                                backgroundColor: contactColor.withValues(alpha: 0.1),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      contactColor.withValues(alpha: 0.1),
+                                      contactColor.withValues(alpha: 0.05),
+                                    ],
+                                  ),
+                                ),
+                                child: Icon(
+                                  _getContactIcon(),
+                                  color: contactColor,
+                                  size: 22,
+                                ),
+                              ),
                       ),
                     ),
 

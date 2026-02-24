@@ -52,12 +52,14 @@ void menuInjection() {
   sl.registerFactory(() => SendMessageToAdminUseCase(sl()));
 
   sl.registerFactory(() => GetFilesUsecase(sl()));
+  sl.registerFactory(() => GetDivisionsUsecase(sl()));
 
   // Register the MenuCubit
   sl.registerFactory<MenuCubit>(
     () => MenuCubit(
       signOutUsecase: sl(),
       getFilesUsecase: sl(),
+      getDivisionsUsecase: sl(),
     ),
   );
 

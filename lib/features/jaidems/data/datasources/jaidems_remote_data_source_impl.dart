@@ -30,7 +30,7 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
       if (flow != null) queryParameters['flow'] = flow;
       if (generation != null) queryParameters['generation'] = generation;
       if (university != null) queryParameters['univer'] = university;
-      if (speciality != null) queryParameters['speciality'] = speciality;
+      if (speciality != null) queryParameters['spec'] = speciality;
       if (age != null) queryParameters['age'] = age;
       if (search != null) queryParameters['search'] = search;
       if (region != null) queryParameters['region'] = region;

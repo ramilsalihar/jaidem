@@ -20,13 +20,19 @@ class GoalRemoteDataSourceImpl implements GoalRemoteDataSource {
   });
 
   @override
-  Future<Either<String, ResponseModel<GoalModel>>> getGoals() async {
+  Future<Either<String, ResponseModel<GoalModel>>> getGoals({int page = 1, String? status}) async {
     try {
       final userId = prefs.getString(AppConstants.userId);
 
-      final response = await dio.get(ApiConst.goals, queryParameters: {
+      final queryParameters = <String, dynamic>{
         'student': userId,
-      });
+        'page': page,
+      };
+      if (status != null) {
+        queryParameters['status'] = status;
+      }
+
+      final response = await dio.get(ApiConst.goals, queryParameters: queryParameters);
 
       if ([200, 201].contains(response.statusCode)) {
         final responseModel = ResponseModel<GoalModel>.fromJson(

@@ -3,7 +3,9 @@ import 'package:jaidem/features/forum/data/models/comment_model.dart';
 import 'package:jaidem/features/forum/data/models/forum_model.dart';
 
 abstract class ForumRemoteDataSource {
-  Future<Either<String, List<ForumModel>>> fetchAllForums(String? search);
+  Future<Either<String, List<ForumModel>>> fetchAllForums(String? search, {int? authorId});
+
+  Future<Either<String, ForumModel>> fetchForumById(int forumId);
 
   Future<Either<String, CommentModel>> postComment({
     required CommentModel comment,

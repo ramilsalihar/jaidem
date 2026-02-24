@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/localization/locale_cubit.dart';
 import 'package:jaidem/core/routes/app_router.dart';
+import 'package:jaidem/core/presentation/dialogs/terms_dialog.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/buttons/menu_button.dart';
@@ -57,6 +58,16 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.pop(context);
                         context.router.push(FilesRoute());
+                      },
+                    ),
+                    MenuButton(
+                      title: context.tr('trainings'),
+                      iconData: Icons.school_rounded,
+                      iconBackgroundColor: Colors.cyan.shade100,
+                      iconColor: Colors.cyan.shade600,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.router.push(TrainingsRoute());
                       },
                     ),
                     MenuButton(
@@ -119,6 +130,19 @@ class AppDrawer extends StatelessWidget {
                       onTap: () {
                         Navigator.pop(context);
                         context.router.push(ChangePasswordRoute());
+                      },
+                    ),
+                    MenuButton(
+                      title: context.tr('terms_title'),
+                      iconData: Icons.description_outlined,
+                      iconBackgroundColor: Colors.blueGrey.shade100,
+                      iconColor: Colors.blueGrey.shade600,
+                      onTap: () {
+                        Navigator.pop(context);
+                        showDialog(
+                          context: context,
+                          builder: (_) => const TermsDialog(readOnly: true),
+                        );
                       },
                     ),
                     BlocBuilder<LocaleCubit, Locale>(

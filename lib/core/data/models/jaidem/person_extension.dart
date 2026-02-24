@@ -8,11 +8,13 @@ extension PersonModelMapper on PersonModel {
     if (avatar != null) data['avatar'] = avatar;
     if (phone != null) data['phone'] = phone;
     data['age'] = age;
-    if (university != null) data['university'] = university;
+    // Send univer ID instead of university string
+    if (univer != null) data['univer'] = univer!.id;
     data['login'] = login;
     // password not in model, but you may inject it separately if needed
     data['course_year'] = courseYear;
-    if (speciality != null) data['speciality'] = speciality;
+    // Send spec ID instead of speciality string
+    if (spec != null) data['spec'] = spec!.id;
     if (email != null) data['email'] = email;
     if (socialMedias != null) data['social_medias'] = socialMedias;
     if (interest != null) data['interest'] = interest;
@@ -29,6 +31,7 @@ extension PersonModelMapper on PersonModel {
     if (region != null) data['region'] = region!.id;
     if (village != null) data['village'] = village!.id;
     data['block'] = block;
+    if (birthday != null) data['birthday'] = birthday;
 
     return data;
   }

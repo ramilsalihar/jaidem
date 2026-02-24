@@ -208,7 +208,12 @@ class _ChatListPageState extends State<ChatListPage> {
 
                           if (chatType == 'users') {
                             context.router.push(
-                              ChatRoute(chatType: chatType, userId: otherUser.id),
+                              ChatRoute(
+                                chatType: chatType,
+                                userId: otherUser.id,
+                                userName: otherUser.name,
+                                userAvatar: otherUser.photoUrl,
+                              ),
                             );
                           } else {
                             context.router.push(

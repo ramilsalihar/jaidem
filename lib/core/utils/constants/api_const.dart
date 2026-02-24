@@ -30,6 +30,21 @@ abstract class ApiConst {
 
   // Files
   static const String files = '/category/file/';
+  static const String divisions = '/category/division/';
+
+  // Trainings
+  static const String trainings = '/core/training/';
+  static const String trainingAnswers = '/core/training_answer/';
+  static const String npsQuestions = '/core/NPS_question/';
+
+  // Opros (Survey)
+  static const String oprosStatus = '/core/opros_status/';
+  static const String oprosQuestions = '/core/jaidemchi_opros_question/';
+  static const String oprosAnswer = '/core/opros_answer/';
+
+  // Birthday
+  static const String todayBirthdays = '/core/today_birthdays/';
+  static const String birthdayReaction = '/core/birthday_reaction/';
 
   // Filters
   static const String regions = '/category/region/';
