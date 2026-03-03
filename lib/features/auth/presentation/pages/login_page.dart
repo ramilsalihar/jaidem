@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/services/deep_link_service.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -162,7 +163,14 @@ class _LoginPageState extends State<LoginPage>
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           HapticFeedback.lightImpact();
-          context.router.replacePath('/main');
+          final pendingPath = DeepLinkService.pendingPath;
+          if (pendingPath != null) {
+            DeepLinkService.pendingPath = null;
+            context.router.replacePath('/main');
+            context.router.pushPath(pendingPath);
+          } else {
+            context.router.replacePath('/main');
+          }
         } else if (state is AuthLoginFailure) {
           HapticFeedback.heavyImpact();
           showMessage(

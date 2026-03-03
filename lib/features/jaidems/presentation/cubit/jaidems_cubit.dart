@@ -22,9 +22,12 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? generation,
     String? university,
     String? speciality,
-    String? age,
+    String? ageMin,
+    String? ageMax,
     String? search,
+    String? state,
     String? region,
+    bool? isAdvisor,
   }) async {
     try {
       if (next == null && previous == null) emit(JaidemsLoading());
@@ -36,9 +39,12 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         generation: generation,
         university: university,
         speciality: speciality,
-        age: age,
+        ageMin: ageMin,
+        ageMax: ageMax,
         search: search,
+        state: state,
         region: region,
+        isAdvisor: isAdvisor,
       );
 
       result.fold(
@@ -82,8 +88,10 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? generation,
     String? university,
     String? speciality,
-    String? age,
+    String? ageMin,
+    String? ageMax,
     String? search,
+    String? state,
     String? region,
   }) async {
     if (hasNextPage) {
@@ -93,8 +101,10 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         generation: generation,
         university: university,
         speciality: speciality,
-        age: age,
+        ageMin: ageMin,
+        ageMax: ageMax,
         search: search,
+        state: state,
         region: region,
       );
     }
@@ -106,8 +116,10 @@ class JaidemsCubit extends Cubit<JaidemsState> {
     String? generation,
     String? university,
     String? speciality,
-    String? age,
+    String? ageMin,
+    String? ageMax,
     String? search,
+    String? state,
     String? region,
   }) async {
     if (hasPreviousPage) {
@@ -117,8 +129,10 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         generation: generation,
         university: university,
         speciality: speciality,
-        age: age,
+        ageMin: ageMin,
+        ageMax: ageMax,
         search: search,
+        state: state,
         region: region,
       );
     }

@@ -2,6 +2,7 @@ abstract class ApiConst {
   static const String baseUrl = 'https://jaidem-back.ru/jaidem/api';
 
   static const String login = '/user/login/';
+  static const String tokenRefresh = '/token/refresh/';
 
   // Profile
   static const String profile = '/user/jaidemchiler/';
@@ -47,7 +48,9 @@ abstract class ApiConst {
   static const String birthdayReaction = '/core/birthday_reaction/';
 
   // Filters
+  static const String states = '/category/state/';
   static const String regions = '/category/region/';
+  static const String villages = '/category/village/';
   static const String universities = '/core/university/';
   static const String specialities = '/category/speciality/';
 }

@@ -1,11 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
 import 'package:jaidem/core/routes/app_router.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource.dart';
 import 'package:jaidem/features/profile/presentation/widgets/birthday_congrats_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class JaidemCard extends StatelessWidget {
   const JaidemCard({
@@ -54,7 +58,7 @@ class JaidemCard extends StatelessWidget {
 
                     // Details
                     Expanded(
-                      child: _buildDetailsSection(),
+                      child: _buildDetailsSection(context),
                     ),
 
                     const SizedBox(height: 8),
@@ -206,11 +210,12 @@ class JaidemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailsSection() {
+  Widget _buildDetailsSection(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
     final items = <Widget>[];
 
     // Use spec object first, fallback to speciality string
-    final specName = person.spec?.name ?? person.speciality;
+    final specName = person.spec?.getLocalizedName(locale) ?? person.speciality;
     if (specName != null && specName.isNotEmpty) {
       items.add(_buildDetailItem(
         Icons.work_outline_rounded,
@@ -219,7 +224,7 @@ class JaidemCard extends StatelessWidget {
     }
 
     // Use univer object first, fallback to university string
-    final univerName = person.univer?.name ?? person.university;
+    final univerName = person.univer?.getLocalizedName(locale) ?? person.university;
     if (univerName != null && univerName.isNotEmpty) {
       items.add(_buildDetailItem(
         Icons.school_outlined,
@@ -228,11 +233,11 @@ class JaidemCard extends StatelessWidget {
       ));
     }
 
-    final stateNameKg = person.state.nameKg;
-    if (stateNameKg != null && stateNameKg.isNotEmpty) {
+    final stateName = person.state.getLocalizedName(locale);
+    if (stateName.isNotEmpty) {
       items.add(_buildDetailItem(
         Icons.location_on_outlined,
-        stateNameKg,
+        stateName,
       ));
     }
 
@@ -282,6 +287,9 @@ class JaidemCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Write message button
+        _buildWriteButton(),
+        const SizedBox(width: 12),
         // WhatsApp button
         _buildSocialButton(
           'assets/icons/whatsapp.png',
@@ -304,6 +312,57 @@ class JaidemCard extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildWriteButton() {
+    return Builder(
+      builder: (context) {
+        return GestureDetector(
+          onTap: () async {
+            HapticFeedback.lightImpact();
+            final currentUserId =
+                sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+
+            if (currentUserId == person.id.toString()) {
+              context.router.replaceAll([BottomBarRoute(initialIndex: 4)]);
+              return;
+            }
+
+            await sl<MenuRemoteDatasource>().ensureUserExists(
+              id: person.id.toString(),
+              name: person.fullname ?? 'User',
+              photoUrl: person.avatar,
+            );
+
+            if (!context.mounted) return;
+
+            context.router.push(
+              ChatRoute(
+                chatType: 'users',
+                userId: person.id.toString(),
+                userName: person.fullname,
+                userAvatar: person.avatar,
+              ),
+            );
+          },
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Icon(
+                Icons.message_rounded,
+                size: 16,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

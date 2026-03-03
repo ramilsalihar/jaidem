@@ -15,6 +15,7 @@ import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
 import 'package:jaidem/features/profile/presentation/widgets/birthday_congrats_widget.dart';
 import 'package:jaidem/features/birthday/domain/usecases/send_birthday_reaction_usecase.dart';
+import 'package:jaidem/features/forum/data/services/forum_firebase_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
@@ -95,6 +96,178 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     super.dispose();
   }
 
+  void _showOptionsBottomSheet() {
+    final userName = widget.person.fullname ?? '';
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.flag_outlined, color: Colors.orange.shade600),
+                title: Text(context.tr('report_user')),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showReportUserDialog();
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.block_rounded, color: Colors.red.shade600),
+                title: Text(context.tr('block_user')),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showBlockUserDialog(userName);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showReportUserDialog() {
+    String? selectedReason;
+    final reasons = [
+      {'key': 'report_spam', 'value': context.tr('report_spam')},
+      {'key': 'report_inappropriate', 'value': context.tr('report_inappropriate')},
+      {'key': 'report_harassment', 'value': context.tr('report_harassment')},
+      {'key': 'report_other', 'value': context.tr('report_other')},
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            context.tr('report_user'),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.tr('report_reason'),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 12),
+              ...reasons.map((reason) => RadioListTile<String>(
+                title: Text(reason['value']!, style: const TextStyle(fontSize: 14)),
+                value: reason['key']!,
+                groupValue: selectedReason,
+                activeColor: AppColors.primary,
+                contentPadding: EdgeInsets.zero,
+                onChanged: (value) => setState(() => selectedReason = value),
+              )),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(context.tr('cancel'), style: TextStyle(color: Colors.grey.shade600)),
+            ),
+            ElevatedButton(
+              onPressed: selectedReason != null
+                  ? () {
+                      Navigator.pop(ctx);
+                      ForumFirebaseService().reportUser(
+                        reportedUserId: widget.person.id,
+                        reason: selectedReason!,
+                        reportedUserName: widget.person.fullname,
+                      );
+                      ScaffoldMessenger.of(this.context).showSnackBar(
+                        SnackBar(
+                          content: Text(this.context.tr('report_sent')),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text(context.tr('send')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showBlockUserDialog(String userName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.block_rounded, color: Colors.red.shade400, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                context.tr('block_user'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          '${context.tr('block_user_confirm')}\n\n$userName',
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade700, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.tr('cancel'), style: TextStyle(color: Colors.grey.shade600)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ForumFirebaseService().blockUser(
+                widget.person.id,
+                blockedUserName: widget.person.fullname,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.tr('user_blocked')),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              // Go back after blocking
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade500,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: Text(context.tr('block_user')),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Don't fetch forums if redirecting to own profile
@@ -156,7 +329,27 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           ),
         ),
       ),
-      actions: const [],
+      actions: [
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _showOptionsBottomSheet();
+          },
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.3),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.more_horiz,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           children: [
@@ -276,7 +469,8 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                     // Use spec object first, fallback to speciality string
                     Builder(
                       builder: (context) {
-                        final specName = widget.person.spec?.name ?? widget.person.speciality;
+                        final locale = Localizations.localeOf(context).languageCode;
+                        final specName = widget.person.spec?.getLocalizedName(locale) ?? widget.person.speciality;
                         if (specName != null && specName.isNotEmpty) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 4),
@@ -668,6 +862,12 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           // Info section
           _buildInfoSection(context),
 
+          // Booking link for advisors
+          if (widget.person.isAdvisor &&
+              widget.person.linkToReserve != null &&
+              widget.person.linkToReserve!.isNotEmpty)
+            _buildBookingLinkSection(context),
+
           // Contact section
           _buildContactSection(context),
 
@@ -717,18 +917,21 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   }
 
   Widget _buildInfoSection(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
     final items = <_InfoItem>[];
 
     // Use univer object first, fallback to university string
-    final univerName = widget.person.univer?.name ?? widget.person.university;
+    final univerName = widget.person.univer?.getLocalizedName(locale) ?? widget.person.university;
     if (univerName != null && univerName.isNotEmpty) {
       items.add(_InfoItem(Icons.school_outlined, context.tr('university'), univerName));
     }
-    if (widget.person.region?.nameKg != null && widget.person.region!.nameKg!.isNotEmpty) {
-      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), widget.person.region!.nameKg!));
+    final regionName = widget.person.region?.getLocalizedName(locale);
+    if (regionName != null && regionName.isNotEmpty) {
+      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), regionName));
     }
-    if (widget.person.village != null && widget.person.village!.name.isNotEmpty) {
-      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), widget.person.village!.name));
+    final villageName = widget.person.village?.getLocalizedName(locale);
+    if (villageName != null && villageName.isNotEmpty) {
+      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), villageName));
     }
     if (widget.person.interest != null && widget.person.interest!.isNotEmpty) {
       items.add(_InfoItem(Icons.favorite_outline, context.tr('interests'), widget.person.interest!));
@@ -802,6 +1005,67 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBookingLinkSection(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        final url = Uri.parse(widget.person.linkToReserve!);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.calendar_month_rounded, size: 20, color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.tr('booking_link'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.person.linkToReserve!,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary,
+                      decoration: TextDecoration.underline,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.open_in_new_rounded, size: 18, color: AppColors.primary),
+          ],
+        ),
       ),
     );
   }

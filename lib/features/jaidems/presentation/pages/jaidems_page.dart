@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_filters.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class JaidemsPage extends StatefulWidget {
   const JaidemsPage({super.key});
@@ -70,8 +73,10 @@ class _JaidemsPageState extends State<JaidemsPage>
         generation: filters['generation'],
         university: filters['university'],
         speciality: filters['speciality'],
-        age: filters['age'],
+        ageMin: filters['age_min'],
+        ageMax: filters['age_max'],
         search: searchQuery,
+        state: filters['state'],
         region: filters['region'],
       )
           .whenComplete(() {
@@ -90,8 +95,10 @@ class _JaidemsPageState extends State<JaidemsPage>
           generation: filters['generation'],
           university: filters['university'],
           speciality: filters['speciality'],
-          age: filters['age'],
+          ageMin: filters['age_min'],
+          ageMax: filters['age_max'],
           search: searchQuery,
+          state: filters['state'],
           region: filters['region'],
         );
   }
@@ -478,6 +485,12 @@ class _JaidemsPageState extends State<JaidemsPage>
   }
 
   Widget _buildJaidemsList(List jaidemList) {
+    final currentUserId =
+        sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+    final filtered = jaidemList
+        .where((p) => p.id.toString() != currentUserId)
+        .toList();
+
     return RefreshIndicator(
       onRefresh: () async {
         _fetchJaidems();
@@ -491,9 +504,9 @@ class _JaidemsPageState extends State<JaidemsPage>
           mainAxisSpacing: 12,
           childAspectRatio: 0.58,
         ),
-        itemCount: jaidemList.length + (_isLoadingMore ? 2 : 0),
+        itemCount: filtered.length + (_isLoadingMore ? 2 : 0),
         itemBuilder: (context, index) {
-          if (index >= jaidemList.length) {
+          if (index >= filtered.length) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -501,7 +514,7 @@ class _JaidemsPageState extends State<JaidemsPage>
               ),
             );
           }
-          return JaidemCard(person: jaidemList[index]);
+          return JaidemCard(person: filtered[index]);
         },
       ),
     );

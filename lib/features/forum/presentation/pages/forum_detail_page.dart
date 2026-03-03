@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/data/injection.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
@@ -45,7 +46,7 @@ class _ForumDetailView extends StatelessWidget {
           onPressed: () => context.router.pop(),
         ),
         title: Text(
-          'Пост',
+          context.tr('post_single'),
           style: TextStyle(
             color: Colors.grey.shade800,
             fontWeight: FontWeight.w600,
@@ -75,7 +76,7 @@ class _ForumDetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Пост табылган жок',
+                    context.tr('post_not_found'),
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey.shade600,
@@ -88,7 +89,7 @@ class _ForumDetailView extends StatelessWidget {
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Кайра жүктөө'),
+                    child: Text(context.tr('reload')),
                   ),
                 ],
               ),

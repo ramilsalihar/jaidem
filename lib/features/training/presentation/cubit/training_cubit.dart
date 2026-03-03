@@ -21,10 +21,10 @@ class TrainingCubit extends Cubit<TrainingState> {
     required this.submitTrainingAnswerUsecase,
   }) : super(const TrainingInitial());
 
-  Future<void> fetchTrainings() async {
+  Future<void> fetchTrainings({int? flowId}) async {
     emit(const TrainingLoading());
 
-    final result = await getTrainingsUsecase();
+    final result = await getTrainingsUsecase(flowId: flowId);
 
     result.fold(
       (error) => emit(TrainingError(message: error)),

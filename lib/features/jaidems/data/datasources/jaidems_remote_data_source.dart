@@ -10,9 +10,12 @@ abstract class JaidemsRemoteDataSource {
     String? generation,
     String? university,
     String? speciality,
-    String? age,
+    String? ageMin,
+    String? ageMax,
     String? search,
+    String? state,
     String? region,
+    bool? isAdvisor,
   });
 
   Future<Either<String, PersonModel>> getJaidemById(int id);

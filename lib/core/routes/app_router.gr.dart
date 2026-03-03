@@ -183,6 +183,22 @@ class AddTaskRouteArgs {
 }
 
 /// generated route for
+/// [AdvisorsPage]
+class AdvisorsRoute extends PageRouteInfo<void> {
+  const AdvisorsRoute({List<PageRouteInfo>? children})
+      : super(AdvisorsRoute.name, initialChildren: children);
+
+  static const String name = 'AdvisorsRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const AdvisorsPage();
+    },
+  );
+}
+
+/// generated route for
 /// [BottomBarPage]
 class BottomBarRoute extends PageRouteInfo<BottomBarRouteArgs> {
   BottomBarRoute({

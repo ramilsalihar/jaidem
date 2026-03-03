@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/details_text_field.dart';
@@ -30,8 +31,8 @@ class PersonDetails extends StatelessWidget {
       child: Column(
         children: [
           DetailsTextField(
-            label: 'Жашы:',
-            value: person.age.toString(),
+            label: context.tr('label_age'),
+            value: person.calculatedAge?.toString() ?? context.tr('no_data'),
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -42,7 +43,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Окуу жылы:',
+            label: context.tr('label_course_year'),
             value: person.courseYear.toString(),
             hasSpace: true,
             labelWidth: 150,
@@ -54,8 +55,8 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Адистик:',
-            value: person.speciality ?? '',
+            label: context.tr('label_specialty'),
+            value: person.spec?.getLocalizedName(Localizations.localeOf(context).languageCode) ?? person.speciality ?? '',
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -66,7 +67,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Регион:',
+            label: context.tr('label_region'),
             value: person.region?.getLocalizedName(Localizations.localeOf(context).languageCode) ?? '',
             hasSpace: true,
             labelWidth: 150,
@@ -78,8 +79,8 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Айыл/шаар:',
-            value: person.village?.name ?? '',
+            label: context.tr('label_village_city'),
+            value: person.village?.getLocalizedName(Localizations.localeOf(context).languageCode) ?? '',
             hasSpace: true,
             labelWidth: 150,
             labelStyle: context.textTheme.bodySmall?.copyWith(
@@ -90,7 +91,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Кызыкчылыктары/көндүмдөрү:',
+            label: context.tr('label_interests_skills'),
             value: person.interest ?? '',
             hasSpace: true,
             labelWidth: 150,
@@ -102,7 +103,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Телефон:',
+            label: context.tr('label_phone'),
             value: person.phone ?? '',
             hasSpace: true,
             labelWidth: 150,
@@ -114,7 +115,7 @@ class PersonDetails extends StatelessWidget {
             ),
           ),
           DetailsTextField(
-            label: 'Email:',
+            label: context.tr('label_email'),
             value: person.email ?? '',
             hasSpace: true,
             labelWidth: 150,

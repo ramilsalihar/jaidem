@@ -157,7 +157,9 @@ class _ProfilePageState extends State<ProfilePage>
                       child: Column(
                         children: [
                           _buildHeader(user),
-                          if (!_oprosLoading && _oprosStatus != null)
+                          if (!_oprosLoading &&
+                              _oprosStatus != null &&
+                              (double.tryParse(user.flow.name) ?? 0) >= 2.5)
                             _buildSurveyCards(),
                           if (_isBirthday && !_showBirthdayWidget)
                             _buildBirthdayCard(user),
@@ -327,7 +329,8 @@ class _ProfilePageState extends State<ProfilePage>
             // Specialty - use spec object first, fallback to speciality string
             Builder(
               builder: (context) {
-                final specName = user.spec?.name ?? user.speciality;
+                final locale = Localizations.localeOf(context).languageCode;
+                final specName = user.spec?.getLocalizedName(locale) ?? user.speciality;
                 if (specName != null && specName.isNotEmpty) {
                   return Text(
                     specName,
@@ -354,8 +357,14 @@ class _ProfilePageState extends State<ProfilePage>
                   _buildTag('${context.tr('flow')} ${user.flow.name}'),
                 if (user.generation != null && user.generation!.isNotEmpty)
                   _buildTag(user.generation!),
-                if (user.state.nameKg != null && user.state.nameKg!.isNotEmpty)
-                  _buildTag(user.state.nameKg!),
+                Builder(
+                  builder: (context) {
+                    final locale = Localizations.localeOf(context).languageCode;
+                    final stateName = user.state.getLocalizedName(locale);
+                    if (stateName.isNotEmpty) return _buildTag(stateName);
+                    return const SizedBox.shrink();
+                  },
+                ),
               ],
             ),
 
@@ -717,17 +726,8 @@ class _ProfileInfoTab extends StatelessWidget {
     );
   }
 
-  int _computeAge() {
-    if (user.birthday == null || user.birthday!.isEmpty) return user.age;
-    final birth = DateTime.tryParse(user.birthday!);
-    if (birth == null) return user.age;
-    final now = DateTime.now();
-    int age = now.year - birth.year;
-    if (now.month < birth.month ||
-        (now.month == birth.month && now.day < birth.day)) {
-      age--;
-    }
-    return age;
+  int? _computeAge() {
+    return user.calculatedAge;
   }
 
   Widget _buildStatsRow(BuildContext context) {
@@ -741,7 +741,10 @@ class _ProfileInfoTab extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${_computeAge()}', context.tr('age')),
+            child: _buildStatItem(
+              _computeAge()?.toString() ?? context.tr('no_data'),
+              context.tr('age'),
+            ),
           ),
           Container(width: 1, height: 36, color: Colors.grey.shade300),
           Padding(
@@ -750,7 +753,8 @@ class _ProfileInfoTab extends StatelessWidget {
           ),
           Builder(
             builder: (context) {
-              final univerName = user.univer?.name ?? user.university;
+              final locale = Localizations.localeOf(context).languageCode;
+              final univerName = user.univer?.getLocalizedName(locale) ?? user.university;
               if (univerName != null && univerName.isNotEmpty) {
                 return Expanded(
                   child: Row(
@@ -871,13 +875,16 @@ class _ProfileInfoTab extends StatelessWidget {
   }
 
   Widget _buildInfoList(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
     final items = <_InfoItem>[];
 
-    if (user.region?.nameKg != null && user.region!.nameKg!.isNotEmpty) {
-      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), user.region!.nameKg!));
+    final regionName = user.region?.getLocalizedName(locale);
+    if (regionName != null && regionName.isNotEmpty) {
+      items.add(_InfoItem(Icons.map_outlined, context.tr('district'), regionName));
     }
-    if (user.village != null && user.village!.name.isNotEmpty) {
-      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), user.village!.name));
+    final villageName = user.village?.getLocalizedName(locale);
+    if (villageName != null && villageName.isNotEmpty) {
+      items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), villageName));
     }
     if (user.interest != null && user.interest!.isNotEmpty) {
       items.add(_InfoItem(Icons.favorite_outline_rounded, context.tr('interests'), user.interest!));
@@ -1133,12 +1140,12 @@ class _UserPostsTabState extends State<_UserPostsTab> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Постту өчүрүү'),
-        content: const Text('Бул постту өчүргүңүз келеби?'),
+        title: Text(context.tr('delete_post_title')),
+        content: Text(context.tr('delete_post_confirm')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Жок', style: TextStyle(color: Colors.grey.shade600)),
+            child: Text(context.tr('no'), style: TextStyle(color: Colors.grey.shade600)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1146,7 +1153,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
               backgroundColor: Colors.red.shade500,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Өчүрүү'),
+            child: Text(context.tr('delete')),
           ),
         ],
       ),
@@ -1159,8 +1166,8 @@ class _UserPostsTabState extends State<_UserPostsTab> {
           _loadPosts();
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Пост ийгиликтүү өчүрүлдү'),
+              SnackBar(
+                content: Text(context.tr('post_deleted')),
                 backgroundColor: Colors.green,
               ),
             );
@@ -1170,7 +1177,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Ката: $e'),
+              content: Text('${context.tr('error')}: $e'),
               backgroundColor: Colors.red,
             ),
           );
@@ -1211,7 +1218,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _loadPosts,
-                  child: const Text('Кайра жүктөө'),
+                  child: Text(context.tr('reload')),
                 ),
               ],
             ),
@@ -1224,7 +1231,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
                 Icon(Icons.article_outlined, size: 64, color: Colors.grey.shade300),
                 const SizedBox(height: 16),
                 Text(
-                  'Посттор жок',
+                  context.tr('no_posts'),
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey.shade500,
@@ -1233,7 +1240,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Биринчи постуңузду жазыңыз',
+                  context.tr('no_posts_hint'),
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
                 ),
               ],
@@ -1484,7 +1491,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Сүрөт жүктөөдө ката: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${context.tr('image_upload_error')}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -1497,7 +1504,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
   Future<void> _savePost() async {
     if (_contentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Мазмунду жазыңыз'), backgroundColor: Colors.orange),
+        SnackBar(content: Text(context.tr('content_required')), backgroundColor: Colors.orange),
       );
       return;
     }
@@ -1543,7 +1550,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(isEditing ? 'Пост жаңыртылды' : 'Пост түзүлдү'),
+              content: Text(isEditing ? context.tr('post_updated') : context.tr('post_created')),
               backgroundColor: Colors.green,
             ),
           );
@@ -1552,7 +1559,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ката: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('${context.tr('error')}: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -1610,7 +1617,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isEditing ? 'Постту түзөтүү' : 'Жаңы пост',
+                          isEditing ? context.tr('edit_post') : context.tr('new_post'),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -1619,7 +1626,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isEditing ? 'Постуңузду жаңыртыңыз' : 'Ойлоруңуз менен бөлүшүңүз',
+                          isEditing ? context.tr('update_post_hint') : context.tr('share_thoughts'),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey.shade500,
@@ -1655,7 +1662,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                       Icon(Icons.photo_library_outlined, size: 18, color: Colors.grey.shade600),
                       const SizedBox(width: 8),
                       Text(
-                        'Сүрөт',
+                        context.tr('photo'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -1682,7 +1689,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                                 Icon(Icons.delete_outline, size: 14, color: Colors.red.shade400),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Өчүрүү',
+                                  context.tr('delete'),
                                   style: TextStyle(fontSize: 12, color: Colors.red.shade400),
                                 ),
                               ],
@@ -1720,7 +1727,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                                 ),
                                 const SizedBox(height: 10),
                                 Text(
-                                  'Жүктөлүүдө...',
+                                  context.tr('uploading'),
                                   style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                                 ),
                               ],
@@ -1753,7 +1760,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Сүрөт кошуу',
+                                              context.tr('add_photo'),
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
@@ -1761,7 +1768,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                                               ),
                                             ),
                                             Text(
-                                              'Галереядан тандоо',
+                                              context.tr('select_from_gallery'),
                                               style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
                                             ),
                                           ],
@@ -1777,7 +1784,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                       Icon(Icons.text_fields_rounded, size: 18, color: Colors.grey.shade600),
                       const SizedBox(width: 8),
                       Text(
-                        'Мазмуну',
+                        context.tr('content_label'),
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -1798,7 +1805,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                       maxLines: 5,
                       style: const TextStyle(fontSize: 14, height: 1.5),
                       decoration: InputDecoration(
-                        hintText: 'Ойлоруңузду жазыңыз...',
+                        hintText: context.tr('write_thoughts'),
                         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.all(16),
@@ -1862,7 +1869,7 @@ class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
                         Icon(isEditing ? Icons.check_rounded : Icons.send_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        _isSaving ? 'Сакталууда...' : (isEditing ? 'Сактоо' : 'Жарыялоо'),
+                        _isSaving ? context.tr('saving') : (isEditing ? context.tr('save') : context.tr('publish')),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,

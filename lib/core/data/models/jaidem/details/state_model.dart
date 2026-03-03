@@ -34,6 +34,17 @@ class StateModel {
     );
   }
 
+  String getLocalizedName(String locale) {
+    switch (locale) {
+      case 'ru':
+        return nameRu ?? name;
+      case 'ky':
+        return nameKg ?? nameRu ?? name;
+      default:
+        return name;
+    }
+  }
+
   factory StateModel.empty() {
     return StateModel(
       id: 0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/comment_card.dart';
 
@@ -101,10 +102,10 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
           Row(
             children: [
               // Title
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Комментарийлер',
-                  style: TextStyle(
+                  context.tr('comments'),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
@@ -153,7 +154,7 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 14,
@@ -184,7 +185,7 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Комментарий жок',
+            context.tr('no_comments'),
             style: TextStyle(
               color: Colors.grey.shade700,
               fontSize: 16,
@@ -193,7 +194,7 @@ mixin CommentDialog<T extends StatefulWidget> on State<T> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Биринчи болуп комментарий калтырыңыз!',
+            context.tr('be_first_comment'),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 14,

@@ -466,6 +466,41 @@ class ForumFirebaseService {
     } catch (_) {}
   }
 
+  /// Report a user profile for inappropriate content
+  Future<void> reportUser({
+    required int reportedUserId,
+    required String reason,
+    String? reportedUserName,
+  }) async {
+    final userId = _userId;
+    if (userId == null || userId.isEmpty) return;
+
+    try {
+      await _firestore.collection('reports').add({
+        'type': 'user',
+        'reportedUserId': reportedUserId.toString(),
+        'reportedUserName': reportedUserName,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'reportedAt': FieldValue.serverTimestamp(),
+        'status': 'pending',
+        'requiresAdminAction': true,
+      });
+
+      await _firestore.collection('admin_notifications').add({
+        'type': 'user_reported',
+        'reportedUserId': reportedUserId.toString(),
+        'reportedUserName': reportedUserName,
+        'reason': reason,
+        'reportedBy': userId,
+        'reportedByName': _userFullname,
+        'createdAt': FieldValue.serverTimestamp(),
+        'read': false,
+      });
+    } catch (_) {}
+  }
+
   /// Block a user with developer notification
   Future<void> blockUser(int blockedUserId, {String? blockedUserName}) async {
     final userId = _userId;

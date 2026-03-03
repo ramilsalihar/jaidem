@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jaidem/core/data/injection.dart';
+import 'package:jaidem/core/data/services/deep_link_service.dart';
 import 'package:jaidem/core/data/services/usage_service.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/localization/locale_cubit.dart';
@@ -102,7 +104,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.lightTheme,
-            routerConfig: appRouter.config(),
+            routerConfig: appRouter.config(
+              deepLinkBuilder: (deepLink) {
+                if (deepLink.path == '/' || deepLink.path.isEmpty) {
+                  return deepLink;
+                }
+                DeepLinkService.pendingPath = deepLink.path;
+                return DeepLink.path('/');
+              },
+            ),
             locale: locale,
             supportedLocales: LocaleCubit.supportedLocales,
             localizationsDelegates: const [

@@ -8,8 +8,8 @@ class GetTrainingsUsecase {
 
   GetTrainingsUsecase(this.repository);
 
-  Future<Either<String, ResponseModel<TrainingModel>>> call() {
-    return repository.getTrainings();
+  Future<Either<String, ResponseModel<TrainingModel>>> call({int? flowId}) {
+    return repository.getTrainings(flowId: flowId);
   }
 }
 

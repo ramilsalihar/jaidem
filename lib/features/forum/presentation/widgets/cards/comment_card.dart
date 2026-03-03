@@ -81,20 +81,20 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
     }
   }
 
-  String _formatDate(String? dateStr) {
+  String _formatDate(String? dateStr, BuildContext context) {
     if (dateStr == null) return '';
     try {
       final date = DateTime.parse(dateStr);
       final now = DateTime.now();
       final diff = now.difference(date);
 
-      if (diff.inMinutes < 1) return 'азыр';
-      if (diff.inMinutes < 60) return '${diff.inMinutes} мүн';
-      if (diff.inHours < 24) return '${diff.inHours} с';
-      if (diff.inDays < 7) return '${diff.inDays} күн';
-      if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} апт';
+      if (diff.inMinutes < 1) return context.tr('just_now');
+      if (diff.inMinutes < 60) return '${diff.inMinutes} ${context.tr('minutes_short')}';
+      if (diff.inHours < 24) return '${diff.inHours} ${context.tr('hours_short')}';
+      if (diff.inDays < 7) return '${diff.inDays} ${context.tr('days_short')}';
+      if (diff.inDays < 30) return '${(diff.inDays / 7).floor()} ${context.tr('weeks_short')}';
 
-      return '${diff.inDays ~/ 30} ай';
+      return '${diff.inDays ~/ 30} ${context.tr('months_short')}';
     } catch (e) {
       return '';
     }
@@ -175,7 +175,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
 
   void _handleReply() {
     HapticFeedback.lightImpact();
-    final authorName = _getAuthorProperty('fullname') ?? 'Аноним';
+    final authorName = _getAuthorProperty('fullname') ?? context.tr('anonymous');
     final documentId = widget.comment.documentId;
 
     if (documentId != null) {
@@ -184,7 +184,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
   }
 
   void _showCommentOptionsBottomSheet() {
-    final authorName = _getAuthorProperty('fullname') ?? 'Аноним';
+    final authorName = _getAuthorProperty('fullname') ?? context.tr('anonymous');
     final authorId = _getAuthorProperty('id');
 
     showModalBottomSheet(
@@ -362,7 +362,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final authorName = _getAuthorProperty('fullname') ?? 'Аноним';
+    final authorName = _getAuthorProperty('fullname') ?? context.tr('anonymous');
     final authorAvatar = _getAuthorProperty('avatar');
     final hasAvatar = authorAvatar != null && authorAvatar.isNotEmpty;
     final hasReplies = widget.comment.replies.isNotEmpty;
@@ -494,7 +494,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
                         children: [
                           // Time
                           Text(
-                            _formatDate(widget.comment.createdAt),
+                            _formatDate(widget.comment.createdAt, context),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade500,
@@ -524,7 +524,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
                                 Text(
                                   _likesCount > 0
                                       ? '$_likesCount'
-                                      : 'Жактырдым',
+                                      : context.tr('liked'),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: _isLiked
@@ -551,7 +551,7 @@ class _CommentCardState extends State<CommentCard> with SingleTickerProviderStat
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'Жооп',
+                                    context.tr('reply_action'),
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: Colors.grey.shade600,

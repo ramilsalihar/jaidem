@@ -15,9 +15,12 @@ class GetJaidemsUsecase {
     String? generation,
     String? university,
     String? speciality,
-    String? age,
+    String? ageMin,
+    String? ageMax,
     String? search,
+    String? state,
     String? region,
+    bool? isAdvisor,
   }) {
     return repository.getJaidems(
       next: next,
@@ -26,9 +29,12 @@ class GetJaidemsUsecase {
       generation: generation,
       university: university,
       speciality: speciality,
-      age: age,
+      ageMin: ageMin,
+      ageMax: ageMax,
       search: search,
+      state: state,
       region: region,
+      isAdvisor: isAdvisor,
     );
   }
 

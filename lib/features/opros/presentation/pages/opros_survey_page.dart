@@ -151,7 +151,7 @@ class _OprosSurveyContentState extends State<_OprosSurveyContent> {
     if (questions.isEmpty) {
       return Center(
         child: Text(
-          'No questions available',
+          context.tr('no_questions'),
           style: TextStyle(color: Colors.grey.shade500),
         ),
       );

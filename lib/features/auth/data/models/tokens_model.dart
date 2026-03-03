@@ -10,7 +10,7 @@ class TokensModel {
   factory TokensModel.fromJson(Map<String, dynamic> json) {
     return TokensModel(
       accessToken: json['access'] as String,
-      refreshToken: json['refresh'] as String,
+      refreshToken: json['refresh'] as String?,
     );
   }
 

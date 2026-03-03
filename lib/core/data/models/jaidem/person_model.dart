@@ -36,6 +36,8 @@ class PersonModel {
   final UniversityModel? univer;
   final SpecialityModel? spec;
   final String? birthday;
+  final bool isAdvisor;
+  final String? linkToReserve;
 
   const PersonModel({
     required this.id,
@@ -68,6 +70,8 @@ class PersonModel {
     this.univer,
     this.spec,
     this.birthday,
+    this.isAdvisor = false,
+    this.linkToReserve,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -115,6 +119,8 @@ class PersonModel {
           ? SpecialityModel.fromJson(json['spec'] as Map<String, dynamic>)
           : null,
       birthday: json['birthday'] as String?,
+      isAdvisor: json['isAdvisor'] as bool? ?? false,
+      linkToReserve: json['linkToReserve'] as String?,
     );
   }
 
@@ -149,6 +155,8 @@ class PersonModel {
     UniversityModel? univer,
     SpecialityModel? spec,
     String? birthday,
+    bool? isAdvisor,
+    String? linkToReserve,
   }) {
     return PersonModel(
       id: id ?? this.id,
@@ -181,6 +189,23 @@ class PersonModel {
       univer: univer ?? this.univer,
       spec: spec ?? this.spec,
       birthday: birthday ?? this.birthday,
+      isAdvisor: isAdvisor ?? this.isAdvisor,
+      linkToReserve: linkToReserve ?? this.linkToReserve,
     );
+  }
+
+  /// Calculate age from birthday string (YYYY-MM-DD format).
+  /// Returns null if birthday is null or empty.
+  int? get calculatedAge {
+    if (birthday == null || birthday!.isEmpty) return null;
+    final birthDate = DateTime.tryParse(birthday!);
+    if (birthDate == null) return null;
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month ||
+        (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age > 0 ? age : null;
   }
 }

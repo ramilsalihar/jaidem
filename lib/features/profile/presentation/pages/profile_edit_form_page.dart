@@ -7,11 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/speciality_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/state_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/university_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/village_model.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/network/dio_network.dart';
 import 'package:jaidem/core/utils/constants/api_const.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
 
@@ -45,6 +49,17 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
   List<SpecialityModel> _specialities = [];
   bool _isLoadingSpecialities = false;
 
+  // Location fields
+  StateModel? _selectedState;
+  RegionModel? _selectedRegion;
+  VillageModel? _selectedVillage;
+  List<StateModel> _states = [];
+  List<RegionModel> _regions = [];
+  List<VillageModel> _villages = [];
+  bool _isLoadingStates = false;
+  bool _isLoadingRegions = false;
+  bool _isLoadingVillages = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +72,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     instagramController = TextEditingController();
     whatsappController = TextEditingController();
     _loadSpecialities();
+    _loadStates();
   }
 
   Future<void> _loadSpecialities() async {
@@ -99,6 +115,68 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     return [];
   }
 
+  Future<void> _loadStates() async {
+    setState(() => _isLoadingStates = true);
+    try {
+      final response = await DioNetwork.appAPI
+          .get('${ApiConst.baseUrl}${ApiConst.states}');
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List results = data is List ? data : (data['results'] as List? ?? []);
+        _states = results.map((e) => StateModel.fromJson(e)).toList();
+      }
+    } catch (_) {}
+    if (mounted) {
+      setState(() => _isLoadingStates = false);
+    }
+  }
+
+  Future<void> _loadRegions(int stateId) async {
+    setState(() {
+      _isLoadingRegions = true;
+      _regions = [];
+      _villages = [];
+      _selectedRegion = null;
+      _selectedVillage = null;
+    });
+    try {
+      final response = await DioNetwork.appAPI.get(
+        '${ApiConst.baseUrl}${ApiConst.regions}',
+        queryParameters: {'state': stateId},
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List results = data is List ? data : (data['results'] as List? ?? []);
+        _regions = results.map((e) => RegionModel.fromJson(e)).toList();
+      }
+    } catch (_) {}
+    if (mounted) {
+      setState(() => _isLoadingRegions = false);
+    }
+  }
+
+  Future<void> _loadVillages(int regionId) async {
+    setState(() {
+      _isLoadingVillages = true;
+      _villages = [];
+      _selectedVillage = null;
+    });
+    try {
+      final response = await DioNetwork.appAPI.get(
+        '${ApiConst.baseUrl}${ApiConst.villages}',
+        queryParameters: {'region': regionId},
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List results = data is List ? data : (data['results'] as List? ?? []);
+        _villages = results.map((e) => VillageModel.fromJson(e)).toList();
+      }
+    } catch (_) {}
+    if (mounted) {
+      setState(() => _isLoadingVillages = false);
+    }
+  }
+
   void _fillControllers(PersonModel user) {
     aboutMeController.text = user.aboutMe ?? '';
     courseYearController.text = user.courseYear.toString();
@@ -112,6 +190,20 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
     _selectedSpeciality = user.spec;
     if (user.birthday != null && user.birthday!.isNotEmpty) {
       _selectedBirthday = DateTime.tryParse(user.birthday!);
+    }
+    // Location fields
+    if (user.state.id != 0) {
+      _selectedState = user.state;
+      _loadRegions(user.state.id).then((_) {
+        if (user.region != null) {
+          setState(() => _selectedRegion = user.region);
+          _loadVillages(user.region!.id).then((_) {
+            if (user.village != null) {
+              setState(() => _selectedVillage = user.village);
+            }
+          });
+        }
+      });
     }
   }
 
@@ -174,7 +266,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Сүрөт ийгиликтүү жүктөлдү'),
+              content: Text(context.tr('image_uploaded')),
               backgroundColor: Colors.green.shade600,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
@@ -188,7 +280,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Сүрөт жүктөөдө ката: $e'),
+            content: Text('${context.tr('image_upload_error')}: $e'),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -229,6 +321,9 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
         univer: _selectedUniversity,
         spec: _selectedSpeciality,
         birthday: birthdayStr,
+        state: _selectedState ?? user.state,
+        region: _selectedRegion,
+        village: _selectedVillage,
       );
 
       await context.read<ProfileCubit>().updateUser(updatedUser);
@@ -236,7 +331,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Профиль ийгиликтүү сакталды'),
+            content: Text(context.tr('profile_saved')),
             backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -250,7 +345,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Сактоодо ката: $e'),
+            content: Text('${context.tr('save_error')}: $e'),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -307,7 +402,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Жүктөлүүдө...',
+            context.tr('loading'),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 14,
@@ -332,7 +427,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Ката кетти',
+              context.tr('error_occurred'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -368,11 +463,11 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
             child: Column(
               children: [
                 // About me
-                _buildSectionTitle('Мен жөнүндө', Icons.person_outline_rounded),
+                _buildSectionTitle(context.tr('about_me'), Icons.person_outline_rounded),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: aboutMeController,
-                  hint: 'Өзүңүз тууралуу маалымат жазыңыз...',
+                  hint: context.tr('about_me_hint'),
                   maxLines: 4,
                 ),
                 const SizedBox(height: 12),
@@ -380,8 +475,19 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
 
                 const SizedBox(height: 24),
 
+                // Location section
+                _buildSectionTitle(context.tr('location'), Icons.location_on_outlined),
+                const SizedBox(height: 12),
+                _buildStateSelector(),
+                const SizedBox(height: 12),
+                _buildRegionSelector(),
+                const SizedBox(height: 12),
+                _buildVillageSelector(),
+
+                const SizedBox(height: 24),
+
                 // Education section
-                _buildSectionTitle('Билим', Icons.school_outlined),
+                _buildSectionTitle(context.tr('education'), Icons.school_outlined),
                 const SizedBox(height: 12),
                 _buildUniversitySelector(),
                 const SizedBox(height: 12),
@@ -390,7 +496,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                     Expanded(
                       child: _buildTextField(
                         controller: courseYearController,
-                        hint: 'Окуу жылы',
+                        hint: context.tr('course_year_hint'),
                         icon: Icons.calendar_today_outlined,
                         keyboardType: TextInputType.number,
                       ),
@@ -406,42 +512,42 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                 const SizedBox(height: 24),
 
                 // Interests & Skills
-                _buildSectionTitle('Кызыкчылыктар жана көндүмдөр', Icons.favorite_outline_rounded),
+                _buildSectionTitle(context.tr('interests_and_skills'), Icons.favorite_outline_rounded),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: interestController,
-                  hint: 'Кызыкчылыктар (мис: Футбол, Китеп окуу...)',
+                  hint: context.tr('interests_hint'),
                   icon: Icons.interests_outlined,
                 ),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: skillsController,
-                  hint: 'Көндүмдөр (мис: Программирование, Дизайн...)',
+                  hint: context.tr('skills_hint'),
                   icon: Icons.psychology_outlined,
                 ),
 
                 const SizedBox(height: 24),
 
                 // Contact info
-                _buildSectionTitle('Байланыш маалыматы', Icons.contact_phone_outlined),
+                _buildSectionTitle(context.tr('contact_info'), Icons.contact_phone_outlined),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: phoneController,
-                  hint: 'Телефон номери',
+                  hint: context.tr('phone_hint'),
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: whatsappController,
-                  hint: 'WhatsApp номери',
+                  hint: context.tr('whatsapp_hint'),
                   icon: Icons.chat_outlined,
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 12),
                 _buildTextField(
                   controller: instagramController,
-                  hint: 'Instagram колдонуучу аты',
+                  hint: context.tr('instagram_hint'),
                   icon: Icons.camera_alt_outlined,
                 ),
 
@@ -500,9 +606,9 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Text(
-                    'Профилди түзөтүү',
-                    style: TextStyle(
+                  Text(
+                    context.tr('edit_profile'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
@@ -590,7 +696,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
 
             // Tap to change text
             Text(
-              'Сүрөттү өзгөртүү үчүн басыңыз',
+              context.tr('tap_to_change_photo'),
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.white.withValues(alpha: 0.7),
@@ -698,174 +804,353 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
         ? '${_selectedBirthday!.day.toString().padLeft(2, '0')}.${_selectedBirthday!.month.toString().padLeft(2, '0')}.${_selectedBirthday!.year}'
         : null;
 
-    return GestureDetector(
-      onTap: () async {
-        final picked = await showDatePicker(
-          context: context,
-          initialDate: _selectedBirthday ?? DateTime(2000, 1, 1),
-          firstDate: DateTime(1950),
-          lastDate: DateTime.now(),
-          builder: (context, child) {
-            return Theme(
-              data: Theme.of(context).copyWith(
-                colorScheme: ColorScheme.light(
-                  primary: AppColors.primary,
-                  onPrimary: Colors.white,
-                  surface: Colors.white,
-                ),
-              ),
-              child: child!,
-            );
-          },
-        );
-        if (picked != null) {
-          setState(() => _selectedBirthday = picked);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: displayText != null
-                ? AppColors.primary.withValues(alpha: 0.5)
-                : Colors.grey.shade200,
-            width: 1,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.cake_outlined,
+            color: Colors.grey.shade400,
+            size: 20,
           ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              displayText ?? context.tr('select_birthday'),
+              style: TextStyle(
+                color: displayText != null
+                    ? Colors.grey.shade500
+                    : Colors.grey.shade400,
+                fontSize: 14,
+                fontWeight: displayText != null ? FontWeight.w500 : FontWeight.normal,
+              ),
+            ),
+          ),
+          Icon(Icons.lock_outline, color: Colors.grey.shade400, size: 18),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationLoadingContainer() {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary.withValues(alpha: 0.5)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDisabledSelector(String hint) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.grey.shade200.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade600, size: 14),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              hint,
+              style: TextStyle(
+                color: Colors.grey.shade400,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationSelector<T>({
+    required T? selectedValue,
+    required String hint,
+    required String? selectedLabel,
+    required VoidCallback onTap,
+    required VoidCallback onClear,
+  }) {
+    final isSelected = selectedValue != null;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.06) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.35)
+                : Colors.grey.shade200,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.cake_outlined,
-              color: Colors.grey.shade400,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                displayText ?? 'Туулган күнүңүздү тандаңыз',
-                style: TextStyle(
-                  color: displayText != null
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade400,
-                  fontSize: 14,
-                  fontWeight: displayText != null ? FontWeight.w500 : FontWeight.normal,
-                ),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.search_rounded,
+                color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                size: 14,
               ),
             ),
-            Icon(Icons.calendar_month_outlined, color: Colors.grey.shade500, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                selectedLabel ?? hint,
+                style: TextStyle(
+                  color: isSelected
+                      ? const Color(0xFF1A1D26)
+                      : Colors.grey.shade400,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isSelected)
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onClear();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: Colors.grey.shade500,
+                    size: 13,
+                  ),
+                ),
+              )
+            else
+              Icon(
+                Icons.unfold_more_rounded,
+                color: Colors.grey.shade400,
+                size: 18,
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStateSelector() {
+    if (_isLoadingStates) return _buildLocationLoadingContainer();
+    final locale = Localizations.localeOf(context).languageCode;
+    return _buildLocationSelector<StateModel>(
+      selectedValue: _selectedState,
+      hint: context.tr('select_state'),
+      selectedLabel: _selectedState?.getLocalizedName(locale),
+      onTap: () => _showStateSearchDialog(),
+      onClear: () {
+        setState(() {
+          _selectedState = null;
+          _selectedRegion = null;
+          _selectedVillage = null;
+          _regions = [];
+          _villages = [];
+        });
+      },
+    );
+  }
+
+  Widget _buildRegionSelector() {
+    if (_isLoadingRegions) return _buildLocationLoadingContainer();
+    if (_selectedState == null) return _buildDisabledSelector(context.tr('select_district_first'));
+    final locale = Localizations.localeOf(context).languageCode;
+    return _buildLocationSelector<RegionModel>(
+      selectedValue: _selectedRegion,
+      hint: context.tr('select_district'),
+      selectedLabel: _selectedRegion?.getLocalizedName(locale),
+      onTap: () => _showRegionSearchDialog(),
+      onClear: () {
+        setState(() {
+          _selectedRegion = null;
+          _selectedVillage = null;
+          _villages = [];
+        });
+      },
+    );
+  }
+
+  Widget _buildVillageSelector() {
+    if (_isLoadingVillages) return _buildLocationLoadingContainer();
+    if (_selectedRegion == null) return _buildDisabledSelector(context.tr('select_village_first'));
+    final locale = Localizations.localeOf(context).languageCode;
+    return _buildLocationSelector<VillageModel>(
+      selectedValue: _selectedVillage,
+      hint: context.tr('select_village'),
+      selectedLabel: _selectedVillage?.getLocalizedName(locale),
+      onTap: () => _showVillageSearchDialog(),
+      onClear: () {
+        setState(() => _selectedVillage = null);
+      },
+    );
+  }
+
+  void _showStateSearchDialog() {
+    final locale = Localizations.localeOf(context).languageCode;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _LocationSearchDialog<StateModel>(
+        title: context.tr('select_state'),
+        searchHint: context.tr('search_hint'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('select_state'),
+        items: _states,
+        selectedItem: _selectedState,
+        itemLabel: (item) => item.getLocalizedName(locale),
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.name.toLowerCase().contains(lowerQuery) ||
+              (item.nameRu?.toLowerCase().contains(lowerQuery) ?? false) ||
+              (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
+        },
+        onSelected: (item) {
+          setState(() {
+            _selectedState = item;
+            _selectedRegion = null;
+            _selectedVillage = null;
+            _regions = [];
+            _villages = [];
+          });
+          if (item != null) {
+            _loadRegions(item.id);
+          }
+        },
+      ),
+    );
+  }
+
+  void _showRegionSearchDialog() {
+    final locale = Localizations.localeOf(context).languageCode;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _LocationSearchDialog<RegionModel>(
+        title: context.tr('select_district'),
+        searchHint: context.tr('search_hint'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('no_districts_found'),
+        items: _regions,
+        selectedItem: _selectedRegion,
+        itemLabel: (item) => item.getLocalizedName(locale),
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.nameEn.toLowerCase().contains(lowerQuery) ||
+              (item.nameRu?.toLowerCase().contains(lowerQuery) ?? false) ||
+              (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
+        },
+        onSelected: (item) {
+          setState(() {
+            _selectedRegion = item;
+            _selectedVillage = null;
+            _villages = [];
+          });
+          if (item != null) {
+            _loadVillages(item.id);
+          }
+        },
+      ),
+    );
+  }
+
+  void _showVillageSearchDialog() {
+    final locale = Localizations.localeOf(context).languageCode;
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _LocationSearchDialog<VillageModel>(
+        title: context.tr('select_village'),
+        searchHint: context.tr('search_hint'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('no_villages_found'),
+        items: _villages,
+        selectedItem: _selectedVillage,
+        itemLabel: (item) => item.getLocalizedName(locale),
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.name.toLowerCase().contains(lowerQuery) ||
+              (item.nameRu?.toLowerCase().contains(lowerQuery) ?? false) ||
+              (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
+        },
+        onSelected: (item) {
+          setState(() => _selectedVillage = item);
+        },
       ),
     );
   }
 
   Widget _buildUniversitySelector() {
-    return GestureDetector(
+    return _buildLocationSelector<UniversityModel>(
+      selectedValue: _selectedUniversity,
+      hint: context.tr('select_university_hint'),
+      selectedLabel: _selectedUniversity?.name,
       onTap: () => _showUniversitySearchDialog(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _selectedUniversity != null
-                ? AppColors.primary.withValues(alpha: 0.5)
-                : Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.account_balance_outlined,
-              color: Colors.grey.shade400,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _selectedUniversity?.name ?? 'Университет тандаңыз',
-                style: TextStyle(
-                  color: _selectedUniversity != null
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade400,
-                  fontSize: 14,
-                  fontWeight: _selectedUniversity != null ? FontWeight.w500 : FontWeight.normal,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (_selectedUniversity != null)
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() {
-                    _selectedUniversity = null;
-                  });
-                },
-                child: Icon(Icons.close, color: Colors.grey.shade500, size: 18),
-              )
-            else
-              Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500, size: 20),
-          ],
-        ),
-      ),
+      onClear: () => setState(() => _selectedUniversity = null),
     );
   }
 
   Widget _buildSpecialitySelector() {
-    return GestureDetector(
+    return _buildLocationSelector<SpecialityModel>(
+      selectedValue: _selectedSpeciality,
+      hint: context.tr('specialty'),
+      selectedLabel: _selectedSpeciality?.name,
       onTap: () => _showSpecialitySearchDialog(),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _selectedSpeciality != null
-                ? AppColors.primary.withValues(alpha: 0.5)
-                : Colors.grey.shade200,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.work_outline_rounded,
-              color: Colors.grey.shade400,
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                _selectedSpeciality?.name ?? 'Адистик',
-                style: TextStyle(
-                  color: _selectedSpeciality != null
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade400,
-                  fontSize: 14,
-                  fontWeight: _selectedSpeciality != null ? FontWeight.w500 : FontWeight.normal,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (_selectedSpeciality != null)
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() {
-                    _selectedSpeciality = null;
-                  });
-                },
-                child: Icon(Icons.close, color: Colors.grey.shade500, size: 18),
-              )
-            else
-              Icon(Icons.keyboard_arrow_down, color: Colors.grey.shade500, size: 20),
-          ],
-        ),
-      ),
+      onClear: () => setState(() => _selectedSpeciality = null),
     );
   }
 
@@ -944,7 +1229,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                   const Icon(Icons.check_rounded, color: Colors.white, size: 20),
                 const SizedBox(width: 10),
                 Text(
-                  _isSaving ? 'Сакталууда...' : 'Сактоо',
+                  _isSaving ? context.tr('saving') : context.tr('save'),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -977,7 +1262,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> {
                 Icon(Icons.close_rounded, color: Colors.grey.shade600, size: 20),
                 const SizedBox(width: 10),
                 Text(
-                  'Жокко чыгаруу',
+                  context.tr('cancel'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1052,111 +1337,253 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+            // Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 10, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade100),
+                ),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Университет тандаңыз',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.account_balance_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      context.tr('select_university_hint'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Search field
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
               child: TextField(
                 controller: _searchController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  hintText: 'Издөө...',
-                  prefixIcon: const Icon(Icons.search),
+                  hintText: '${context.tr('search_hint')}...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 6),
+                    child: Icon(Icons.search_rounded, size: 18, color: Colors.grey.shade400),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 34),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
+                      ? GestureDetector(
+                          onTap: () {
                             _searchController.clear();
                             _loadUniversities();
                           },
-                          icon: const Icon(Icons.close, size: 18),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(Icons.close_rounded, size: 15, color: Colors.grey.shade400),
+                          ),
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade200),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  isDense: true,
                 ),
                 onChanged: _onSearchChanged,
               ),
             ),
+
+            // Clear selection option
             if (widget.selectedUniversity != null)
-              ListTile(
-                leading: Icon(Icons.clear, color: AppColors.primary),
-                title: Text('Тазалоо', style: TextStyle(color: AppColors.primary)),
+              GestureDetector(
                 onTap: () {
                   widget.onSelected(null);
                   Navigator.of(context).pop();
                 },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.remove_circle_outline_rounded, color: AppColors.primary, size: 15),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.tr('clear'),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            const Divider(height: 1),
+
+            Divider(height: 1, color: Colors.grey.shade100),
+
+            // List
             Flexible(
               child: _isLoading
-                  ? const Center(
+                  ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
+                        padding: const EdgeInsets.all(32),
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        ),
                       ),
                     )
                   : _universities.isEmpty
                       ? Center(
                           child: Padding(
                             padding: const EdgeInsets.all(32),
-                            child: Text(
-                              'Университеттер табылган жок',
-                              style: TextStyle(color: Colors.grey.shade600),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 36,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  context.tr('no_universities_found'),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : ListView.separated(
                           shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           itemCount: _universities.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 2),
                           itemBuilder: (context, index) {
                             final item = _universities[index];
                             final isSelected = widget.selectedUniversity?.id == item.id;
 
-                            return ListTile(
-                              dense: true,
-                              title: Text(
-                                item.name,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                  color: isSelected ? AppColors.primary : Colors.grey.shade800,
-                                ),
-                              ),
-                              trailing: isSelected
-                                  ? Icon(Icons.check, color: AppColors.primary, size: 20)
-                                  : null,
+                            return GestureDetector(
                               onTap: () {
                                 HapticFeedback.lightImpact();
                                 widget.onSelected(item);
                                 Navigator.of(context).pop();
                               },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withValues(alpha: 0.08)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.name,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : const Color(0xFF2D3142),
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -1220,114 +1647,559 @@ class _SpecialitySearchDialogState extends State<_SpecialitySearchDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+            // Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 10, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade100),
+                ),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Адистик тандаңыз',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.work_outline_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      context.tr('select_speciality_hint'),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Search field
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
               child: TextField(
                 controller: _searchController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
-                  hintText: 'Издөө...',
-                  prefixIcon: const Icon(Icons.search),
+                  hintText: '${context.tr('search_hint')}...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 6),
+                    child: Icon(Icons.search_rounded, size: 18, color: Colors.grey.shade400),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 34),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
+                      ? GestureDetector(
+                          onTap: () {
                             _searchController.clear();
                             _filterItems('');
                           },
-                          icon: const Icon(Icons.close, size: 18),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(Icons.close_rounded, size: 15, color: Colors.grey.shade400),
+                          ),
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade200),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  isDense: true,
                 ),
                 onChanged: _filterItems,
               ),
             ),
+
+            // Clear selection option
             if (widget.selectedSpeciality != null)
-              ListTile(
-                leading: Icon(Icons.clear, color: AppColors.primary),
-                title: Text('Тазалоо', style: TextStyle(color: AppColors.primary)),
+              GestureDetector(
                 onTap: () {
                   widget.onSelected(null);
                   Navigator.of(context).pop();
                 },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.remove_circle_outline_rounded, color: AppColors.primary, size: 15),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.tr('clear'),
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            const Divider(height: 1),
+
+            Divider(height: 1, color: Colors.grey.shade100),
+
+            // List
             Flexible(
               child: widget.isLoading
-                  ? const Center(
+                  ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
+                        padding: const EdgeInsets.all(32),
+                        child: SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        ),
                       ),
                     )
                   : _filteredItems.isEmpty
                       ? Center(
                           child: Padding(
                             padding: const EdgeInsets.all(32),
-                            child: Text(
-                              'Адистиктер табылган жок',
-                              style: TextStyle(color: Colors.grey.shade600),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 36,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  context.tr('specialities_not_found'),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : ListView.separated(
                           shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           itemCount: _filteredItems.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 2),
                           itemBuilder: (context, index) {
                             final item = _filteredItems[index];
                             final isSelected = widget.selectedSpeciality?.id == item.id;
 
-                            return ListTile(
-                              dense: true,
-                              title: Text(
-                                item.name,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                  color: isSelected ? AppColors.primary : Colors.grey.shade800,
-                                ),
-                              ),
-                              trailing: isSelected
-                                  ? Icon(Icons.check, color: AppColors.primary, size: 20)
-                                  : null,
+                            return GestureDetector(
                               onTap: () {
                                 HapticFeedback.lightImpact();
                                 widget.onSelected(item);
                                 Navigator.of(context).pop();
                               },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withValues(alpha: 0.08)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.name,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : const Color(0xFF2D3142),
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationSearchDialog<T> extends StatefulWidget {
+  const _LocationSearchDialog({
+    super.key,
+    required this.title,
+    required this.items,
+    required this.selectedItem,
+    required this.itemLabel,
+    required this.searchFilter,
+    required this.onSelected,
+    required this.searchHint,
+    required this.clearLabel,
+    required this.emptyText,
+  });
+
+  final String title;
+  final String searchHint;
+  final String clearLabel;
+  final String emptyText;
+  final List<T> items;
+  final T? selectedItem;
+  final String Function(T) itemLabel;
+  final bool Function(T item, String query) searchFilter;
+  final void Function(T?) onSelected;
+
+  @override
+  State<_LocationSearchDialog<T>> createState() => _LocationSearchDialogState<T>();
+}
+
+class _LocationSearchDialogState<T> extends State<_LocationSearchDialog<T>> {
+  final TextEditingController _searchController = TextEditingController();
+  List<T> _filteredItems = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredItems = widget.items;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterItems(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredItems = widget.items;
+      } else {
+        _filteredItems = widget.items
+            .where((item) => widget.searchFilter(item, query))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 10, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade100),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.list_alt_rounded,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Search field
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: '${widget.searchHint}...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 6),
+                    child: Icon(Icons.search_rounded, size: 18, color: Colors.grey.shade400),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 34),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            _filterItems('');
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(Icons.close_rounded, size: 15, color: Colors.grey.shade400),
+                          ),
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  isDense: true,
+                ),
+                onChanged: _filterItems,
+              ),
+            ),
+
+            // Clear selection option
+            if (widget.selectedItem != null)
+              GestureDetector(
+                onTap: () {
+                  widget.onSelected(null);
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.remove_circle_outline_rounded, color: AppColors.primary, size: 15),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.clearLabel,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            Divider(height: 1, color: Colors.grey.shade100),
+
+            // List
+            Flexible(
+              child: _filteredItems.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 36,
+                              color: Colors.grey.shade300,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              widget.emptyText,
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      itemCount: _filteredItems.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 2),
+                      itemBuilder: (context, index) {
+                        final item = _filteredItems[index];
+                        final isSelected = widget.selectedItem == item;
+
+                        return GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            widget.onSelected(item);
+                            Navigator.of(context).pop();
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary.withValues(alpha: 0.08)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.itemLabel(item),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : const Color(0xFF2D3142),
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),

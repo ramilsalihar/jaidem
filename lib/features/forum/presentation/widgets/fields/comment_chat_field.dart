@@ -129,7 +129,7 @@ class _CommentChatFieldState extends State<CommentChatField> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${state.replyToAuthorName} га жооп берүү',
+                        '${state.replyToAuthorName} ${context.tr('reply_to')}',
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.primary,
@@ -222,8 +222,8 @@ class _CommentChatFieldState extends State<CommentChatField> {
                               ),
                               decoration: InputDecoration(
                                 hintText: isReplying
-                                    ? 'Жооп жазуу...'
-                                    : 'Комментарий жазуу...',
+                                    ? context.tr('write_reply')
+                                    : context.tr('write_comment'),
                                 hintStyle: TextStyle(
                                   fontSize: 15,
                                   color: Colors.grey.shade500,

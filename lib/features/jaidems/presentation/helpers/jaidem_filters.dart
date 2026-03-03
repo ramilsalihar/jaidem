@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/speciality_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/state_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/university_model.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/network/dio_network.dart';
@@ -13,25 +14,33 @@ import 'package:jaidem/core/utils/constants/api_const.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
 mixin JaidemFilters<T extends StatefulWidget> on State<T> {
+  int? selectedGeneration;
   FlowModel? selectedFlow;
-  int? selectedAge;
+  int? selectedAgeMin;
+  int? selectedAgeMax;
+  StateModel? selectedState;
   RegionModel? selectedRegion;
   UniversityModel? selectedUniversity;
   SpecialityModel? selectedSpeciality;
 
   List<FlowModel> _flows = [];
+  List<StateModel> _states = [];
   List<RegionModel> _regions = [];
   List<UniversityModel> _universities = [];
   List<SpecialityModel> _specialities = [];
 
   bool _isLoadingFlows = false;
+  bool _isLoadingStates = false;
   bool _isLoadingRegions = false;
   bool _isLoadingUniversities = false;
   bool _isLoadingSpecialities = false;
 
   bool hasActiveFilters() {
-    return selectedFlow != null ||
-        selectedAge != null ||
+    return selectedGeneration != null ||
+        selectedFlow != null ||
+        selectedAgeMin != null ||
+        selectedAgeMax != null ||
+        selectedState != null ||
         selectedRegion != null ||
         selectedUniversity != null ||
         selectedSpeciality != null;
@@ -39,8 +48,10 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
 
   int getActiveFilterCount() {
     int count = 0;
+    if (selectedGeneration != null) count++;
     if (selectedFlow != null) count++;
-    if (selectedAge != null) count++;
+    if (selectedAgeMin != null || selectedAgeMax != null) count++;
+    if (selectedState != null) count++;
     if (selectedRegion != null) count++;
     if (selectedUniversity != null) count++;
     if (selectedSpeciality != null) count++;
@@ -62,20 +73,42 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
     }
   }
 
-  Future<void> _loadRegions() async {
-    if (_regions.isNotEmpty) return;
+  Future<void> _loadStates() async {
+    if (_states.isNotEmpty) return;
 
     try {
       final response = await DioNetwork.appAPI
-          .get('${ApiConst.baseUrl}${ApiConst.regions}');
+          .get('${ApiConst.baseUrl}${ApiConst.states}');
       if (response.statusCode == 200) {
         final data = response.data;
         final List results = data is List ? data : (data['results'] as List? ?? []);
-        _regions = results.map((e) => RegionModel.fromJson(e)).toList();
+        _states = results.map((e) => StateModel.fromJson(e)).toList();
       }
     } on DioException catch (_) {
       // Handle error silently
     }
+  }
+
+  Future<List<RegionModel>> _loadRegions({int? stateId}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (stateId != null) {
+        queryParams['state'] = stateId;
+      }
+      final response = await DioNetwork.appAPI.get(
+        '${ApiConst.baseUrl}${ApiConst.regions}',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List results = data is List ? data : (data['results'] as List? ?? []);
+        _regions = results.map((e) => RegionModel.fromJson(e)).toList();
+        return _regions;
+      }
+    } on DioException catch (_) {
+      // Handle error silently
+    }
+    return [];
   }
 
   Future<List<UniversityModel>> _loadUniversities({String? search}) async {
@@ -131,15 +164,20 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
         return _FilterSheet(
           locale: locale,
           flows: _flows,
+          states: _states,
           regions: _regions,
           universities: _universities,
           specialities: _specialities,
           isLoadingFlows: _isLoadingFlows,
+          isLoadingStates: _isLoadingStates,
           isLoadingRegions: _isLoadingRegions,
           isLoadingUniversities: _isLoadingUniversities,
           isLoadingSpecialities: _isLoadingSpecialities,
+          selectedGeneration: selectedGeneration,
           selectedFlow: selectedFlow,
-          selectedAge: selectedAge,
+          selectedAgeMin: selectedAgeMin,
+          selectedAgeMax: selectedAgeMax,
+          selectedState: selectedState,
           selectedRegion: selectedRegion,
           selectedUniversity: selectedUniversity,
           selectedSpeciality: selectedSpeciality,
@@ -151,13 +189,19 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             }
             return _flows;
           },
-          onLoadRegions: () async {
-            if (_regions.isEmpty && !_isLoadingRegions) {
-              _isLoadingRegions = true;
-              await _loadRegions();
-              _isLoadingRegions = false;
+          onLoadStates: () async {
+            if (_states.isEmpty && !_isLoadingStates) {
+              _isLoadingStates = true;
+              await _loadStates();
+              _isLoadingStates = false;
             }
-            return _regions;
+            return _states;
+          },
+          onLoadRegions: ({int? stateId}) async {
+            _isLoadingRegions = true;
+            final result = await _loadRegions(stateId: stateId);
+            _isLoadingRegions = false;
+            return result;
           },
           onLoadUniversities: (String? search) async {
             if (!_isLoadingUniversities) {
@@ -176,15 +220,21 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             }
             return _specialities;
           },
-          onApply: (flow, age, region, university, speciality) {
+          onApply: (generation, flow, ageMin, ageMax, stateModel, region, university, speciality) {
+            selectedGeneration = generation;
             selectedFlow = flow;
-            selectedAge = age;
+            selectedAgeMin = ageMin;
+            selectedAgeMax = ageMax;
+            selectedState = stateModel;
             selectedRegion = region;
             selectedUniversity = university;
             selectedSpeciality = speciality;
             final filters = <String, String?>{
+              'generation': generation?.toString(),
               'flow': flow?.id.toString(),
-              'age': age?.toString(),
+              'age_min': ageMin?.toString(),
+              'age_max': ageMax?.toString(),
+              'state': stateModel?.id.toString(),
               'region': region?.id.toString(),
               'university': university?.id.toString(),
               'speciality': speciality?.id.toString(),
@@ -192,8 +242,11 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             onApply(filters);
           },
           onReset: () {
+            selectedGeneration = null;
             selectedFlow = null;
-            selectedAge = null;
+            selectedAgeMin = null;
+            selectedAgeMax = null;
+            selectedState = null;
             selectedRegion = null;
             selectedUniversity = null;
             selectedSpeciality = null;
@@ -209,19 +262,25 @@ class _FilterSheet extends StatefulWidget {
   const _FilterSheet({
     required this.locale,
     required this.flows,
+    required this.states,
     required this.regions,
     required this.universities,
     required this.specialities,
     required this.isLoadingFlows,
+    required this.isLoadingStates,
     required this.isLoadingRegions,
     required this.isLoadingUniversities,
     required this.isLoadingSpecialities,
+    required this.selectedGeneration,
     required this.selectedFlow,
-    required this.selectedAge,
+    required this.selectedAgeMin,
+    required this.selectedAgeMax,
+    required this.selectedState,
     required this.selectedRegion,
     required this.selectedUniversity,
     required this.selectedSpeciality,
     required this.onLoadFlows,
+    required this.onLoadStates,
     required this.onLoadRegions,
     required this.onLoadUniversities,
     required this.onLoadSpecialities,
@@ -231,25 +290,34 @@ class _FilterSheet extends StatefulWidget {
 
   final String locale;
   final List<FlowModel> flows;
+  final List<StateModel> states;
   final List<RegionModel> regions;
   final List<UniversityModel> universities;
   final List<SpecialityModel> specialities;
   final bool isLoadingFlows;
+  final bool isLoadingStates;
   final bool isLoadingRegions;
   final bool isLoadingUniversities;
   final bool isLoadingSpecialities;
+  final int? selectedGeneration;
   final FlowModel? selectedFlow;
-  final int? selectedAge;
+  final int? selectedAgeMin;
+  final int? selectedAgeMax;
+  final StateModel? selectedState;
   final RegionModel? selectedRegion;
   final UniversityModel? selectedUniversity;
   final SpecialityModel? selectedSpeciality;
   final Future<List<FlowModel>> Function() onLoadFlows;
-  final Future<List<RegionModel>> Function() onLoadRegions;
+  final Future<List<StateModel>> Function() onLoadStates;
+  final Future<List<RegionModel>> Function({int? stateId}) onLoadRegions;
   final Future<List<UniversityModel>> Function(String? search) onLoadUniversities;
   final Future<List<SpecialityModel>> Function() onLoadSpecialities;
   final void Function(
+    int? generation,
     FlowModel? flow,
-    int? age,
+    int? ageMin,
+    int? ageMax,
+    StateModel? stateModel,
     RegionModel? region,
     UniversityModel? university,
     SpecialityModel? speciality,
@@ -262,16 +330,20 @@ class _FilterSheet extends StatefulWidget {
 
 class _FilterSheetState extends State<_FilterSheet> {
   List<FlowModel> _flows = [];
+  List<StateModel> _statesList = [];
   List<RegionModel> _regions = [];
   List<SpecialityModel> _specialities = [];
 
   bool _isLoadingFlows = true;
-  bool _isLoadingRegions = true;
+  bool _isLoadingStates = true;
+  bool _isLoadingRegions = false;
   bool _isLoadingSpecialities = true;
 
+  int? _selectedGeneration;
   FlowModel? _selectedFlow;
-  double _selectedAge = 20;
+  RangeValues _ageRange = const RangeValues(18, 25);
   bool _ageFilterEnabled = false;
+  StateModel? _selectedState;
   RegionModel? _selectedRegion;
   UniversityModel? _selectedUniversity;
   SpecialityModel? _selectedSpeciality;
@@ -279,12 +351,17 @@ class _FilterSheetState extends State<_FilterSheet> {
   @override
   void initState() {
     super.initState();
+    _selectedGeneration = widget.selectedGeneration;
     _selectedFlow = widget.selectedFlow;
+    _selectedState = widget.selectedState;
     _selectedRegion = widget.selectedRegion;
     _selectedUniversity = widget.selectedUniversity;
     _selectedSpeciality = widget.selectedSpeciality;
-    if (widget.selectedAge != null) {
-      _selectedAge = widget.selectedAge!.toDouble();
+    if (widget.selectedAgeMin != null || widget.selectedAgeMax != null) {
+      _ageRange = RangeValues(
+        (widget.selectedAgeMin ?? 15).toDouble(),
+        (widget.selectedAgeMax ?? 35).toDouble(),
+      );
       _ageFilterEnabled = true;
     }
     _loadAllData();
@@ -293,9 +370,12 @@ class _FilterSheetState extends State<_FilterSheet> {
   Future<void> _loadAllData() async {
     await Future.wait([
       _loadFlows(),
-      _loadRegions(),
+      _loadStates(),
       _loadSpecialities(),
     ]);
+    if (_selectedState != null) {
+      await _loadRegionsByState(_selectedState!.id);
+    }
   }
 
   Future<void> _loadFlows() async {
@@ -308,8 +388,21 @@ class _FilterSheetState extends State<_FilterSheet> {
     }
   }
 
-  Future<void> _loadRegions() async {
-    final regions = await widget.onLoadRegions();
+  Future<void> _loadStates() async {
+    final states = await widget.onLoadStates();
+    if (mounted) {
+      setState(() {
+        _statesList = states;
+        _isLoadingStates = false;
+      });
+    }
+  }
+
+  Future<void> _loadRegionsByState(int stateId) async {
+    setState(() {
+      _isLoadingRegions = true;
+    });
+    final regions = await widget.onLoadRegions(stateId: stateId);
     if (mounted) {
       setState(() {
         _regions = regions;
@@ -329,8 +422,10 @@ class _FilterSheetState extends State<_FilterSheet> {
   }
 
   bool _hasActiveFilters() {
-    return _selectedFlow != null ||
+    return _selectedGeneration != null ||
+        _selectedFlow != null ||
         _ageFilterEnabled ||
+        _selectedState != null ||
         _selectedRegion != null ||
         _selectedUniversity != null ||
         _selectedSpeciality != null;
@@ -339,10 +434,13 @@ class _FilterSheetState extends State<_FilterSheet> {
   void _clearAllFilters() {
     HapticFeedback.lightImpact();
     setState(() {
+      _selectedGeneration = null;
       _selectedFlow = null;
       _ageFilterEnabled = false;
-      _selectedAge = 20;
+      _ageRange = const RangeValues(18, 25);
+      _selectedState = null;
       _selectedRegion = null;
+      _regions = [];
       _selectedUniversity = null;
       _selectedSpeciality = null;
     });
@@ -354,17 +452,17 @@ class _FilterSheetState extends State<_FilterSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Handle bar
           Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
+            margin: const EdgeInsets.only(top: 10),
+            width: 36,
             height: 4,
             decoration: BoxDecoration(
               color: Colors.grey.shade300,
@@ -373,28 +471,69 @@ class _FilterSheetState extends State<_FilterSheet> {
           ),
 
           // Header
-          Padding(
-            padding: const EdgeInsets.all(20),
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.tr('filter'),
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary.withValues(alpha: 0.12),
+                            AppColors.primary.withValues(alpha: 0.05),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.tune_rounded,
+                        color: AppColors.primary,
+                        size: 18,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      context.tr('filter'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ],
                 ),
                 if (_hasActiveFilters())
                   GestureDetector(
                     onTap: _clearAllFilters,
-                    child: Text(
-                      context.tr('clear'),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        context.tr('clear'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -405,100 +544,124 @@ class _FilterSheetState extends State<_FilterSheet> {
           // Content - Scrollable
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Flow Filter
-                  _buildSectionTitle(context.tr('flow')),
-                  const SizedBox(height: 12),
+                  _buildSectionTitle(context.tr('generation'), Icons.groups_rounded),
+                  const SizedBox(height: 10),
+                  _buildGenerationSelector(),
+
+                  const SizedBox(height: 20),
+
+                  _buildSectionTitle(context.tr('flow'), Icons.account_tree_rounded),
+                  const SizedBox(height: 10),
                   _buildFlowSelector(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // Region Filter
-                  _buildSectionTitle(context.tr('region')),
-                  const SizedBox(height: 12),
+                  _buildSectionTitle(context.tr('state'), Icons.map_rounded),
+                  const SizedBox(height: 10),
+                  _buildStateSelector(),
+
+                  const SizedBox(height: 20),
+
+                  _buildSectionTitle(context.tr('region'), Icons.location_on_rounded),
+                  const SizedBox(height: 10),
                   _buildRegionSelector(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // University Filter
-                  _buildSectionTitle(context.tr('university')),
-                  const SizedBox(height: 12),
+                  _buildSectionTitle(context.tr('university'), Icons.school_rounded),
+                  const SizedBox(height: 10),
                   _buildUniversitySelector(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // Speciality Filter
-                  _buildSectionTitle(context.tr('speciality')),
-                  const SizedBox(height: 12),
+                  _buildSectionTitle(context.tr('speciality'), Icons.work_rounded),
+                  const SizedBox(height: 10),
                   _buildSpecialitySelector(),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // Age Filter
                   _buildAgeSection(),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 28),
 
                   // Apply Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.onApply(
-                          _selectedFlow,
-                          _ageFilterEnabled ? _selectedAge.round() : null,
-                          _selectedRegion,
-                          _selectedUniversity,
-                          _selectedSpeciality,
-                        );
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onApply(
+                        _selectedGeneration,
+                        _selectedFlow,
+                        _ageFilterEnabled ? _ageRange.start.round() : null,
+                        _ageFilterEnabled ? _ageRange.end.round() : null,
+                        _selectedState,
+                        _selectedRegion,
+                        _selectedUniversity,
+                        _selectedSpeciality,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 15),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.primary,
+                            AppColors.primary.withValues(alpha: 0.85),
+                          ],
                         ),
-                        elevation: 0,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: Text(
-                        context.tr('apply'),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      child: Center(
+                        child: Text(
+                          context.tr('apply'),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
 
                   // Reset Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        widget.onReset();
-                        Navigator.of(context).pop();
-                      },
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                  GestureDetector(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      widget.onReset();
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.grey.shade200),
                       ),
-                      child: Text(
-                        context.tr('reset'),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade600,
+                      child: Center(
+                        child: Text(
+                          context.tr('reset'),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade500,
+                          ),
                         ),
                       ),
                     ),
@@ -514,13 +677,65 @@ class _FilterSheetState extends State<_FilterSheet> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-        color: Colors.grey.shade700,
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, size: 15, color: AppColors.primary.withValues(alpha: 0.7)),
+        const SizedBox(width: 6),
+        Text(
+          title.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: Colors.grey.shade500,
+            letterSpacing: 0.8,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenerationSelector() {
+    return _buildSearchableSelector<int?>(
+      selectedValue: _selectedGeneration,
+      hint: context.tr('select_generation'),
+      selectedLabel: _selectedGeneration != null
+          ? '${context.tr('generation')} $_selectedGeneration'
+          : null,
+      onTap: () => _showGenerationSelectDialog(),
+      onClear: () {
+        setState(() {
+          _selectedGeneration = null;
+          _selectedFlow = null;
+        });
+      },
+    );
+  }
+
+  void _showGenerationSelectDialog() {
+    final generations = [1, 2, 3, 4, 5];
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _SearchableDialog<int>(
+        title: context.tr('select_generation'),
+        searchHint: context.tr('search'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('nothing_found'),
+        items: generations,
+        selectedItem: _selectedGeneration,
+        itemLabel: (item) => '${context.tr('generation')} $item',
+        searchFilter: (item, query) => item.toString().contains(query),
+        onSelected: (item) {
+          setState(() {
+            if (_selectedGeneration != item &&
+                _selectedFlow != null &&
+                item != null &&
+                _selectedFlow!.generation != item) {
+              _selectedFlow = null;
+            }
+            _selectedGeneration = item;
+          });
+        },
       ),
     );
   }
@@ -530,45 +745,137 @@ class _FilterSheetState extends State<_FilterSheet> {
       return _buildLoadingContainer();
     }
 
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        _buildFlowChip(null, context.tr('all')),
-        ..._flows.map((flow) => _buildFlowChip(flow, '${context.tr('flow')} ${flow.name}')),
-      ],
+    if (_selectedGeneration == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.grey.shade200.withValues(alpha: 0.6),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade600, size: 14),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.tr('select_generation_first'),
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _buildSearchableSelector<FlowModel>(
+      selectedValue: _selectedFlow,
+      hint: context.tr('select_flow'),
+      selectedLabel: _selectedFlow != null
+          ? '${context.tr('flow')} ${_selectedFlow!.name}'
+          : null,
+      onTap: () => _showFlowSearchDialog(),
+      onClear: () {
+        setState(() {
+          _selectedFlow = null;
+        });
+      },
     );
   }
 
-  Widget _buildFlowChip(FlowModel? flow, String label) {
-    final isSelected = _selectedFlow?.id == flow?.id;
+  List<FlowModel> _getFilteredFlows() {
+    if (_selectedGeneration == null) return _flows;
+    return _flows.where((f) => f.generation == _selectedGeneration).toList();
+  }
 
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
+  void _showFlowSearchDialog() {
+    final filteredFlows = _getFilteredFlows();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _SearchableDialog<FlowModel>(
+        title: context.tr('select_flow'),
+        searchHint: context.tr('search'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('nothing_found'),
+        items: filteredFlows,
+        selectedItem: _selectedFlow,
+        itemLabel: (item) => '${context.tr('flow')} ${item.name} - ${item.description}',
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.name.toLowerCase().contains(lowerQuery) ||
+              item.description.toLowerCase().contains(lowerQuery);
+        },
+        onSelected: (item) {
+          setState(() {
+            _selectedFlow = item;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildStateSelector() {
+    if (_isLoadingStates) {
+      return _buildLoadingContainer();
+    }
+
+    return _buildSearchableSelector<StateModel>(
+      selectedValue: _selectedState,
+      hint: context.tr('select_state'),
+      selectedLabel: _selectedState?.getLocalizedName(widget.locale),
+      onTap: () => _showStateSearchDialog(),
+      onClear: () {
         setState(() {
-          _selectedFlow = flow;
+          _selectedState = null;
+          _selectedRegion = null;
+          _regions = [];
         });
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.grey.shade200,
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
-          ),
-        ),
+    );
+  }
+
+  void _showStateSearchDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _SearchableDialog<StateModel>(
+        title: context.tr('select_state'),
+        searchHint: context.tr('search'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('nothing_found'),
+        items: _statesList,
+        selectedItem: _selectedState,
+        itemLabel: (item) => item.getLocalizedName(widget.locale),
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.name.toLowerCase().contains(lowerQuery) ||
+              (item.nameRu?.toLowerCase().contains(lowerQuery) ?? false) ||
+              (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
+        },
+        onSelected: (item) {
+          setState(() {
+            if (_selectedState?.id != item?.id) {
+              _selectedRegion = null;
+              _regions = [];
+            }
+            _selectedState = item;
+          });
+          if (item != null) {
+            _loadRegionsByState(item.id);
+          }
+        },
       ),
     );
   }
@@ -576,6 +883,42 @@ class _FilterSheetState extends State<_FilterSheet> {
   Widget _buildRegionSelector() {
     if (_isLoadingRegions) {
       return _buildLoadingContainer();
+    }
+
+    if (_selectedState == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.grey.shade200.withValues(alpha: 0.6),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade600, size: 14),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                context.tr('select_state_first'),
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return _buildSearchableSelector<RegionModel>(
@@ -630,43 +973,61 @@ class _FilterSheetState extends State<_FilterSheet> {
     required VoidCallback onTap,
     required VoidCallback onClear,
   }) {
+    final isSelected = selectedValue != null;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
+          color: isSelected ? AppColors.primary.withValues(alpha: 0.06) : Colors.white,
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selectedValue != null
-                ? AppColors.primary.withValues(alpha: 0.5)
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.35)
                 : Colors.grey.shade200,
-            width: 1.5,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? AppColors.primary.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.search,
-              color: Colors.grey.shade500,
-              size: 20,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withValues(alpha: 0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                isSelected ? Icons.check_circle_rounded : Icons.search_rounded,
+                color: isSelected ? AppColors.primary : Colors.grey.shade400,
+                size: 14,
+              ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 selectedLabel ?? hint,
                 style: TextStyle(
-                  color: selectedValue != null
-                      ? Colors.grey.shade800
-                      : Colors.grey.shade500,
-                  fontSize: 14,
-                  fontWeight:
-                      selectedValue != null ? FontWeight.w500 : FontWeight.normal,
+                  color: isSelected
+                      ? const Color(0xFF1A1D26)
+                      : Colors.grey.shade400,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            if (selectedValue != null)
+            if (isSelected)
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -674,18 +1035,22 @@ class _FilterSheetState extends State<_FilterSheet> {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Icon(
-                    Icons.close,
+                    Icons.close_rounded,
                     color: Colors.grey.shade500,
-                    size: 18,
+                    size: 13,
                   ),
                 ),
               )
             else
               Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.grey.shade500,
-                size: 20,
+                Icons.unfold_more_rounded,
+                color: Colors.grey.shade400,
+                size: 18,
               ),
           ],
         ),
@@ -767,16 +1132,20 @@ class _FilterSheetState extends State<_FilterSheet> {
 
   Widget _buildLoadingContainer() {
     return Container(
-      height: 50,
+      height: 48,
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
       ),
-      child: const Center(
+      child: Center(
         child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary.withValues(alpha: 0.5)),
+          ),
         ),
       ),
     );
@@ -789,7 +1158,7 @@ class _FilterSheetState extends State<_FilterSheet> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle(context.tr('age')),
+            _buildSectionTitle(context.tr('age'), Icons.cake_rounded),
             Switch(
               value: _ageFilterEnabled,
               onChanged: (value) {
@@ -818,17 +1187,17 @@ class _FilterSheetState extends State<_FilterSheet> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
+                        horizontal: 16,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        '${_selectedAge.round()} ${context.tr('years_old')}',
+                        '${_ageRange.start.round()} - ${_ageRange.end.round()} ${context.tr('years_old')}',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppColors.primary,
                         ),
@@ -841,22 +1210,21 @@ class _FilterSheetState extends State<_FilterSheet> {
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: AppColors.primary,
                     inactiveTrackColor: Colors.grey.shade200,
-                    thumbColor: AppColors.primary,
                     overlayColor: AppColors.primary.withValues(alpha: 0.2),
                     trackHeight: 6,
-                    thumbShape: const RoundSliderThumbShape(
+                    rangeThumbShape: const RoundRangeSliderThumbShape(
                       enabledThumbRadius: 10,
                     ),
                   ),
-                  child: Slider(
-                    value: _selectedAge,
+                  child: RangeSlider(
+                    values: _ageRange,
                     min: 15,
                     max: 35,
                     divisions: 20,
-                    onChanged: (value) {
+                    onChanged: (values) {
                       HapticFeedback.selectionClick();
                       setState(() {
-                        _selectedAge = value;
+                        _ageRange = values;
                       });
                     },
                   ),
@@ -947,31 +1315,70 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 10, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade100),
+                ),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.list_alt_rounded,
+                      color: AppColors.primary,
+                      size: 16,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+                    ),
                   ),
                 ],
               ),
@@ -979,31 +1386,53 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
 
             // Search field
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
               child: TextField(
                 controller: _searchController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   hintText: '${widget.searchHint}...',
-                  prefixIcon: const Icon(Icons.search),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 6),
+                    child: Icon(Icons.search_rounded, size: 18, color: Colors.grey.shade400),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 34),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
+                      ? GestureDetector(
+                          onTap: () {
                             _searchController.clear();
                             _filterItems('');
                           },
-                          icon: const Icon(Icons.close, size: 18),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(Icons.close_rounded, size: 15, color: Colors.grey.shade400),
+                          ),
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: 12,
+                    vertical: 10,
                   ),
+                  isDense: true,
                 ),
                 onChanged: _filterItems,
               ),
@@ -1011,19 +1440,36 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
 
             // Clear selection option
             if (widget.selectedItem != null)
-              ListTile(
-                leading: Icon(Icons.clear, color: AppColors.primary),
-                title: Text(
-                  widget.clearLabel,
-                  style: TextStyle(color: AppColors.primary),
-                ),
+              GestureDetector(
                 onTap: () {
                   widget.onSelected(null);
                   Navigator.of(context).pop();
                 },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.remove_circle_outline_rounded, color: AppColors.primary, size: 15),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.clearLabel,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-            const Divider(height: 1),
+            Divider(height: 1, color: Colors.grey.shade100),
 
             // List
             Flexible(
@@ -1031,41 +1477,82 @@ class _SearchableDialogState<T> extends State<_SearchableDialog<T>> {
                   ? Center(
                       child: Padding(
                         padding: const EdgeInsets.all(32),
-                        child: Text(
-                          widget.emptyText,
-                          style: TextStyle(color: Colors.grey.shade600),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 36,
+                              color: Colors.grey.shade300,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              widget.emptyText,
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     )
-                  : ListView.builder(
+                  : ListView.separated(
                       shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       itemCount: _filteredItems.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 2),
                       itemBuilder: (context, index) {
                         final item = _filteredItems[index];
                         final isSelected = widget.selectedItem == item;
 
-                        return ListTile(
-                          dense: true,
-                          title: Text(
-                            widget.itemLabel(item),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : Colors.grey.shade800,
-                            ),
-                          ),
-                          trailing: isSelected
-                              ? Icon(Icons.check, color: AppColors.primary, size: 20)
-                              : null,
+                        return GestureDetector(
                           onTap: () {
                             HapticFeedback.lightImpact();
                             widget.onSelected(item);
                             Navigator.of(context).pop();
                           },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary.withValues(alpha: 0.08)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.itemLabel(item),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : const Color(0xFF2D3142),
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: const Icon(
+                                      Icons.check_rounded,
+                                      color: Colors.white,
+                                      size: 12,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -1146,31 +1633,70 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
       child: Container(
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
-          maxWidth: MediaQuery.of(context).size.width * 0.9,
+          maxHeight: MediaQuery.of(context).size.height * 0.65,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.12),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 12, 0),
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 10, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade100),
+                ),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(
+                      Icons.school_rounded,
+                      color: AppColors.primary,
+                      size: 16,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1D26),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+                    ),
                   ),
                 ],
               ),
@@ -1178,31 +1704,53 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
 
             // Search field
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 6),
               child: TextField(
                 controller: _searchController,
+                style: const TextStyle(fontSize: 13),
                 decoration: InputDecoration(
                   hintText: '${widget.searchHint}...',
-                  prefixIcon: const Icon(Icons.search),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 6),
+                    child: Icon(Icons.search_rounded, size: 18, color: Colors.grey.shade400),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(minWidth: 34),
                   suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          onPressed: () {
+                      ? GestureDetector(
+                          onTap: () {
                             _searchController.clear();
                             _loadUniversities();
                           },
-                          icon: const Icon(Icons.close, size: 18),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Icon(Icons.close_rounded, size: 15, color: Colors.grey.shade400),
+                          ),
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.grey.shade100,
+                  fillColor: Colors.grey.shade50,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                    horizontal: 12,
+                    vertical: 10,
                   ),
+                  isDense: true,
                 ),
                 onChanged: _onSearchChanged,
               ),
@@ -1210,69 +1758,134 @@ class _UniversitySearchDialogState extends State<_UniversitySearchDialog> {
 
             // Clear selection option
             if (widget.selectedUniversity != null)
-              ListTile(
-                leading: Icon(Icons.clear, color: AppColors.primary),
-                title: Text(
-                  widget.clearLabel,
-                  style: TextStyle(color: AppColors.primary),
-                ),
+              GestureDetector(
                 onTap: () {
                   widget.onSelected(null);
                   Navigator.of(context).pop();
                 },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.06),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.remove_circle_outline_rounded, color: AppColors.primary, size: 15),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.clearLabel,
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-            const Divider(height: 1),
+            Divider(height: 1, color: Colors.grey.shade100),
 
             // List
             Flexible(
               child: _isLoading
-                  ? const Center(
+                  ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: CircularProgressIndicator(),
+                        padding: const EdgeInsets.all(32),
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                          ),
+                        ),
                       ),
                     )
                   : _universities.isEmpty
                       ? Center(
                           child: Padding(
                             padding: const EdgeInsets.all(32),
-                            child: Text(
-                              widget.emptyText,
-                              style: TextStyle(color: Colors.grey.shade600),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 36,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  widget.emptyText,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : ListView.separated(
                           shrinkWrap: true,
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           itemCount: _universities.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 2),
                           itemBuilder: (context, index) {
                             final item = _universities[index];
                             final isSelected =
                                 widget.selectedUniversity?.id == item.id;
 
-                            return ListTile(
-                              dense: true,
-                              title: Text(
-                                item.getLocalizedName(widget.locale),
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.normal,
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : Colors.grey.shade800,
-                                ),
-                              ),
-                              trailing: isSelected
-                                  ? Icon(Icons.check, color: AppColors.primary, size: 20)
-                                  : null,
+                            return GestureDetector(
                               onTap: () {
                                 HapticFeedback.lightImpact();
                                 widget.onSelected(item);
                                 Navigator.of(context).pop();
                               },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withValues(alpha: 0.08)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        item.getLocalizedName(widget.locale),
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                          color: isSelected
+                                              ? AppColors.primary
+                                              : const Color(0xFF2D3142),
+                                        ),
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),

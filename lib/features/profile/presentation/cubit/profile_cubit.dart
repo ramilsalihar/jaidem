@@ -44,7 +44,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  /// Save user fullname and avatar to SharedPreferences
+  /// Save user fullname, avatar, and flowId to SharedPreferences
   void _saveUserDataToPrefs(PersonModel user) {
     if (user.fullname != null) {
       _prefs.setString(AppConstants.userFullname, user.fullname!);
@@ -52,6 +52,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     if (user.avatar != null) {
       _prefs.setString(AppConstants.userAvatar, user.avatar!);
     }
+    _prefs.setInt('user_flow_id', user.flow.id);
   }
 
   /// Update user profile

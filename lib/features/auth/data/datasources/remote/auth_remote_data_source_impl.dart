@@ -16,9 +16,24 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   });
 
   @override
-  Future<Either<String, TokensModel>> getRefreshToken() {
-    // TODO: implement getRefreshToken
-    throw UnimplementedError();
+  Future<Either<String, String>> refreshAccessToken(String refreshToken) {
+    return _makeNetworkCall<String>(() async {
+      final plainDio = Dio(BaseOptions(
+        baseUrl: ApiConst.baseUrl,
+        responseType: ResponseType.json,
+      ));
+
+      final response = await plainDio.post(
+        ApiConst.tokenRefresh,
+        data: {'refresh': refreshToken},
+      );
+
+      if ([200, 201].contains(response.statusCode)) {
+        return response.data['access'] as String;
+      } else {
+        throw Exception('Token refresh failed');
+      }
+    });
   }
 
   @override

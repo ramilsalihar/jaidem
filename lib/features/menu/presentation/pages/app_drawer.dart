@@ -97,7 +97,7 @@ class AppDrawer extends StatelessWidget {
                       iconColor: Colors.purple.shade600,
                       onTap: () {
                         Navigator.pop(context);
-                        context.router.push(ChatRoute(chatType: 'mentors'));
+                        context.router.push(AdvisorsRoute());
                       },
                     ),
 

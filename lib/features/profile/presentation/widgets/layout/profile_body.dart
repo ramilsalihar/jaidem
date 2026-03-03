@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -61,7 +62,7 @@ class _ProfileBodyState extends State<ProfileBody> {
               ),
               child: Center(
                 child: Text(
-                  'Профилди түзөтүү',
+                  context.tr('edit_profile'),
                   style: context.textTheme.labelSmall?.copyWith(
                     color: AppColors.primary,
                   ),
@@ -88,14 +89,14 @@ class _ProfileBodyState extends State<ProfileBody> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Мен жөнүндө',
+                context.tr('about_me'),
                 style: context.textTheme.headlineLarge?.copyWith(
                   color: AppColors.black,
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                widget.person.aboutMe ?? 'Маалымат жок',
+                widget.person.aboutMe ?? context.tr('no_data'),
                 style: context.textTheme.bodySmall?.copyWith(
                   color: AppColors.black,
                 ),

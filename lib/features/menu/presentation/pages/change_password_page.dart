@@ -1,6 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:dio/dio.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/network/dio_network.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
 @RoutePage()
@@ -42,28 +45,56 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     setState(() => _obscureConfirmPass = !_obscureConfirmPass);
   }
 
-  void _handleSubmit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      HapticFeedback.mediumImpact();
-      setState(() => _isLoading = true);
+  Future<void> _handleSubmit() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-      // Simulate API call
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() => _isLoading = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Сырсөз ийгиликтүү өзгөртүлдү!'),
-              backgroundColor: AppColors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-          context.router.pop();
+    HapticFeedback.mediumImpact();
+    setState(() => _isLoading = true);
+
+    try {
+      await DioNetwork.appAPI.post(
+        '/jaidem/api/user/change_password/',
+        data: {
+          'old_password': _currentPassController.text,
+          'new_password': _newPassController.text,
+        },
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('password_changed')),
+          backgroundColor: AppColors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      context.router.pop();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      String errorMessage = context.tr('error_occurred');
+      if (e is DioException && e.response?.statusCode == 400) {
+        final data = e.response?.data;
+        if (data is Map && data.containsKey('error')) {
+          errorMessage = data['error'];
         }
-      });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: AppColors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
     }
   }
 
@@ -142,7 +173,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Сырсөздү өзгөртүү',
+                                  context.tr('change_password'),
                                   style: TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.bold,
@@ -150,7 +181,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                   ),
                                 ),
                                 Text(
-                                  'Жаңы сырсөз орнотуңуз',
+                                  context.tr('set_new_password'),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade500,
@@ -204,7 +235,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                           const SizedBox(width: 14),
                           Expanded(
                             child: Text(
-                              'Сырсөз 8 белгиден кем болбошу керек жана тамгалар менен цифраларды камтышы керек.',
+                              context.tr('password_requirements'),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.primary.shade700,
@@ -221,13 +252,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     // Current password field
                     _buildPasswordField(
                       controller: _currentPassController,
-                      label: 'Учурдагы сырсөз',
-                      hint: 'Учурдагы сырсөзүңүздү киргизиңиз',
+                      label: context.tr('current_password'),
+                      hint: context.tr('enter_current_password'),
                       obscureText: _obscureCurrentPass,
                       onToggleVisibility: _toggleCurrentPassVisibility,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Учурдагы сырсөзүңүздү киргизиңиз';
+                          return context.tr('enter_current_password');
                         }
                         return null;
                       },
@@ -238,16 +269,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     // New password field
                     _buildPasswordField(
                       controller: _newPassController,
-                      label: 'Жаңы сырсөз',
-                      hint: 'Жаңы сырсөз киргизиңиз',
+                      label: context.tr('new_password'),
+                      hint: context.tr('enter_new_password'),
                       obscureText: _obscureNewPass,
                       onToggleVisibility: _toggleNewPassVisibility,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Жаңы сырсөз киргизиңиз';
+                          return context.tr('enter_new_password');
                         }
                         if (value.length < 8) {
-                          return 'Сырсөз 8 белгиден кем болбошу керек';
+                          return context.tr('password_min_length');
                         }
                         return null;
                       },
@@ -258,16 +289,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     // Confirm password field
                     _buildPasswordField(
                       controller: _confirmPassController,
-                      label: 'Сырсөздү ырастаңыз',
-                      hint: 'Жаңы сырсөздү кайталаңыз',
+                      label: context.tr('confirm_password'),
+                      hint: context.tr('repeat_new_password'),
                       obscureText: _obscureConfirmPass,
                       onToggleVisibility: _toggleConfirmPassVisibility,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Сырсөздү ырастаңыз';
+                          return context.tr('confirm_password');
                         }
                         if (value != _newPassController.text) {
-                          return 'Сырсөздөр дал келбейт';
+                          return context.tr('passwords_dont_match');
                         }
                         return null;
                       },
@@ -297,7 +328,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                               ),
                               child: Center(
                                 child: Text(
-                                  'Жокко чыгаруу',
+                                  context.tr('cancel'),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -343,9 +374,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                           strokeWidth: 2.5,
                                         ),
                                       )
-                                    : const Text(
-                                        'Сактоо',
-                                        style: TextStyle(
+                                    : Text(
+                                        context.tr('save'),
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,

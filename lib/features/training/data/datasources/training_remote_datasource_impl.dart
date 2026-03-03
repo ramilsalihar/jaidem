@@ -11,9 +11,14 @@ class TrainingRemoteDatasourceImpl implements TrainingRemoteDatasource {
   TrainingRemoteDatasourceImpl({required this.dio});
 
   @override
-  Future<Either<String, ResponseModel<TrainingModel>>> getTrainings() async {
+  Future<Either<String, ResponseModel<TrainingModel>>> getTrainings({int? flowId}) async {
     try {
-      final response = await dio.get(ApiConst.trainings);
+      final response = await dio.get(
+        ApiConst.trainings,
+        queryParameters: {
+          if (flowId != null) 'flow': flowId,
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = ResponseModel<TrainingModel>.fromJson(

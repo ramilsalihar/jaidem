@@ -3,12 +3,14 @@ class FlowModel {
   final String name;
   final String description;
   final int year;
+  final int? generation;
 
   const FlowModel({
     required this.id,
     required this.name,
     required this.description,
     required this.year,
+    this.generation,
   });
 
   factory FlowModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class FlowModel {
       name: json['name'] as String,
       description: json['description'] as String,
       year: json['year'] as int,
+      generation: json['generation'] as int?,
     );
   }
 
@@ -25,12 +28,14 @@ class FlowModel {
     String? name,
     String? description,
     int? year,
+    int? generation,
   }) {
     return FlowModel(
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
       year: year ?? this.year,
+      generation: generation ?? this.generation,
     );
   }
 
@@ -40,6 +45,7 @@ class FlowModel {
       name: '',
       description: '',
       year: 0,
+      generation: null,
     );
   }
 }

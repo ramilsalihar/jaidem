@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/services/push_notification_service.dart';
 import 'package:jaidem/features/auth/domain/usecases/is_user_logged_in_usecase.dart';
 import 'package:jaidem/features/auth/domain/usecases/login_usecase.dart';
 import 'package:jaidem/features/auth/domain/usecases/sign_out_usecase.dart';
@@ -45,6 +46,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthLoginFailure(error: failure));
       },
       (success) {
+        PushNotificationService().onUserLogin();
         emit(const AuthAuthenticated());
       },
     );
@@ -52,6 +54,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   /// Sign out the current user
   Future<void> signOut() async {
+    await PushNotificationService().onUserLogout();
     emit(AuthLoading());
 
     final result = await signOutUsecase.call();

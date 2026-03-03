@@ -114,17 +114,17 @@ class _ForumCardState extends State<ForumCard>
     }
   }
 
-  String _formatDate(String? dateStr) {
+  String _formatDate(String? dateStr, BuildContext context) {
     if (dateStr == null) return '';
     try {
       final date = DateTime.parse(dateStr);
       final now = DateTime.now();
       final diff = now.difference(date);
 
-      if (diff.inMinutes < 1) return 'азыр';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}мүн';
-      if (diff.inHours < 24) return '${diff.inHours}с';
-      if (diff.inDays < 7) return '${diff.inDays}к';
+      if (diff.inMinutes < 1) return context.tr('just_now');
+      if (diff.inMinutes < 60) return '${diff.inMinutes}${context.tr('minutes_short')}';
+      if (diff.inHours < 24) return '${diff.inHours}${context.tr('hours_short')}';
+      if (diff.inDays < 7) return '${diff.inDays}${context.tr('days_short')}';
 
       final day = date.day.toString().padLeft(2, '0');
       final month = _getMonthName(date.month);
@@ -442,37 +442,23 @@ class _ForumCardState extends State<ForumCard>
 
   Widget _buildHeader() {
     final author = widget.forum.author;
-    final formattedDate = _formatDate(widget.forum.createdAt);
+    final formattedDate = _formatDate(widget.forum.createdAt, context);
 
     return Row(
       children: [
         // Name
-        Flexible(
-          child: GestureDetector(
-            onTap: _navigateToAuthorProfile,
-            child: Text(
-              author?.fullname ?? 'Жайдем',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: Colors.black,
-              ),
-              overflow: TextOverflow.ellipsis,
+        GestureDetector(
+          onTap: _navigateToAuthorProfile,
+          child: Text(
+            author?.fullname ?? 'Жайдем',
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
             ),
           ),
         ),
         const SizedBox(width: 4),
-        // Handle / ID
-        Flexible(
-          child: Text(
-            author != null ? '@jaidem${author.id}' : '@jaidem',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
         // Dot separator
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -559,7 +545,7 @@ class _ForumCardState extends State<ForumCard>
             child: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'Көбүрөөк көрүү',
+                context.tr('see_more'),
                 style: TextStyle(
                   fontSize: 14,
                   color: AppColors.primary,

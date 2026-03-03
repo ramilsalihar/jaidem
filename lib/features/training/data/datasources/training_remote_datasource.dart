@@ -3,7 +3,7 @@ import 'package:jaidem/core/data/models/response_model.dart';
 import 'package:jaidem/features/training/data/models/training_model.dart';
 
 abstract class TrainingRemoteDatasource {
-  Future<Either<String, ResponseModel<TrainingModel>>> getTrainings();
+  Future<Either<String, ResponseModel<TrainingModel>>> getTrainings({int? flowId});
   Future<Either<String, TrainingModel>> getTrainingById(int id);
   Future<Either<String, List<TrainingAnswer>>> getTrainingAnswers({
     required int trainingId,

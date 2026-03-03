@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/core/widgets/fields/details_text_field.dart';
@@ -58,7 +59,7 @@ class PersonShortInfo extends StatelessWidget {
                 // ),
                 const SizedBox(height: 5),
                 DetailsTextField(
-                  label: 'Адис/кесип: ',
+                  label: context.tr('specialty_profession'),
                   value: person.speciality ?? '',
                   labelStyle: context.textTheme.labelMedium?.copyWith(
                     color: AppColors.grey,
@@ -68,7 +69,7 @@ class PersonShortInfo extends StatelessWidget {
                   ),
                 ),
                 DetailsTextField(
-                  label: 'Униерситет: ',
+                  label: context.tr('university_label'),
                   value: person.university ?? '',
                   labelStyle: context.textTheme.labelMedium?.copyWith(
                     color: AppColors.grey,

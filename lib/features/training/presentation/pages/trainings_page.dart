@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:jaidem/core/data/injection.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:jaidem/features/training/data/models/training_model.dart';
 import 'package:jaidem/features/training/presentation/cubit/training_cubit.dart';
 
@@ -15,15 +17,18 @@ class TrainingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final flowId = context.read<ProfileCubit>().currentUser?.flow.id;
     return BlocProvider(
-      create: (context) => sl<TrainingCubit>()..fetchTrainings(),
-      child: const _TrainingsPageContent(),
+      create: (context) => sl<TrainingCubit>()..fetchTrainings(flowId: flowId),
+      child: _TrainingsPageContent(flowId: flowId),
     );
   }
 }
 
 class _TrainingsPageContent extends StatelessWidget {
-  const _TrainingsPageContent();
+  const _TrainingsPageContent({this.flowId});
+
+  final int? flowId;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +105,7 @@ class _TrainingsPageContent extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Тренинги',
+                                  context.tr('trainings_title'),
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
@@ -108,7 +113,7 @@ class _TrainingsPageContent extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  'Окуу тренингдери',
+                                  context.tr('training_subtitle'),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade500,
@@ -150,7 +155,7 @@ class _TrainingsPageContent extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Жүктөлүүдө...',
+                            context.tr('loading'),
                             style: TextStyle(
                               color: Colors.grey.shade600,
                               fontSize: 14,
@@ -173,7 +178,7 @@ class _TrainingsPageContent extends StatelessWidget {
 
                   if (trainings.isEmpty) {
                     return SliverFillRemaining(
-                      child: _buildEmptyState(),
+                      child: _buildEmptyState(context),
                     );
                   }
 
@@ -188,7 +193,7 @@ class _TrainingsPageContent extends StatelessWidget {
                 }
 
                 return SliverFillRemaining(
-                  child: _buildEmptyState(),
+                  child: _buildEmptyState(context),
                 );
               },
             ),
@@ -198,7 +203,7 @@ class _TrainingsPageContent extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +222,7 @@ class _TrainingsPageContent extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Тренингдер жок',
+            context.tr('no_trainings'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -226,7 +231,7 @@ class _TrainingsPageContent extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Учурда жеткиликтүү тренингдер жок',
+            context.tr('no_trainings_available'),
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade500,
@@ -256,7 +261,7 @@ class _TrainingsPageContent extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Ката кетти',
+            context.tr('error_occurred'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -279,7 +284,7 @@ class _TrainingsPageContent extends StatelessWidget {
           GestureDetector(
             onTap: () {
               HapticFeedback.mediumImpact();
-              context.read<TrainingCubit>().fetchTrainings();
+              context.read<TrainingCubit>().fetchTrainings(flowId: flowId);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -296,14 +301,14 @@ class _TrainingsPageContent extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.refresh_rounded, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
                   Text(
-                    'Кайра аракет кылуу',
-                    style: TextStyle(
+                    context.tr('try_again'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),

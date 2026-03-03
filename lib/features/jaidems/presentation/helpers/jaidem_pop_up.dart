@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -160,7 +161,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      person.fullname ?? 'Белгисиз',
+                      person.fullname ?? context.tr('unknown'),
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -172,7 +173,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
                     Row(
                       children: [
                         _buildHeaderChip(
-                          'Агым ${person.flow.name}',
+                          '${context.tr('flow_label')} ${person.flow.name}',
                           Icons.stream_rounded,
                         ),
                         if (person.generation != null) ...[
@@ -191,59 +192,57 @@ class _JaidemDetailsSheet extends StatelessWidget {
           ),
 
           // Stats row
-          if (person.age > 0 ||
-              person.university != null ||
-              person.state.nameKg != null) ...[
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Builder(
+            builder: (context) {
+              final locale = Localizations.localeOf(context).languageCode;
+              final univerName = person.univer?.getLocalizedName(locale) ?? person.university;
+              final stateName = person.state.getLocalizedName(locale);
+              final hasUniver = univerName != null && univerName.isNotEmpty;
+              final hasState = stateName.isNotEmpty;
+              if (person.calculatedAge == null && !hasUniver && !hasState) {
+                return const SizedBox.shrink();
+              }
+              return Column(
                 children: [
-                  if (person.age > 0)
-                    _buildStatItem('${person.age}', 'жаш'),
-                  if (person.age > 0 &&
-                      (person.university != null ||
-                          person.state.nameKg != null))
-                    Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.white24,
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  if (person.university != null &&
-                      person.university!.isNotEmpty)
-                    Expanded(
-                      child: _buildStatItem(
-                        person.university!.length > 15
-                            ? '${person.university!.substring(0, 15)}...'
-                            : person.university!,
-                        'окуу жайы',
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        if (person.calculatedAge != null)
+                          _buildStatItem('${person.calculatedAge}', context.tr('age_label')),
+                        if (person.calculatedAge != null && (hasUniver || hasState))
+                          Container(width: 1, height: 30, color: Colors.white24),
+                        if (hasUniver)
+                          Expanded(
+                            child: _buildStatItem(
+                              univerName.length > 15
+                                  ? '${univerName.substring(0, 15)}...'
+                                  : univerName,
+                              context.tr('education_place'),
+                            ),
+                          ),
+                        if (hasUniver && hasState)
+                          Container(width: 1, height: 30, color: Colors.white24),
+                        if (hasState)
+                          _buildStatItem(
+                            stateName.length > 12
+                                ? '${stateName.substring(0, 12)}...'
+                                : stateName,
+                            context.tr('region_label'),
+                          ),
+                      ],
                     ),
-                  if (person.university != null &&
-                      person.state.nameKg != null &&
-                      person.state.nameKg!.isNotEmpty)
-                    Container(
-                      width: 1,
-                      height: 30,
-                      color: Colors.white24,
-                    ),
-                  if (person.state.nameKg != null &&
-                      person.state.nameKg!.isNotEmpty)
-                    _buildStatItem(
-                      person.state.nameKg!.length > 12
-                          ? '${person.state.nameKg!.substring(0, 12)}...'
-                          : person.state.nameKg!,
-                      'облус',
-                    ),
+                  ),
                 ],
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ],
       ),
     );
@@ -355,7 +354,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
           if (hasPhone)
             _buildQuickActionButton(
               iconData: Icons.phone_rounded,
-              label: 'Чалуу',
+              label: context.tr('call'),
               color: AppColors.primary,
               onTap: () {
                 HapticFeedback.lightImpact();
@@ -437,13 +436,15 @@ class _JaidemDetailsSheet extends StatelessWidget {
   }
 
   Widget _buildInfoCards(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
     final infoItems = <_InfoCardData>[];
 
-    if (person.speciality != null && person.speciality!.isNotEmpty) {
+    final specName = person.spec?.getLocalizedName(locale) ?? person.speciality;
+    if (specName != null && specName.isNotEmpty) {
       infoItems.add(_InfoCardData(
         icon: Icons.work_outline_rounded,
-        title: 'Адистик',
-        value: person.speciality!,
+        title: context.tr('specialty'),
+        value: specName,
         color: Colors.blue,
       ));
     }
@@ -451,17 +452,18 @@ class _JaidemDetailsSheet extends StatelessWidget {
     if (person.courseYear > 0) {
       infoItems.add(_InfoCardData(
         icon: Icons.calendar_today_rounded,
-        title: 'Окуу жылы',
+        title: context.tr('course_year_hint'),
         value: '${person.courseYear}-жыл',
         color: Colors.purple,
       ));
     }
 
-    if (person.region?.nameKg != null && person.region!.nameKg!.isNotEmpty) {
+    final regionName = person.region?.getLocalizedName(locale);
+    if (regionName != null && regionName.isNotEmpty) {
       infoItems.add(_InfoCardData(
         icon: Icons.location_on_rounded,
-        title: 'Район',
-        value: person.region!.nameKg!,
+        title: context.tr('district'),
+        value: regionName,
         color: Colors.teal,
       ));
     }
@@ -469,7 +471,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
     if (person.interest != null && person.interest!.isNotEmpty) {
       infoItems.add(_InfoCardData(
         icon: Icons.favorite_rounded,
-        title: 'Кызыкчылыктар',
+        title: context.tr('interests_label'),
         value: person.interest!,
         color: Colors.pink,
       ));
@@ -478,7 +480,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
     if (person.skills != null && person.skills!.isNotEmpty) {
       infoItems.add(_InfoCardData(
         icon: Icons.psychology_rounded,
-        title: 'Көндүмдөр',
+        title: context.tr('skills_label'),
         value: person.skills!,
         color: Colors.amber,
       ));
@@ -503,7 +505,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'Кошумча маалымат',
+              context.tr('additional_info'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -608,7 +610,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'Байланыш маалыматы',
+              context.tr('contact_info'),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -635,7 +637,7 @@ class _JaidemDetailsSheet extends StatelessWidget {
               if (hasPhone)
                 _buildContactRow(
                   icon: Icons.phone_rounded,
-                  label: 'Телефон',
+                  label: context.tr('phone_label'),
                   value: person.phone!,
                   color: AppColors.primary,
                   onTap: () {
@@ -772,26 +774,26 @@ class _JaidemDetailsSheet extends StatelessWidget {
             ),
           ],
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.person_rounded,
               color: Colors.white,
               size: 22,
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
-              'Толук профилди көрүү',
-              style: TextStyle(
+              context.tr('full_profile'),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
                 letterSpacing: 0.3,
               ),
             ),
-            SizedBox(width: 6),
-            Icon(
+            const SizedBox(width: 6),
+            const Icon(
               Icons.arrow_forward_rounded,
               color: Colors.white70,
               size: 20,
