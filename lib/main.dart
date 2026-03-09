@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/services/push_notification_service.dart';
+import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
 import 'package:jaidem/firebase_options.dart';
 import 'core/app/app.dart';
 
@@ -24,6 +25,9 @@ Future<void> main() async {
   await initInjections();
 
   await PushNotificationService().initialize();
+
+  // Create goal reminder notification channel
+  await GoalReminderService().createChannel();
 
   runApp(const App());
 }

@@ -3,10 +3,16 @@ import 'package:jaidem/features/forum/domain/entities/author_entity.dart';
 
 class AuthorMapper {
   static AuthorModel fromJson(Map<String, dynamic> json) {
+    final flow = json['flow'];
+    String? flowName;
+    if (flow is Map<String, dynamic>) {
+      flowName = flow['name'] as String?;
+    }
     return AuthorModel(
       id: json['id'],
       fullname: json['fullname'],
       avatar: json['avatar'],
+      flowName: flowName,
     );
   }
 
@@ -15,6 +21,7 @@ class AuthorMapper {
       id: model.id,
       fullname: model.fullname,
       avatar: model.avatar,
+      flowName: model.flowName,
     );
   }
 
@@ -23,6 +30,7 @@ class AuthorMapper {
       id: entity.id,
       fullname: entity.fullname,
       avatar: entity.avatar,
+      flowName: entity.flowName,
     );
   }
 

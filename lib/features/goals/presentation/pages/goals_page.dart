@@ -6,6 +6,7 @@ import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
+import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/pages/goal_overview_page.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
@@ -214,14 +215,28 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
   }
 }
 
-class _GoalsContent extends StatelessWidget {
+class _GoalsContent extends StatefulWidget {
   final String? selectedStatus;
 
   const _GoalsContent({this.selectedStatus});
 
   @override
+  State<_GoalsContent> createState() => _GoalsContentState();
+}
+
+class _GoalsContentState extends State<_GoalsContent> {
+  bool _remindersScheduled = false;
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GoalsCubit, GoalsState>(
+    return BlocConsumer<GoalsCubit, GoalsState>(
+      listener: (context, state) {
+        // Reschedule all goal reminders once after first successful load
+        if (!_remindersScheduled && state is GoalsLoaded && state.goals.isNotEmpty) {
+          _remindersScheduled = true;
+          GoalReminderService().rescheduleAll(state.goals);
+        }
+      },
       builder: (context, state) {
         if (state is GoalsLoading && state.goals.isEmpty) {
           return _buildLoadingState(context);
@@ -306,7 +321,7 @@ class _GoalsContent extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
-                context.read<GoalsCubit>().fetchGoals(status: selectedStatus);
+                context.read<GoalsCubit>().fetchGoals(status: widget.selectedStatus);
               },
               icon: const Icon(Icons.refresh_rounded, size: 20),
               label: Text(context.tr('reload')),
@@ -412,7 +427,7 @@ class _GoalsContent extends StatelessWidget {
             onRefresh: () async {
               await context.read<GoalsCubit>().fetchGoals(
                     refresh: true,
-                    status: selectedStatus,
+                    status: widget.selectedStatus,
                   );
             },
             color: AppColors.primary,

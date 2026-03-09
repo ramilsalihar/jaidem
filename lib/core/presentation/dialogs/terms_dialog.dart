@@ -127,12 +127,7 @@ class _TermsDialogState extends State<TermsDialog> {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(context.tr('terms_must_accept')),
-                              backgroundColor: Colors.orange,
-                            ),
-                          );
+                          Navigator.of(context).pop(false);
                         },
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),

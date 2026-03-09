@@ -4,6 +4,7 @@ import 'package:jaidem/features/goals/data/datasources/goal_remote_data_source_i
 import 'package:jaidem/features/goals/data/repositories/goal_repository_impl.dart';
 import 'package:jaidem/features/goals/domain/repositories/goal_repository.dart';
 import 'package:jaidem/features/goals/domain/usecases/create_goal_usecase.dart';
+import 'package:jaidem/features/goals/domain/usecases/delete_goal_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/create_goal_indicator_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/create_goal_task_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/delete_goal_indicator_usecase.dart';
@@ -70,6 +71,9 @@ void goalInjection() {
   sl.registerLazySingleton(
     () => UpdateGoalUseCase(sl()),
   );
+  sl.registerLazySingleton(
+    () => DeleteGoalUseCase(sl()),
+  );
 
   // Cubits
   sl.registerFactory(
@@ -77,6 +81,7 @@ void goalInjection() {
       fetchGoalsUseCase: sl(),
       createGoalUseCase: sl(),
       updateGoalUseCase: sl(),
+      deleteGoalUseCase: sl(),
     ),
   );
   

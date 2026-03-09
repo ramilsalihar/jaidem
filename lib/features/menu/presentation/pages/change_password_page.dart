@@ -53,7 +53,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
     try {
       await DioNetwork.appAPI.post(
-        '/jaidem/api/user/change_password/',
+        '/user/change_password/',
         data: {
           'old_password': _currentPassController.text,
           'new_password': _newPassController.text,

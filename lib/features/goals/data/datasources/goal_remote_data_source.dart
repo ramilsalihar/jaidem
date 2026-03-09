@@ -15,6 +15,10 @@ abstract class GoalRemoteDataSource {
     GoalModel goal,
   );
 
+  Future<Either<String, void>> deleteGoal(
+    String goalId,
+  );
+
   // Indicators
   Future<Either<String, ResponseModel<GoalIndicatorModel>>> getGoalIndicators(
     String goalId,

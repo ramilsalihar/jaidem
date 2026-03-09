@@ -6,6 +6,102 @@ const { getMessaging } = require("firebase-admin/messaging");
 initializeApp();
 
 /**
+ * Trigger: New chat message
+ * When a message is created in any chat subcollection,
+ * send push notification to the receiver.
+ *
+ * Path: chats/{chatType}/chats/{chatId}/messages/{messageId}
+ */
+exports.onNewChatMessage = onDocumentCreated(
+  "chats/{chatType}/chats/{chatId}/messages/{messageId}",
+  async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+
+    const messageData = snap.data();
+    const senderId = messageData.senderId;
+    const receiverId = messageData.receiverId;
+    const text = messageData.text || "";
+
+    if (!senderId || !receiverId) {
+      console.log("Missing senderId or receiverId in message");
+      return;
+    }
+
+    // Don't notify sender about their own message
+    if (senderId === receiverId) return;
+
+    const db = getFirestore();
+
+    // Get receiver's FCM token
+    const receiverDoc = await db.collection("users").doc(receiverId).get();
+    if (!receiverDoc.exists) {
+      console.log(`Receiver ${receiverId} not found in users collection`);
+      return;
+    }
+
+    const receiverData = receiverDoc.data();
+    const receiverToken = receiverData.fcmToken;
+    if (!receiverToken || typeof receiverToken !== "string") {
+      console.log(`No valid FCM token for receiver ${receiverId}`);
+      return;
+    }
+
+    // Get sender name from chat participants
+    const { chatType, chatId } = event.params;
+    const chatDoc = await db
+      .collection("chats")
+      .doc(chatType)
+      .collection("chats")
+      .doc(chatId)
+      .get();
+
+    let senderName = "Жаңы билдирүү";
+    if (chatDoc.exists) {
+      const chatData = chatDoc.data();
+      const users = chatData.users || [];
+      const sender = users.find((u) => u.id === senderId);
+      if (sender && sender.name) {
+        senderName = sender.name;
+      }
+    }
+
+    const messaging = getMessaging();
+
+    try {
+      await messaging.send({
+        token: receiverToken,
+        notification: {
+          title: senderName,
+          body: text.length > 100 ? text.substring(0, 100) + "..." : text,
+        },
+        data: {
+          type: "chat",
+          chatType: chatType,
+          chatId: chatId,
+          senderId: senderId,
+          senderName: senderName,
+        },
+      });
+      console.log(`Chat notification sent to ${receiverId} from ${senderId}`);
+    } catch (error) {
+      console.log(`Error sending chat notification: ${error.message}`);
+
+      // Clean up invalid token
+      if (
+        error.code === "messaging/invalid-registration-token" ||
+        error.code === "messaging/registration-token-not-registered"
+      ) {
+        await db.collection("users").doc(receiverId).update({
+          fcmToken: null,
+        });
+        console.log(`Removed invalid token for user ${receiverId}`);
+      }
+    }
+  }
+);
+
+/**
  * Trigger 1: New Firestore notification
  * When a document is created in "notifications" collection,
  * send push notification to ALL users with an FCM token.

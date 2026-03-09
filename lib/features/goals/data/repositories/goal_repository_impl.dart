@@ -45,6 +45,16 @@ class GoalRepositoryImpl implements GoalRepository {
   }
 
   @override
+  Future<Either<String, void>> deleteGoal(String goalId) {
+    return remoteDataSource.deleteGoal(goalId).then((result) {
+      return result.fold(
+        (failure) => Left(failure),
+        (responseModel) => Right(responseModel),
+      );
+    });
+  }
+
+  @override
   Future<Either<String, GoalIndicatorModel>> createGoalIndicator(
     GoalIndicatorModel indicator,
   ) {

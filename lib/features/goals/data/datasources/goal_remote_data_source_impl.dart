@@ -91,6 +91,21 @@ class GoalRemoteDataSourceImpl implements GoalRemoteDataSource {
   }
 
   @override
+  Future<Either<String, void>> deleteGoal(String goalId) async {
+    try {
+      final response = await dio.delete('${ApiConst.goals}$goalId/');
+
+      if (response.statusCode == 204) {
+        return const Right(null);
+      } else {
+        return const Left('Failed to delete goal');
+      }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
   Future<Either<String, ResponseModel<GoalIndicatorModel>>> getGoalIndicators(
     String goalId,
   ) async {

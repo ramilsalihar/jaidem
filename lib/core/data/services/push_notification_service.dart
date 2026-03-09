@@ -119,6 +119,14 @@ class PushNotificationService {
 
   void _onNotificationTap(NotificationResponse response) {
     if (response.payload == null) return;
+
+    // Handle goal reminder notifications (payload: "goal_<id>")
+    if (response.payload!.startsWith('goal_')) {
+      final router = sl<AppRouter>();
+      router.replaceAll([BottomBarRoute(initialIndex: 2)]);
+      return;
+    }
+
     try {
       final data = jsonDecode(response.payload!) as Map<String, dynamic>;
       _navigateFromPayload(data);
@@ -132,6 +140,10 @@ class PushNotificationService {
     switch (type) {
       case 'training':
         router.pushPath('/trainings');
+        break;
+      case 'chat':
+        final chatType = data['chatType'] as String? ?? 'users';
+        router.push(ChatRoute(chatType: chatType));
         break;
       case 'notification':
       default:

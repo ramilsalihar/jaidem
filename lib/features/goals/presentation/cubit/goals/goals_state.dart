@@ -112,3 +112,33 @@ class GoalUpdateError extends GoalsState {
   @override
   List<Object> get props => [message, goals, currentPage, hasMore];
 }
+
+class GoalDeleting extends GoalsState {
+  const GoalDeleting({
+    required super.goals,
+    super.currentPage,
+    super.hasMore,
+  });
+}
+
+class GoalDeleted extends GoalsState {
+  const GoalDeleted({
+    required super.goals,
+    super.currentPage,
+    super.hasMore,
+  });
+}
+
+class GoalDeleteError extends GoalsState {
+  final String message;
+
+  const GoalDeleteError({
+    required this.message,
+    required super.goals,
+    super.currentPage,
+    super.hasMore,
+  });
+
+  @override
+  List<Object> get props => [message, goals, currentPage, hasMore];
+}

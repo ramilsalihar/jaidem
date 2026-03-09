@@ -13,6 +13,8 @@ extension PersonModelMapper on PersonModel {
     data['login'] = login;
     // password not in model, but you may inject it separately if needed
     data['course_year'] = courseYear;
+    if (univerStartDate != null) data['univerStartDate'] = univerStartDate;
+    if (univerEndDate != null) data['univerEndDate'] = univerEndDate;
     // Send spec ID instead of speciality string
     if (spec != null) data['spec'] = spec!.id;
     if (email != null) data['email'] = email;
@@ -32,6 +34,7 @@ extension PersonModelMapper on PersonModel {
     if (village != null) data['village'] = village!.id;
     data['block'] = block;
     if (birthday != null) data['birthday'] = birthday;
+    data['noUniversity'] = noUniversity;
 
     return data;
   }

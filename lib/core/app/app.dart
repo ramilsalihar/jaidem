@@ -104,6 +104,12 @@ class _AppState extends State<App> with WidgetsBindingObserver {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.lightTheme,
+            builder: (context, child) {
+              return GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: child,
+              );
+            },
             routerConfig: appRouter.config(
               deepLinkBuilder: (deepLink) {
                 if (deepLink.path == '/' || deepLink.path.isEmpty) {

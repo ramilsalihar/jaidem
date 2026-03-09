@@ -2,10 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
-import 'package:jaidem/core/presentation/dialogs/terms_dialog.dart';
-import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/pages/events_page.dart';
@@ -14,7 +11,6 @@ import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
 import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class BottomBarPage extends StatefulWidget {
@@ -39,23 +35,6 @@ class _BottomBarPageState extends State<BottomBarPage> {
       if (mounted) context.read<ForumCubit>().fetchAllForums();
     });
     _pageController = PageController(initialPage: _selectedIndex);
-    _checkTermsAcceptance();
-  }
-
-  void _checkTermsAcceptance() {
-    final prefs = sl<SharedPreferences>();
-    final accepted = prefs.getBool(AppConstants.termsAccepted) ?? false;
-    if (!accepted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const TermsDialog(),
-          );
-        }
-      });
-    }
   }
 
   @override

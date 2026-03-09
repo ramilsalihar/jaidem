@@ -9,6 +9,7 @@ abstract class JaidemsRemoteDataSource {
     String? flow,
     String? generation,
     String? university,
+    String? faculty,
     String? speciality,
     String? ageMin,
     String? ageMax,

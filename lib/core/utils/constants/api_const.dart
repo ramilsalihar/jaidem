@@ -53,4 +53,11 @@ abstract class ApiConst {
   static const String villages = '/category/village/';
   static const String universities = '/core/university/';
   static const String specialities = '/category/speciality/';
+  static const String faculties = '/category/faculty/';
+
+  // Profile extras
+  static const String otherSchools = '/user/other_school/';
+  static const String workPlaces = '/user/work_place/';
+  static const String successHistory = '/user/success_history/';
+  static const String additionalEducation = '/user/additional_education/';
 }

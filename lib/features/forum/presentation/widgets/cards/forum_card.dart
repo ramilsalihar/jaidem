@@ -446,19 +446,45 @@ class _ForumCardState extends State<ForumCard>
 
     return Row(
       children: [
-        // Name
-        GestureDetector(
-          onTap: _navigateToAuthorProfile,
-          child: Text(
-            author?.fullname ?? 'Жайдем',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
-            ),
+        // Name + badge (takes available space)
+        Expanded(
+          child: Row(
+            children: [
+              Flexible(
+                child: GestureDetector(
+                  onTap: _navigateToAuthorProfile,
+                  child: Text(
+                    author?.fullname ?? 'Жайдем',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              if (author?.flowName != null && author!.flowName!.isNotEmpty) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    author.flowName!,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
-        const SizedBox(width: 4),
         // Dot separator
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -479,7 +505,7 @@ class _ForumCardState extends State<ForumCard>
             color: Colors.grey.shade600,
           ),
         ),
-        const Spacer(),
+        const SizedBox(width: 8),
         // More options
         GestureDetector(
           onTap: () {

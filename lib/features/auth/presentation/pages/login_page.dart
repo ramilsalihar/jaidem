@@ -2,11 +2,15 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/services/deep_link_service.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/presentation/dialogs/terms_dialog.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/helpers/show.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -78,6 +82,34 @@ class _LoginPageState extends State<LoginPage>
     _loginFocusNode.dispose();
     _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _navigateAfterAuth() async {
+    final prefs = sl<SharedPreferences>();
+    final termsAccepted = prefs.getBool(AppConstants.termsAccepted) ?? false;
+
+    if (!termsAccepted) {
+      if (!mounted) return;
+      final accepted = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const TermsDialog(),
+      );
+      if (accepted != true) {
+        if (mounted) context.read<AuthCubit>().signOut();
+        return;
+      }
+    }
+
+    if (!mounted) return;
+    final pendingPath = DeepLinkService.pendingPath;
+    if (pendingPath != null) {
+      DeepLinkService.pendingPath = null;
+      context.router.replacePath('/main');
+      context.router.pushPath(pendingPath);
+    } else {
+      context.router.replacePath('/main');
+    }
   }
 
   void _handleLogin() {
@@ -163,14 +195,7 @@ class _LoginPageState extends State<LoginPage>
       listener: (context, state) {
         if (state is AuthAuthenticated) {
           HapticFeedback.lightImpact();
-          final pendingPath = DeepLinkService.pendingPath;
-          if (pendingPath != null) {
-            DeepLinkService.pendingPath = null;
-            context.router.replacePath('/main');
-            context.router.pushPath(pendingPath);
-          } else {
-            context.router.replacePath('/main');
-          }
+          _navigateAfterAuth();
         } else if (state is AuthLoginFailure) {
           HapticFeedback.heavyImpact();
           showMessage(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/data/models/jaidem/details/faculty_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/speciality_model.dart';
@@ -21,18 +22,21 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
   StateModel? selectedState;
   RegionModel? selectedRegion;
   UniversityModel? selectedUniversity;
+  FacultyModel? selectedFaculty;
   SpecialityModel? selectedSpeciality;
 
   List<FlowModel> _flows = [];
   List<StateModel> _states = [];
   List<RegionModel> _regions = [];
   List<UniversityModel> _universities = [];
+  List<FacultyModel> _faculties = [];
   List<SpecialityModel> _specialities = [];
 
   bool _isLoadingFlows = false;
   bool _isLoadingStates = false;
   bool _isLoadingRegions = false;
   bool _isLoadingUniversities = false;
+  bool _isLoadingFaculties = false;
   bool _isLoadingSpecialities = false;
 
   bool hasActiveFilters() {
@@ -43,6 +47,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
         selectedState != null ||
         selectedRegion != null ||
         selectedUniversity != null ||
+        selectedFaculty != null ||
         selectedSpeciality != null;
   }
 
@@ -54,6 +59,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
     if (selectedState != null) count++;
     if (selectedRegion != null) count++;
     if (selectedUniversity != null) count++;
+    if (selectedFaculty != null) count++;
     if (selectedSpeciality != null) count++;
     return count;
   }
@@ -133,21 +139,42 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
     return [];
   }
 
-  Future<void> _loadSpecialities() async {
-    if (_specialities.isNotEmpty) return;
+  Future<void> _loadFaculties() async {
+    if (_faculties.isNotEmpty) return;
 
     try {
       final response = await DioNetwork.appAPI
-          .get('${ApiConst.baseUrl}${ApiConst.specialities}');
+          .get('${ApiConst.baseUrl}${ApiConst.faculties}');
       if (response.statusCode == 200) {
         final data = response.data;
         final List results = data is List ? data : (data['results'] as List? ?? []);
-        _specialities =
-            results.map((e) => SpecialityModel.fromJson(e)).toList();
+        _faculties = results.map((e) => FacultyModel.fromJson(e)).toList();
       }
     } on DioException catch (_) {
       // Handle error silently
     }
+  }
+
+  Future<List<SpecialityModel>> _loadSpecialities({int? facultyId}) async {
+    try {
+      final queryParams = <String, dynamic>{};
+      if (facultyId != null) {
+        queryParams['faculty'] = facultyId;
+      }
+      final response = await DioNetwork.appAPI.get(
+        '${ApiConst.baseUrl}${ApiConst.specialities}',
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List results = data is List ? data : (data['results'] as List? ?? []);
+        _specialities = results.map((e) => SpecialityModel.fromJson(e)).toList();
+        return _specialities;
+      }
+    } on DioException catch (_) {
+      // Handle error silently
+    }
+    return [];
   }
 
   void showFilterModal({
@@ -167,11 +194,13 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
           states: _states,
           regions: _regions,
           universities: _universities,
+          faculties: _faculties,
           specialities: _specialities,
           isLoadingFlows: _isLoadingFlows,
           isLoadingStates: _isLoadingStates,
           isLoadingRegions: _isLoadingRegions,
           isLoadingUniversities: _isLoadingUniversities,
+          isLoadingFaculties: _isLoadingFaculties,
           isLoadingSpecialities: _isLoadingSpecialities,
           selectedGeneration: selectedGeneration,
           selectedFlow: selectedFlow,
@@ -180,6 +209,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
           selectedState: selectedState,
           selectedRegion: selectedRegion,
           selectedUniversity: selectedUniversity,
+          selectedFaculty: selectedFaculty,
           selectedSpeciality: selectedSpeciality,
           onLoadFlows: () async {
             if (_flows.isEmpty && !_isLoadingFlows) {
@@ -212,15 +242,21 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             }
             return _universities;
           },
-          onLoadSpecialities: () async {
-            if (_specialities.isEmpty && !_isLoadingSpecialities) {
-              _isLoadingSpecialities = true;
-              await _loadSpecialities();
-              _isLoadingSpecialities = false;
+          onLoadFaculties: () async {
+            if (_faculties.isEmpty && !_isLoadingFaculties) {
+              _isLoadingFaculties = true;
+              await _loadFaculties();
+              _isLoadingFaculties = false;
             }
-            return _specialities;
+            return _faculties;
           },
-          onApply: (generation, flow, ageMin, ageMax, stateModel, region, university, speciality) {
+          onLoadSpecialities: ({int? facultyId}) async {
+            _isLoadingSpecialities = true;
+            final result = await _loadSpecialities(facultyId: facultyId);
+            _isLoadingSpecialities = false;
+            return result;
+          },
+          onApply: (generation, flow, ageMin, ageMax, stateModel, region, university, faculty, speciality) {
             selectedGeneration = generation;
             selectedFlow = flow;
             selectedAgeMin = ageMin;
@@ -228,6 +264,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             selectedState = stateModel;
             selectedRegion = region;
             selectedUniversity = university;
+            selectedFaculty = faculty;
             selectedSpeciality = speciality;
             final filters = <String, String?>{
               'generation': generation?.toString(),
@@ -237,6 +274,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
               'state': stateModel?.id.toString(),
               'region': region?.id.toString(),
               'university': university?.id.toString(),
+              'faculty': faculty?.id.toString(),
               'speciality': speciality?.id.toString(),
             };
             onApply(filters);
@@ -249,6 +287,7 @@ mixin JaidemFilters<T extends StatefulWidget> on State<T> {
             selectedState = null;
             selectedRegion = null;
             selectedUniversity = null;
+            selectedFaculty = null;
             selectedSpeciality = null;
             onReset();
           },
@@ -265,11 +304,13 @@ class _FilterSheet extends StatefulWidget {
     required this.states,
     required this.regions,
     required this.universities,
+    required this.faculties,
     required this.specialities,
     required this.isLoadingFlows,
     required this.isLoadingStates,
     required this.isLoadingRegions,
     required this.isLoadingUniversities,
+    required this.isLoadingFaculties,
     required this.isLoadingSpecialities,
     required this.selectedGeneration,
     required this.selectedFlow,
@@ -278,11 +319,13 @@ class _FilterSheet extends StatefulWidget {
     required this.selectedState,
     required this.selectedRegion,
     required this.selectedUniversity,
+    required this.selectedFaculty,
     required this.selectedSpeciality,
     required this.onLoadFlows,
     required this.onLoadStates,
     required this.onLoadRegions,
     required this.onLoadUniversities,
+    required this.onLoadFaculties,
     required this.onLoadSpecialities,
     required this.onApply,
     required this.onReset,
@@ -293,11 +336,13 @@ class _FilterSheet extends StatefulWidget {
   final List<StateModel> states;
   final List<RegionModel> regions;
   final List<UniversityModel> universities;
+  final List<FacultyModel> faculties;
   final List<SpecialityModel> specialities;
   final bool isLoadingFlows;
   final bool isLoadingStates;
   final bool isLoadingRegions;
   final bool isLoadingUniversities;
+  final bool isLoadingFaculties;
   final bool isLoadingSpecialities;
   final int? selectedGeneration;
   final FlowModel? selectedFlow;
@@ -306,12 +351,14 @@ class _FilterSheet extends StatefulWidget {
   final StateModel? selectedState;
   final RegionModel? selectedRegion;
   final UniversityModel? selectedUniversity;
+  final FacultyModel? selectedFaculty;
   final SpecialityModel? selectedSpeciality;
   final Future<List<FlowModel>> Function() onLoadFlows;
   final Future<List<StateModel>> Function() onLoadStates;
   final Future<List<RegionModel>> Function({int? stateId}) onLoadRegions;
   final Future<List<UniversityModel>> Function(String? search) onLoadUniversities;
-  final Future<List<SpecialityModel>> Function() onLoadSpecialities;
+  final Future<List<FacultyModel>> Function() onLoadFaculties;
+  final Future<List<SpecialityModel>> Function({int? facultyId}) onLoadSpecialities;
   final void Function(
     int? generation,
     FlowModel? flow,
@@ -320,6 +367,7 @@ class _FilterSheet extends StatefulWidget {
     StateModel? stateModel,
     RegionModel? region,
     UniversityModel? university,
+    FacultyModel? faculty,
     SpecialityModel? speciality,
   ) onApply;
   final VoidCallback onReset;
@@ -332,11 +380,13 @@ class _FilterSheetState extends State<_FilterSheet> {
   List<FlowModel> _flows = [];
   List<StateModel> _statesList = [];
   List<RegionModel> _regions = [];
+  List<FacultyModel> _faculties = [];
   List<SpecialityModel> _specialities = [];
 
   bool _isLoadingFlows = true;
   bool _isLoadingStates = true;
-  bool _isLoadingRegions = false;
+  bool _isLoadingRegions = true;
+  bool _isLoadingFaculties = true;
   bool _isLoadingSpecialities = true;
 
   int? _selectedGeneration;
@@ -346,6 +396,7 @@ class _FilterSheetState extends State<_FilterSheet> {
   StateModel? _selectedState;
   RegionModel? _selectedRegion;
   UniversityModel? _selectedUniversity;
+  FacultyModel? _selectedFaculty;
   SpecialityModel? _selectedSpeciality;
 
   @override
@@ -356,6 +407,7 @@ class _FilterSheetState extends State<_FilterSheet> {
     _selectedState = widget.selectedState;
     _selectedRegion = widget.selectedRegion;
     _selectedUniversity = widget.selectedUniversity;
+    _selectedFaculty = widget.selectedFaculty;
     _selectedSpeciality = widget.selectedSpeciality;
     if (widget.selectedAgeMin != null || widget.selectedAgeMax != null) {
       _ageRange = RangeValues(
@@ -371,11 +423,10 @@ class _FilterSheetState extends State<_FilterSheet> {
     await Future.wait([
       _loadFlows(),
       _loadStates(),
-      _loadSpecialities(),
+      _loadFaculties(),
+      _loadRegions(),
+      _loadAllSpecialities(),
     ]);
-    if (_selectedState != null) {
-      await _loadRegionsByState(_selectedState!.id);
-    }
   }
 
   Future<void> _loadFlows() async {
@@ -411,7 +462,40 @@ class _FilterSheetState extends State<_FilterSheet> {
     }
   }
 
-  Future<void> _loadSpecialities() async {
+  Future<void> _loadFaculties() async {
+    final faculties = await widget.onLoadFaculties();
+    if (mounted) {
+      setState(() {
+        _faculties = faculties;
+        _isLoadingFaculties = false;
+      });
+    }
+  }
+
+  Future<void> _loadSpecialitiesByFaculty(int facultyId) async {
+    setState(() {
+      _isLoadingSpecialities = true;
+    });
+    final specialities = await widget.onLoadSpecialities(facultyId: facultyId);
+    if (mounted) {
+      setState(() {
+        _specialities = specialities;
+        _isLoadingSpecialities = false;
+      });
+    }
+  }
+
+  Future<void> _loadRegions() async {
+    final regions = await widget.onLoadRegions();
+    if (mounted) {
+      setState(() {
+        _regions = regions;
+        _isLoadingRegions = false;
+      });
+    }
+  }
+
+  Future<void> _loadAllSpecialities() async {
     final specialities = await widget.onLoadSpecialities();
     if (mounted) {
       setState(() {
@@ -428,6 +512,7 @@ class _FilterSheetState extends State<_FilterSheet> {
         _selectedState != null ||
         _selectedRegion != null ||
         _selectedUniversity != null ||
+        _selectedFaculty != null ||
         _selectedSpeciality != null;
   }
 
@@ -440,10 +525,12 @@ class _FilterSheetState extends State<_FilterSheet> {
       _ageRange = const RangeValues(18, 25);
       _selectedState = null;
       _selectedRegion = null;
-      _regions = [];
       _selectedUniversity = null;
+      _selectedFaculty = null;
       _selectedSpeciality = null;
     });
+    _loadRegions();
+    _loadAllSpecialities();
   }
 
   @override
@@ -578,6 +665,12 @@ class _FilterSheetState extends State<_FilterSheet> {
 
                   const SizedBox(height: 20),
 
+                  _buildSectionTitle(context.tr('faculty'), Icons.account_balance_rounded),
+                  const SizedBox(height: 10),
+                  _buildFacultySelector(),
+
+                  const SizedBox(height: 20),
+
                   _buildSectionTitle(context.tr('speciality'), Icons.work_rounded),
                   const SizedBox(height: 10),
                   _buildSpecialitySelector(),
@@ -600,6 +693,7 @@ class _FilterSheetState extends State<_FilterSheet> {
                         _selectedState,
                         _selectedRegion,
                         _selectedUniversity,
+                        _selectedFaculty,
                         _selectedSpeciality,
                       );
                       Navigator.of(context).pop();
@@ -745,42 +839,6 @@ class _FilterSheetState extends State<_FilterSheet> {
       return _buildLoadingContainer();
     }
 
-    if (_selectedGeneration == null) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: Colors.grey.shade200.withValues(alpha: 0.6),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade600, size: 14),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                context.tr('select_generation_first'),
-                style: TextStyle(
-                  color: Colors.grey.shade400,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
     return _buildSearchableSelector<FlowModel>(
       selectedValue: _selectedFlow,
       hint: context.tr('select_flow'),
@@ -841,8 +899,8 @@ class _FilterSheetState extends State<_FilterSheet> {
         setState(() {
           _selectedState = null;
           _selectedRegion = null;
-          _regions = [];
         });
+        _loadRegions();
       },
     );
   }
@@ -868,12 +926,13 @@ class _FilterSheetState extends State<_FilterSheet> {
           setState(() {
             if (_selectedState?.id != item?.id) {
               _selectedRegion = null;
-              _regions = [];
             }
             _selectedState = item;
           });
           if (item != null) {
             _loadRegionsByState(item.id);
+          } else {
+            _loadRegions();
           }
         },
       ),
@@ -883,42 +942,6 @@ class _FilterSheetState extends State<_FilterSheet> {
   Widget _buildRegionSelector() {
     if (_isLoadingRegions) {
       return _buildLoadingContainer();
-    }
-
-    if (_selectedState == null) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: Colors.grey.shade200.withValues(alpha: 0.6),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(Icons.info_outline_rounded, color: Colors.amber.shade600, size: 14),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                context.tr('select_state_first'),
-                style: TextStyle(
-                  color: Colors.grey.shade400,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
     }
 
     return _buildSearchableSelector<RegionModel>(
@@ -944,6 +967,26 @@ class _FilterSheetState extends State<_FilterSheet> {
         setState(() {
           _selectedUniversity = null;
         });
+      },
+    );
+  }
+
+  Widget _buildFacultySelector() {
+    if (_isLoadingFaculties) {
+      return _buildLoadingContainer();
+    }
+
+    return _buildSearchableSelector<FacultyModel>(
+      selectedValue: _selectedFaculty,
+      hint: context.tr('select_faculty'),
+      selectedLabel: _selectedFaculty?.getLocalizedName(widget.locale),
+      onTap: () => _showFacultySearchDialog(),
+      onClear: () {
+        setState(() {
+          _selectedFaculty = null;
+          _selectedSpeciality = null;
+        });
+        _loadAllSpecialities();
       },
     );
   }
@@ -1099,6 +1142,40 @@ class _FilterSheetState extends State<_FilterSheet> {
           setState(() {
             _selectedUniversity = item;
           });
+        },
+      ),
+    );
+  }
+
+  void _showFacultySearchDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => _SearchableDialog<FacultyModel>(
+        title: context.tr('select_faculty'),
+        searchHint: context.tr('search'),
+        clearLabel: context.tr('clear'),
+        emptyText: context.tr('nothing_found'),
+        items: _faculties,
+        selectedItem: _selectedFaculty,
+        itemLabel: (item) => item.getLocalizedName(widget.locale),
+        searchFilter: (item, query) {
+          final lowerQuery = query.toLowerCase();
+          return item.nameRu.toLowerCase().contains(lowerQuery) ||
+              (item.nameEn?.toLowerCase().contains(lowerQuery) ?? false) ||
+              (item.nameKg?.toLowerCase().contains(lowerQuery) ?? false);
+        },
+        onSelected: (item) {
+          setState(() {
+            if (_selectedFaculty?.id != item?.id) {
+              _selectedSpeciality = null;
+            }
+            _selectedFaculty = item;
+          });
+          if (item != null) {
+            _loadSpecialitiesByFaculty(item.id);
+          } else {
+            _loadAllSpecialities();
+          }
         },
       ),
     );

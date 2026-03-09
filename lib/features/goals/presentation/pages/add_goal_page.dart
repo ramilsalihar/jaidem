@@ -10,6 +10,7 @@ import 'package:jaidem/core/utils/helpers/time_picker_mixin.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
+import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
 
@@ -217,6 +218,10 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
           BlocListener<GoalsCubit, GoalsState>(
             listener: (context, state) {
               if (state is GoalCreated || state is GoalUpdated) {
+                // Schedule reminder notification
+                final createdGoal = state.goals.first;
+                GoalReminderService().scheduleGoalReminder(createdGoal);
+
                 if (_indicators.isNotEmpty && !_isEditMode) {
                   final goalId = state.goals.first.id;
                   for (final indicator in _indicators) {

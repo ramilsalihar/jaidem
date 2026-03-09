@@ -28,30 +28,7 @@ class FileCard extends StatelessWidget {
   Future<void> _openUrl(BuildContext context, String url) async {
     try {
       final uri = Uri.parse(url);
-
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.error_outline, color: Colors.white, size: 20),
-                  SizedBox(width: 12),
-                  Text('Шилтемени ачуу мүмкүн болбоду'),
-                ],
-              ),
-              backgroundColor: AppColors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          );
-        }
-      }
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,7 +37,7 @@ class FileCard extends StatelessWidget {
               children: [
                 const Icon(Icons.error_outline, color: Colors.white, size: 20),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Ката: ${e.toString()}')),
+                Expanded(child: Text('Шилтемени ачуу мүмкүн болбоду: $e')),
               ],
             ),
             backgroundColor: AppColors.red,
@@ -108,6 +85,21 @@ class FileCard extends StatelessWidget {
           } else {
             _openUrl(context, file.file!);
           }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.white, size: 20),
+                  SizedBox(width: 12),
+                  Text('Файл же шилтеме жок'),
+                ],
+              ),
+              backgroundColor: AppColors.orange,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
         }
       },
       child: Container(

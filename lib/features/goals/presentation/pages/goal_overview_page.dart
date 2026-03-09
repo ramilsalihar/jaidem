@@ -9,6 +9,7 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/goals/data/models/goal_indicator_model.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goal_statistics/goal_statistics_cubit.dart';
+import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/cubit/indicators/indicators_cubit.dart';
 import 'package:jaidem/features/goals/presentation/helpers/goal_statistics_calculator.dart';
 import 'package:jaidem/features/goals/presentation/widgets/cards/indicator_card.dart';
@@ -103,6 +104,35 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     }
   }
 
+  void _confirmDeleteGoal() {
+    HapticFeedback.lightImpact();
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Максатты өчүрүү'),
+        content: const Text('Бул максатты чындап өчүргүңүз келеби?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Жок'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              final goalId = widget.goal.id?.toString();
+              if (goalId != null) {
+                context.read<GoalsCubit>().deleteGoal(goalId);
+                Navigator.of(context).pop(true);
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Өчүрүү'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final progress = widget.goal.progress.clamp(0.0, 100.0);
@@ -179,6 +209,22 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
         ),
       ),
       actions: [
+        GestureDetector(
+          onTap: () => _confirmDeleteGoal(),
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        ),
         GestureDetector(
           onTap: () async {
             HapticFeedback.lightImpact();

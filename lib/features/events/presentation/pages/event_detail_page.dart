@@ -8,6 +8,7 @@ import 'package:jaidem/features/events/data/services/event_firebase_service.dart
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 import 'package:jaidem/features/events/presentation/widgets/video/event_video_player.dart';
 import 'package:jaidem/features/events/presentation/widgets/reviews/event_reviews_section.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
@@ -68,16 +69,12 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
   Future<void> _makePhoneCall(String phone) async {
     final uri = Uri(scheme: 'tel', path: phone);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    await launchUrl(uri);
   }
 
   Future<void> _sendEmail(String email) async {
     final uri = Uri(scheme: 'mailto', path: email);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
+    await launchUrl(uri);
   }
 
   @override
@@ -315,7 +312,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
             value: widget.event.date.toReadableDateWithTime(),
           ),
 
-          const Divider(height: 24),
+          const SizedBox(height: 16),
 
           // Location
           _buildInfoItem(
@@ -325,15 +322,6 @@ class _EventDetailPageState extends State<EventDetailPage> {
             value: widget.event.location,
           ),
 
-          const Divider(height: 24),
-
-          // Generation
-          _buildInfoItem(
-            icon: Icons.groups_rounded,
-            iconColor: AppColors.green,
-            label: context.tr('event_generation'),
-            value: widget.event.generation,
-          ),
         ],
       ),
     );
@@ -470,13 +458,30 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            widget.event.description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade700,
-              height: 1.6,
-            ),
+          Html(
+            data: widget.event.description,
+            style: {
+              "body": Style(
+                fontSize: FontSize(14),
+                color: Colors.grey.shade700,
+                lineHeight: LineHeight(1.6),
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+              ),
+              "p": Style(
+                margin: Margins.only(bottom: 8),
+              ),
+              "a": Style(
+                color: AppColors.primary,
+                textDecoration: TextDecoration.none,
+              ),
+            },
+            onLinkTap: (url, _, __) async {
+              if (url != null) {
+                final uri = Uri.parse(url);
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
           ),
         ],
       ),
@@ -605,8 +610,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         widget.event.phone,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade700,
+                          color: AppColors.primary,
                           fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.primary,
                         ),
                       ),
                     ),
@@ -643,8 +650,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
                         widget.event.email,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade700,
+                          color: AppColors.primary,
                           fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.primary,
                         ),
                       ),
                     ),

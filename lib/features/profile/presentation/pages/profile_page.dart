@@ -136,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       body: BlocBuilder<ProfileCubit, ProfileState>(
         builder: (context, state) {
           final user = state is ProfileLoaded ? state.user : null;
@@ -326,22 +326,52 @@ class _ProfilePageState extends State<ProfilePage>
 
             const SizedBox(height: 4),
 
-            // Specialty - use spec object first, fallback to speciality string
+            // Headline: work place and/or university info
             Builder(
               builder: (context) {
                 final locale = Localizations.localeOf(context).languageCode;
-                final specName = user.spec?.getLocalizedName(locale) ?? user.speciality;
-                if (specName != null && specName.isNotEmpty) {
-                  return Text(
-                    specName,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  );
+                final hasWork = user.workPlaces != null && user.workPlaces!.isNotEmpty;
+                final noUni = user.noUniversity;
+
+                String? uniLine;
+                if (!noUni) {
+                  final specName = user.spec?.getLocalizedName(locale) ?? user.speciality;
+                  final univerName = user.univer?.getLocalizedName(locale) ?? user.university;
+                  final parts = <String>[
+                    if (specName != null && specName.isNotEmpty) specName,
+                    if (univerName != null && univerName.isNotEmpty) univerName,
+                  ];
+                  if (parts.isNotEmpty) uniLine = parts.join(' | ');
                 }
-                return const SizedBox.shrink();
+
+                String? workLine;
+                if (hasWork) {
+                  final latest = user.workPlaces!.last;
+                  final parts = <String>[
+                    if (latest.position.isNotEmpty) latest.position,
+                    if (latest.name.isNotEmpty) latest.name,
+                  ];
+                  if (parts.isNotEmpty) workLine = parts.join(' | ');
+                }
+
+                if (workLine == null && uniLine == null) return const SizedBox.shrink();
+
+                final textStyle = TextStyle(
+                  fontSize: 13,
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontWeight: FontWeight.w500,
+                );
+
+                return Column(
+                  children: [
+                    if (workLine != null)
+                      Text(workLine, style: textStyle, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    if (uniLine != null) ...[
+                      if (workLine != null) const SizedBox(height: 2),
+                      Text(uniLine, style: textStyle, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    ],
+                  ],
+                );
               },
             ),
 
@@ -694,179 +724,185 @@ class _ProfileInfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Column(
-        children: [
-          // Stats Row
-          _buildStatsRow(context),
+    return RefreshIndicator(
+      onRefresh: () => context.read<ProfileCubit>().getUser(),
+      color: AppColors.primary,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Positions in Jaidem
+            if (user.positionsInJaidem != null && user.positionsInJaidem!.isNotEmpty)
+              _buildPositionsSection(),
 
-          const SizedBox(height: 28),
+            // About Section
+            if (user.aboutMe != null && user.aboutMe!.isNotEmpty) _buildAboutSection(context),
 
-          // About Section
-          if (user.aboutMe != null && user.aboutMe!.isNotEmpty) _buildAboutSection(context),
+            // Info List
+            _buildInfoList(context),
 
-          // Info List
-          _buildInfoList(context),
+            // Other Schools
+            if (user.otherSchools != null && user.otherSchools!.isNotEmpty)
+              _buildProfileListSection(
+                context,
+                context.tr('other_education'),
+                Icons.menu_book_outlined,
+                user.otherSchools!.map((s) {
+                  final parts = <String>[
+                    if (s.description.isNotEmpty) s.description,
+                    if (s.startDate != null || s.endDate != null) _formatDateRange(s.startDate, s.endDate),
+                  ];
+                  return MapEntry(s.name, parts.isNotEmpty ? parts.join(' · ') : null);
+                }).toList(),
+              ),
 
-          const SizedBox(height: 28),
+            // Additional Education
+            if (user.additionalEducations != null && user.additionalEducations!.isNotEmpty)
+              _buildProfileListSection(
+                context,
+                context.tr('additional_education'),
+                Icons.auto_stories_outlined,
+                user.additionalEducations!.map((e) {
+                  final parts = <String>[
+                    if (e.description.isNotEmpty) e.description,
+                    if (e.dateStart != null || e.dateEnd != null) _formatDateRange(e.dateStart, e.dateEnd),
+                  ];
+                  return MapEntry(e.title, parts.isNotEmpty ? parts.join(' · ') : null);
+                }).toList(),
+              ),
 
-          // Edit Profile Button
-          _buildEditButton(context),
+            // Work Places
+            if (user.workPlaces != null && user.workPlaces!.isNotEmpty)
+              _buildProfileListSection(
+                context,
+                context.tr('work_experience'),
+                Icons.work_outline_rounded,
+                user.workPlaces!.map((w) {
+                  final parts = <String>[
+                    if (w.position.isNotEmpty) w.position,
+                    if (w.startDate != null || w.endDate != null) _formatDateRange(w.startDate, w.endDate),
+                  ];
+                  return MapEntry(w.name, parts.isNotEmpty ? parts.join(' · ') : null);
+                }).toList(),
+              ),
 
-          const SizedBox(height: 16),
+            // Success History
+            if (user.successHist != null && user.successHist!.isNotEmpty)
+              _buildProfileListSection(
+                context,
+                context.tr('success_history'),
+                Icons.emoji_events_outlined,
+                user.successHist!.map((s) => MapEntry(s.name, s.description.isNotEmpty ? s.description : null)).toList(),
+              ),
 
-          // Delete Account Button
-          _buildDeleteAccountButton(context),
+            const SizedBox(height: 16),
 
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 24),
-        ],
+            // Edit Profile Button
+            _buildEditButton(context),
+
+            const SizedBox(height: 16),
+
+            // Delete Account Button
+            _buildDeleteAccountButton(context),
+
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
 
-  int? _computeAge() {
-    return user.calculatedAge;
-  }
-
-  Widget _buildStatsRow(BuildContext context) {
+  Widget _buildPositionsSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem(
-              _computeAge()?.toString() ?? context.tr('no_data'),
-              context.tr('age'),
-            ),
-          ),
-          Container(width: 1, height: 36, color: Colors.grey.shade300),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: _buildStatItem('${user.courseYear}', context.tr('course_year')),
-          ),
-          Builder(
-            builder: (context) {
-              final locale = Localizations.localeOf(context).languageCode;
-              final univerName = user.univer?.getLocalizedName(locale) ?? user.university;
-              if (univerName != null && univerName.isNotEmpty) {
-                return Expanded(
-                  child: Row(
-                    children: [
-                      Container(width: 1, height: 36, color: Colors.grey.shade300),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: _buildUniversityItem(univerName, context.tr('university')),
-                        ),
-                      ),
-                    ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: user.positionsInJaidem!.map((position) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
                   ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    position,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade700,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildStatItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: Colors.grey.shade800,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildUniversityItem(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade800,
-            height: 1.3,
-          ),
-          textAlign: TextAlign.center,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.grey.shade500,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
+  String _formatDateRange(String? startDate, String? endDate) {
+    String fmt(String d) {
+      final dt = DateTime.tryParse(d);
+      if (dt == null) return d;
+      return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+    }
+    final s = startDate != null ? fmt(startDate) : null;
+    final e = endDate != null ? fmt(endDate) : null;
+    if (s != null && e != null) return '$s — $e';
+    if (s != null) return '$s — ...';
+    if (e != null) return '... — $e';
+    return '';
   }
 
   Widget _buildAboutSection(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.format_quote_rounded, color: AppColors.primary, size: 22),
+              Icon(Icons.person_outline, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 context.tr('about_me'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: Colors.grey.shade800,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              user.aboutMe!,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-                height: 1.6,
-              ),
+          Text(
+            user.aboutMe!,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+              height: 1.5,
             ),
           ),
         ],
@@ -877,6 +913,15 @@ class _ProfileInfoTab extends StatelessWidget {
   Widget _buildInfoList(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode;
     final items = <_InfoItem>[];
+
+    // Birthday
+    if (user.birthday != null && user.birthday!.isNotEmpty) {
+      final birthDate = DateTime.tryParse(user.birthday!);
+      if (birthDate != null) {
+        final formatted = '${birthDate.day.toString().padLeft(2, '0')}.${birthDate.month.toString().padLeft(2, '0')}.${birthDate.year}';
+        items.add(_InfoItem(Icons.cake_outlined, context.tr('date_of_birth'), formatted));
+      }
+    }
 
     final regionName = user.region?.getLocalizedName(locale);
     if (regionName != null && regionName.isNotEmpty) {
@@ -904,50 +949,116 @@ class _ProfileInfoTab extends StatelessWidget {
 
     if (items.isEmpty) return const SizedBox();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
-            const SizedBox(width: 8),
-            Text(
-              context.tr('information'),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.grey.shade800,
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('information'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        ...items.map((item) => _buildInfoRow(item)),
-      ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => _buildInfoRow(item)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileListSection(
+    BuildContext context,
+    String title,
+    IconData icon,
+    List<MapEntry<String, String?>> items,
+  ) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.circle, size: 6, color: Colors.grey.shade400),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.key,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          if (item.value != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              item.value!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
     );
   }
 
   Widget _buildInfoRow(_InfoItem item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(14),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(item.icon, color: AppColors.primary, size: 20),
-          ),
-          const SizedBox(width: 14),
+          Icon(item.icon, size: 20, color: Colors.grey.shade500),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -957,20 +1068,16 @@ class _ProfileInfoTab extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade500,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   item.value,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                     color: Colors.grey.shade800,
-                    height: 1.4,
                   ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -995,12 +1102,12 @@ class _ProfileInfoTab extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [AppColors.primary, AppColors.primary.shade600],
           ),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -1056,7 +1163,7 @@ class _ProfileInfoTab extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.red.shade300, width: 1.5),
         ),
         child: Row(

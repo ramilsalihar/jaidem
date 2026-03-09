@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/data/models/division_model.dart';
 import 'package:jaidem/features/menu/data/models/file_model.dart';
@@ -84,7 +85,10 @@ class _FilesPageState extends State<FilesPage> {
                 ),
                 child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
               ),
-              onPressed: () => context.router.pop(),
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                context.router.pop();
+              },
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
@@ -136,18 +140,11 @@ class _FilesPageState extends State<FilesPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'База знаний',
+                                  context.tr('knowledge_base'),
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.grey.shade800,
-                                  ),
-                                ),
-                                Text(
-                                  'Билим базасы',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade500,
                                   ),
                                 ),
                               ],

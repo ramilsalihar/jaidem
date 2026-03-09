@@ -16,6 +16,7 @@ import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart
 import 'package:jaidem/features/profile/presentation/widgets/birthday_congrats_widget.dart';
 import 'package:jaidem/features/birthday/domain/usecases/send_birthday_reaction_usecase.dart';
 import 'package:jaidem/features/forum/data/services/forum_firebase_service.dart';
+import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
@@ -35,13 +36,27 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   bool _isBirthday = false;
   bool _hasReacted = false;
   bool _isSendingReaction = false;
+  PersonModel? _fullPerson;
+
+  PersonModel get _person => _fullPerson ?? widget.person;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _isBirthday = isTodayBirthday(widget.person.birthday);
+    _isBirthday = isTodayBirthday(_person.birthday);
     _checkIfOwnProfile();
+    _loadFullPerson();
+  }
+
+  Future<void> _loadFullPerson() async {
+    final person = await context.read<JaidemsCubit>().getJaidemById(_person.id);
+    if (mounted && person != null) {
+      setState(() {
+        _fullPerson = person;
+        _isBirthday = isTodayBirthday(person.birthday);
+      });
+    }
   }
 
   Future<void> _sendBirthdayReaction() async {
@@ -49,7 +64,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     setState(() => _isSendingReaction = true);
 
     final useCase = sl<SendBirthdayReactionUseCase>();
-    final result = await useCase(toUserId: widget.person.id);
+    final result = await useCase(toUserId: _person.id);
 
     if (mounted) {
       result.fold(
@@ -79,7 +94,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
 
     // If viewing own profile, redirect to profile page
-    if (currentUserId == widget.person.id.toString()) {
+    if (currentUserId == _person.id.toString()) {
       _isOwnProfile = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -97,7 +112,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   }
 
   void _showOptionsBottomSheet() {
-    final userName = widget.person.fullname ?? '';
+    final userName = _person.fullname ?? '';
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -189,9 +204,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                   ? () {
                       Navigator.pop(ctx);
                       ForumFirebaseService().reportUser(
-                        reportedUserId: widget.person.id,
+                        reportedUserId: _person.id,
                         reason: selectedReason!,
-                        reportedUserName: widget.person.fullname,
+                        reportedUserName: _person.fullname,
                       );
                       ScaffoldMessenger.of(this.context).showSnackBar(
                         SnackBar(
@@ -244,8 +259,8 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
             onPressed: () {
               Navigator.pop(ctx);
               ForumFirebaseService().blockUser(
-                widget.person.id,
-                blockedUserName: widget.person.fullname,
+                _person.id,
+                blockedUserName: _person.fullname,
               );
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -278,7 +293,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     }
 
     return BlocProvider(
-      create: (context) => sl<ForumCubit>()..fetchAllForums(authorId: widget.person.id),
+      create: (context) => sl<ForumCubit>()..fetchAllForums(authorId: _person.id),
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
         body: NestedScrollView(
@@ -294,8 +309,8 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildPostsTab(context),
                     _buildAboutTab(context),
+                    _buildPostsTab(context),
                   ],
                 ),
               ),
@@ -367,7 +382,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                   ],
                 ),
               ),
-              child: widget.person.avatar != null
+              child: _person.avatar != null
                   ? ShaderMask(
                       shaderCallback: (rect) {
                         return LinearGradient(
@@ -381,7 +396,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                       },
                       blendMode: BlendMode.darken,
                       child: Image.network(
-                        widget.person.avatar!,
+                        _person.avatar!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => const SizedBox(),
                       ),
@@ -435,13 +450,13 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                 child: CircleAvatar(
                   radius: 40,
                   backgroundColor: AppColors.primary.shade100,
-                  backgroundImage: widget.person.avatar != null
-                      ? NetworkImage(widget.person.avatar!)
+                  backgroundImage: _person.avatar != null
+                      ? NetworkImage(_person.avatar!)
                       : null,
-                  child: widget.person.avatar == null
+                  child: _person.avatar == null
                       ? Text(
-                          (widget.person.fullname?.isNotEmpty ?? false)
-                              ? widget.person.fullname![0].toUpperCase()
+                          (_person.fullname?.isNotEmpty ?? false)
+                              ? _person.fullname![0].toUpperCase()
                               : 'U',
                           style: TextStyle(
                             fontSize: 32,
@@ -459,31 +474,69 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.person.fullname ?? context.tr('unknown'),
+                      _person.fullname ?? context.tr('unknown'),
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         color: Colors.black87,
                       ),
                     ),
-                    // Use spec object first, fallback to speciality string
+                    // Headline: work place and/or university info
                     Builder(
                       builder: (context) {
                         final locale = Localizations.localeOf(context).languageCode;
-                        final specName = widget.person.spec?.getLocalizedName(locale) ?? widget.person.speciality;
-                        if (specName != null && specName.isNotEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              specName,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          );
+                        final hasWork = _person.workPlaces != null && _person.workPlaces!.isNotEmpty;
+                        final noUni = _person.noUniversity;
+
+                        // Build university line: spec | university
+                        String? uniLine;
+                        if (!noUni) {
+                          final specName = _person.spec?.getLocalizedName(locale) ?? _person.speciality;
+                          final univerName = _person.univer?.getLocalizedName(locale) ?? _person.university;
+                          final parts = <String>[
+                            if (specName != null && specName.isNotEmpty) specName,
+                            if (univerName != null && univerName.isNotEmpty) univerName,
+                          ];
+                          if (parts.isNotEmpty) uniLine = parts.join(' | ');
                         }
-                        return const SizedBox.shrink();
+
+                        // Build work line: position | name (latest)
+                        String? workLine;
+                        if (hasWork) {
+                          final latest = _person.workPlaces!.last;
+                          final parts = <String>[
+                            if (latest.position.isNotEmpty) latest.position,
+                            if (latest.name.isNotEmpty) latest.name,
+                          ];
+                          if (parts.isNotEmpty) workLine = parts.join(' | ');
+                        }
+
+                        if (workLine == null && uniLine == null) return const SizedBox.shrink();
+
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (workLine != null)
+                                Text(
+                                  workLine,
+                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              if (uniLine != null) ...[
+                                if (workLine != null) const SizedBox(height: 2),
+                                Text(
+                                  uniLine,
+                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
@@ -492,11 +545,11 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                       spacing: 6,
                       runSpacing: 6,
                       children: [
-                        if (widget.person.flow.name.isNotEmpty)
-                          _buildSmallTag('${context.tr('flow')} ${widget.person.flow.name}'),
-                        if (widget.person.generation != null &&
-                            widget.person.generation!.isNotEmpty)
-                          _buildSmallTag(widget.person.generation!),
+                        if (_person.flow.name.isNotEmpty)
+                          _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
+                        if (_person.generation != null &&
+                            _person.generation!.isNotEmpty)
+                          _buildSmallTag(_person.generation!),
                       ],
                     ),
                   ],
@@ -590,8 +643,8 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   }
 
   Widget _buildQuickActions(BuildContext context) {
-    final hasWhatsApp = widget.person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
-    final hasInstagram = widget.person.socialMedias?['instagram']?.isNotEmpty ?? false;
+    final hasWhatsApp = _person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
+    final hasInstagram = _person.socialMedias?['instagram']?.isNotEmpty ?? false;
 
     return Row(
       children: [
@@ -607,16 +660,16 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               final currentUserId = sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
 
               // If viewing own profile, go to profile page
-              if (currentUserId == widget.person.id.toString()) {
+              if (currentUserId == _person.id.toString()) {
                 context.router.replaceAll([BottomBarRoute(initialIndex: 4)]);
                 return;
               }
 
               // Ensure target user exists in Firebase with proper data
               await sl<MenuRemoteDatasource>().ensureUserExists(
-                id: widget.person.id.toString(),
-                name: widget.person.fullname ?? 'User',
-                photoUrl: widget.person.avatar,
+                id: _person.id.toString(),
+                name: _person.fullname ?? 'User',
+                photoUrl: _person.avatar,
               );
 
               if (!context.mounted) return;
@@ -624,9 +677,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               context.router.push(
                 ChatRoute(
                   chatType: 'users',
-                  userId: widget.person.id.toString(),
-                  userName: widget.person.fullname,
-                  userAvatar: widget.person.avatar,
+                  userId: _person.id.toString(),
+                  userName: _person.fullname,
+                  userAvatar: _person.avatar,
                 ),
               );
             },
@@ -641,7 +694,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               color: const Color(0xFF25D366),
               onTap: () {
                 HapticFeedback.lightImpact();
-                ContactService().openWhatsapp(widget.person.socialMedias!['whatsapp']!);
+                ContactService().openWhatsapp(_person.socialMedias!['whatsapp']!);
               },
             ),
           ),
@@ -654,7 +707,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               color: const Color(0xFFE4405F),
               onTap: () {
                 HapticFeedback.lightImpact();
-                ContactService().openInstagram(widget.person.socialMedias!['instagram']!);
+                ContactService().openInstagram(_person.socialMedias!['instagram']!);
               },
             ),
           ),
@@ -736,9 +789,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.article_outlined, size: 18),
+                  const Icon(Icons.info_outline, size: 18),
                   const SizedBox(width: 6),
-                  Text(context.tr('posts')),
+                  Text(context.tr('profile_tab')),
                 ],
               ),
             ),
@@ -746,9 +799,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.info_outline, size: 18),
+                  const Icon(Icons.article_outlined, size: 18),
                   const SizedBox(width: 6),
-                  Text(context.tr('profile_tab')),
+                  Text(context.tr('posts')),
                 ],
               ),
             ),
@@ -789,7 +842,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
-                    context.read<ForumCubit>().fetchAllForums(authorId: widget.person.id);
+                    context.read<ForumCubit>().fetchAllForums(authorId: _person.id);
                   },
                   child: Text(context.tr('retry')),
                 ),
@@ -832,7 +885,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
 
         return RefreshIndicator(
           onRefresh: () async {
-            await context.read<ForumCubit>().fetchAllForums(authorId: widget.person.id);
+            await context.read<ForumCubit>().fetchAllForums(authorId: _person.id);
           },
           child: ListView.builder(
             padding: EdgeInsets.zero,
@@ -855,17 +908,75 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Positions in Jaidem
+          if (_person.positionsInJaidem != null && _person.positionsInJaidem!.isNotEmpty)
+            _buildPositionsSection(),
+
           // About section
-          if (widget.person.aboutMe != null && widget.person.aboutMe!.isNotEmpty)
+          if (_person.aboutMe != null && _person.aboutMe!.isNotEmpty)
             _buildAboutSection(context),
 
           // Info section
           _buildInfoSection(context),
 
+          // Other Schools
+          if (_person.otherSchools != null && _person.otherSchools!.isNotEmpty)
+            _buildListSection(
+              context,
+              context.tr('other_education'),
+              Icons.menu_book_outlined,
+              _person.otherSchools!.map((s) {
+                final parts = <String>[
+                  if (s.description.isNotEmpty) s.description,
+                  if (s.startDate != null || s.endDate != null) _formatDateRange(s.startDate, s.endDate),
+                ];
+                return MapEntry(s.name, parts.isNotEmpty ? parts.join(' · ') : null);
+              }).toList(),
+            ),
+
+          // Additional Education
+          if (_person.additionalEducations != null && _person.additionalEducations!.isNotEmpty)
+            _buildListSection(
+              context,
+              context.tr('additional_education'),
+              Icons.auto_stories_outlined,
+              _person.additionalEducations!.map((e) {
+                final parts = <String>[
+                  if (e.description.isNotEmpty) e.description,
+                  if (e.dateStart != null || e.dateEnd != null) _formatDateRange(e.dateStart, e.dateEnd),
+                ];
+                return MapEntry(e.title, parts.isNotEmpty ? parts.join(' · ') : null);
+              }).toList(),
+            ),
+
+          // Work Places
+          if (_person.workPlaces != null && _person.workPlaces!.isNotEmpty)
+            _buildListSection(
+              context,
+              context.tr('work_experience'),
+              Icons.work_outline_rounded,
+              _person.workPlaces!.map((w) {
+                final parts = <String>[
+                  if (w.position.isNotEmpty) w.position,
+                  if (w.startDate != null || w.endDate != null) _formatDateRange(w.startDate, w.endDate),
+                ];
+                return MapEntry(w.name, parts.isNotEmpty ? parts.join(' · ') : null);
+              }).toList(),
+            ),
+
+          // Success History
+          if (_person.successHist != null && _person.successHist!.isNotEmpty)
+            _buildListSection(
+              context,
+              context.tr('success_history'),
+              Icons.emoji_events_outlined,
+              _person.successHist!.map((s) => MapEntry(s.name, s.description.isNotEmpty ? s.description : null)).toList(),
+            ),
+
           // Booking link for advisors
-          if (widget.person.isAdvisor &&
-              widget.person.linkToReserve != null &&
-              widget.person.linkToReserve!.isNotEmpty)
+          if (_person.isAdvisor &&
+              _person.linkToReserve != null &&
+              _person.linkToReserve!.isNotEmpty)
             _buildBookingLinkSection(context),
 
           // Contact section
@@ -873,6 +984,50 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
 
           const SizedBox(height: 24),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPositionsSection() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: _person.positionsInJaidem!.map((position) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 5,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    position,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade700,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }
@@ -904,7 +1059,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           ),
           const SizedBox(height: 12),
           Text(
-            widget.person.aboutMe!,
+            _person.aboutMe!,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey.shade700,
@@ -920,24 +1075,33 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     final locale = Localizations.localeOf(context).languageCode;
     final items = <_InfoItem>[];
 
+    // Birthday
+    if (_person.birthday != null && _person.birthday!.isNotEmpty) {
+      final birthDate = DateTime.tryParse(_person.birthday!);
+      if (birthDate != null) {
+        final formatted = '${birthDate.day.toString().padLeft(2, '0')}.${birthDate.month.toString().padLeft(2, '0')}.${birthDate.year}';
+        items.add(_InfoItem(Icons.cake_outlined, context.tr('date_of_birth'), formatted));
+      }
+    }
+
     // Use univer object first, fallback to university string
-    final univerName = widget.person.univer?.getLocalizedName(locale) ?? widget.person.university;
+    final univerName = _person.univer?.getLocalizedName(locale) ?? _person.university;
     if (univerName != null && univerName.isNotEmpty) {
       items.add(_InfoItem(Icons.school_outlined, context.tr('university'), univerName));
     }
-    final regionName = widget.person.region?.getLocalizedName(locale);
+    final regionName = _person.region?.getLocalizedName(locale);
     if (regionName != null && regionName.isNotEmpty) {
       items.add(_InfoItem(Icons.map_outlined, context.tr('district'), regionName));
     }
-    final villageName = widget.person.village?.getLocalizedName(locale);
+    final villageName = _person.village?.getLocalizedName(locale);
     if (villageName != null && villageName.isNotEmpty) {
       items.add(_InfoItem(Icons.location_city_outlined, context.tr('village'), villageName));
     }
-    if (widget.person.interest != null && widget.person.interest!.isNotEmpty) {
-      items.add(_InfoItem(Icons.favorite_outline, context.tr('interests'), widget.person.interest!));
+    if (_person.interest != null && _person.interest!.isNotEmpty) {
+      items.add(_InfoItem(Icons.favorite_outline, context.tr('interests'), _person.interest!));
     }
-    if (widget.person.skills != null && widget.person.skills!.isNotEmpty) {
-      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), widget.person.skills!));
+    if (_person.skills != null && _person.skills!.isNotEmpty) {
+      items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), _person.skills!));
     }
 
     if (items.isEmpty) return const SizedBox();
@@ -1013,7 +1177,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     return GestureDetector(
       onTap: () async {
         HapticFeedback.lightImpact();
-        final url = Uri.parse(widget.person.linkToReserve!);
+        final url = Uri.parse(_person.linkToReserve!);
         if (await canLaunchUrl(url)) {
           await launchUrl(url, mode: LaunchMode.externalApplication);
         }
@@ -1051,7 +1215,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    widget.person.linkToReserve!,
+                    _person.linkToReserve!,
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.primary,
@@ -1070,9 +1234,94 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     );
   }
 
+  String _formatDateRange(String? startDate, String? endDate) {
+    String fmt(String d) {
+      final dt = DateTime.tryParse(d);
+      if (dt == null) return d;
+      return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+    }
+    final s = startDate != null ? fmt(startDate) : null;
+    final e = endDate != null ? fmt(endDate) : null;
+    if (s != null && e != null) return '$s — $e';
+    if (s != null) return '$s — ...';
+    if (e != null) return '... — $e';
+    return '';
+  }
+
+  Widget _buildListSection(
+    BuildContext context,
+    String title,
+    IconData icon,
+    List<MapEntry<String, String?>> items,
+  ) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...items.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.circle, size: 6, color: Colors.grey.shade400),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.key,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          if (item.value != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              item.value!,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContactSection(BuildContext context) {
-    final hasPhone = widget.person.phone != null && widget.person.phone!.isNotEmpty;
-    final hasEmail = widget.person.email != null && widget.person.email!.isNotEmpty;
+    final hasPhone = _person.phone != null && _person.phone!.isNotEmpty;
+    final hasEmail = _person.email != null && _person.email!.isNotEmpty;
 
     if (!hasPhone && !hasEmail) return const SizedBox();
 
@@ -1103,19 +1352,19 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           if (hasPhone)
             _buildContactRow(
               icon: Icons.phone_rounded,
-              value: widget.person.phone!,
+              value: _person.phone!,
               onTap: () {
                 HapticFeedback.lightImpact();
-                ContactService().callToPhone(widget.person.phone!);
+                ContactService().callToPhone(_person.phone!);
               },
             ),
           if (hasEmail)
             _buildContactRow(
               icon: Icons.email_rounded,
-              value: widget.person.email!,
+              value: _person.email!,
               onTap: () async {
                 HapticFeedback.lightImpact();
-                final url = Uri.parse('mailto:${widget.person.email!}');
+                final url = Uri.parse('mailto:${_person.email!}');
                 if (await canLaunchUrl(url)) {
                   await launchUrl(url);
                 }

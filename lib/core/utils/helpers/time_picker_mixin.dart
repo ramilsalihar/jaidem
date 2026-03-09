@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/extensions/theme_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 
@@ -150,13 +152,13 @@ mixin TimePickerMixin {
 
     await showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => Container(
-        height: 260,
+      builder: (BuildContext popupContext) => Container(
+        height: 310,
         padding: const EdgeInsets.only(top: 6.0),
         margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(popupContext).viewInsets.bottom,
         ),
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(popupContext),
         child: SafeArea(
           top: false,
           child: Column(
@@ -176,10 +178,10 @@ mixin TimePickerMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CupertinoButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(popupContext).pop(),
                       child: Text(
                         cancelText,
-                        style: context.textTheme.headlineMedium?.copyWith(
+                        style: popupContext.textTheme.headlineMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w600,
                         ),
@@ -188,11 +190,11 @@ mixin TimePickerMixin {
                     CupertinoButton(
                       onPressed: () {
                         onDateSelected(selectedDate);
-                        Navigator.of(context).pop();
+                        Navigator.of(popupContext).pop();
                       },
                       child: Text(
                         doneText,
-                        style: context.textTheme.headlineMedium?.copyWith(
+                        style: popupContext.textTheme.headlineMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
                         ),
@@ -213,11 +215,153 @@ mixin TimePickerMixin {
                   },
                 ),
               ),
+              // Enter manually button
+              Container(
+                decoration: const BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: CupertinoColors.separator,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: CupertinoButton(
+                  onPressed: () {
+                    Navigator.of(popupContext).pop();
+                    _showManualDateEntryDialog(
+                      context: context,
+                      initialDate: selectedDate,
+                      minimumDate: minimumDate,
+                      maximumDate: maximumDate,
+                      onDateSelected: onDateSelected,
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.edit_calendar_outlined, size: 18, color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.tr('enter_manually'),
+                        style: popupContext.textTheme.headlineMedium?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _showManualDateEntryDialog({
+    required BuildContext context,
+    DateTime? initialDate,
+    DateTime? minimumDate,
+    DateTime? maximumDate,
+    required Function(DateTime) onDateSelected,
+  }) async {
+    final controller = TextEditingController(
+      text: initialDate != null
+          ? '${initialDate.day.toString().padLeft(2, '0')}-${initialDate.month.toString().padLeft(2, '0')}-${initialDate.year}'
+          : '',
+    );
+    String? errorText;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            context.tr('select_date'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.datetime,
+                inputFormatters: [_DateInputFormatter()],
+                decoration: InputDecoration(
+                  hintText: context.tr('enter_date_hint'),
+                  errorText: errorText,
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                ),
+                style: const TextStyle(fontSize: 16, letterSpacing: 1.2),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                context.tr('cancel'),
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final parsed = _parseDDMMYYYY(controller.text);
+                if (parsed == null) {
+                  setDialogState(() {
+                    errorText = context.tr('invalid_date_format');
+                  });
+                  return;
+                }
+                if (minimumDate != null && parsed.isBefore(minimumDate) ||
+                    maximumDate != null && parsed.isAfter(maximumDate)) {
+                  setDialogState(() {
+                    errorText = context.tr('invalid_date_format');
+                  });
+                  return;
+                }
+                onDateSelected(parsed);
+                Navigator.pop(ctx);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: Text(context.tr('save')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  DateTime? _parseDDMMYYYY(String text) {
+    final parts = text.split('-');
+    if (parts.length != 3) return null;
+    try {
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+      if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1000) return null;
+      final date = DateTime(year, month, day);
+      if (date.day != day || date.month != month) return null;
+      return date;
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Parses string in HH:MM format to TimeOfDay
@@ -257,5 +401,27 @@ mixin TimePickerMixin {
       // Return null if parsing fails
     }
     return null;
+  }
+}
+
+class _DateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < digitsOnly.length && i < 8; i++) {
+      if (i == 2 || i == 4) buffer.write('-');
+      buffer.write(digitsOnly[i]);
+    }
+
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
   }
 }

@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/domain/usecases/create_goal_usecase.dart';
+import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
+import 'package:jaidem/features/goals/domain/usecases/delete_goal_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/fetch_goals_usecase.dart';
 import 'package:jaidem/features/goals/domain/usecases/update_goal_usecase.dart';
 
@@ -11,6 +13,7 @@ class GoalsCubit extends Cubit<GoalsState> {
   final FetchGoalsUseCase _fetchGoalsUseCase;
   final CreateGoalUseCase _createGoalUseCase;
   final UpdateGoalUseCase _updateGoalUseCase;
+  final DeleteGoalUseCase _deleteGoalUseCase;
 
   String? _selectedStatus;
 
@@ -18,9 +21,11 @@ class GoalsCubit extends Cubit<GoalsState> {
     required FetchGoalsUseCase fetchGoalsUseCase,
     required CreateGoalUseCase createGoalUseCase,
     required UpdateGoalUseCase updateGoalUseCase,
+    required DeleteGoalUseCase deleteGoalUseCase,
   })  : _fetchGoalsUseCase = fetchGoalsUseCase,
         _createGoalUseCase = createGoalUseCase,
         _updateGoalUseCase = updateGoalUseCase,
+        _deleteGoalUseCase = deleteGoalUseCase,
         super(const GoalsInitial());
 
   Future<void> fetchGoals({bool refresh = false, String? status}) async {
@@ -131,6 +136,41 @@ class GoalsCubit extends Cubit<GoalsState> {
           return g.id == updatedGoal.id ? updatedGoal : g;
         }).toList();
         emit(GoalUpdated(
+          goals: updatedGoals,
+          currentPage: state.currentPage,
+          hasMore: state.hasMore,
+        ));
+      },
+    );
+  }
+
+  Future<void> deleteGoal(String goalId) async {
+    emit(GoalDeleting(
+      goals: state.goals,
+      currentPage: state.currentPage,
+      hasMore: state.hasMore,
+    ));
+
+    final result = await _deleteGoalUseCase(goalId);
+
+    result.fold(
+      (error) => emit(GoalDeleteError(
+        message: error,
+        goals: state.goals,
+        currentPage: state.currentPage,
+        hasMore: state.hasMore,
+      )),
+      (_) {
+        // Cancel the scheduled reminder notification
+        final parsedId = int.tryParse(goalId);
+        if (parsedId != null) {
+          GoalReminderService().cancelGoalReminder(parsedId);
+        }
+
+        final updatedGoals = state.goals
+            .where((g) => g.id.toString() != goalId)
+            .toList();
+        emit(GoalDeleted(
           goals: updatedGoals,
           currentPage: state.currentPage,
           hasMore: state.hasMore,

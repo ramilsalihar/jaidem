@@ -9,6 +9,7 @@ abstract class GoalRepository {
   Future<Either<String, ResponseModel<GoalModel>>> fetchGoals({int page = 1, String? status});
   Future<Either<String, GoalModel>> createGoal(GoalModel goal);
   Future<Either<String, GoalModel>> updateGoal(GoalModel goal);
+  Future<Either<String, void>> deleteGoal(String goalId);
 
   // Indicators
   Future<Either<String, List<GoalIndicatorModel>>> fetchGoalIndicators(

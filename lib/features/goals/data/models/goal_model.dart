@@ -49,19 +49,21 @@ class GoalModel {
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{
       'title': title,
-      'description': description,
       'status': status,
-      'date_created': dateCreated.toIso8601String(),
-      'date_updated': dateUpdated.toIso8601String(),
-      'deadline': deadline != null
-          ? '${deadline!.year.toString().padLeft(4, '0')}-${deadline!.month.toString().padLeft(2, '0')}-${deadline!.day.toString().padLeft(2, '0')}'
-          : null,
       'frequency': frequency,
       'reminder': reminder,
-      'progress': progress,
     };
+    if (description != null && description!.isNotEmpty) {
+      map['description'] = description;
+    }
+    if (deadline != null) {
+      map['deadline'] =
+          '${deadline!.year.toString().padLeft(4, '0')}-${deadline!.month.toString().padLeft(2, '0')}-${deadline!.day.toString().padLeft(2, '0')}';
+    }
     if (id != null) map['id'] = id;
-    if (student != null) map['student'] = student;
+    if (student != null) {
+      map['student'] = student is String ? int.tryParse(student) ?? student : student;
+    }
     if (category != null) map['category'] = category;
     return map;
   }

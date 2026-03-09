@@ -1,9 +1,13 @@
+import 'package:jaidem/core/data/models/jaidem/details/additional_education_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/other_school_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/speciality_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/state_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/university_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/village_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/success_history_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/work_place_model.dart';
 
 class PersonModel {
   final int id;
@@ -38,6 +42,14 @@ class PersonModel {
   final String? birthday;
   final bool isAdvisor;
   final String? linkToReserve;
+  final bool noUniversity;
+  final String? univerStartDate;
+  final String? univerEndDate;
+  final List<OtherSchoolModel>? otherSchools;
+  final List<WorkPlaceModel>? workPlaces;
+  final List<SuccessHistoryModel>? successHist;
+  final List<AdditionalEducationModel>? additionalEducations;
+  final List<String>? positionsInJaidem;
 
   const PersonModel({
     required this.id,
@@ -72,6 +84,14 @@ class PersonModel {
     this.birthday,
     this.isAdvisor = false,
     this.linkToReserve,
+    this.noUniversity = false,
+    this.univerStartDate,
+    this.univerEndDate,
+    this.otherSchools,
+    this.workPlaces,
+    this.successHist,
+    this.additionalEducations,
+    this.positionsInJaidem,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -121,6 +141,24 @@ class PersonModel {
       birthday: json['birthday'] as String?,
       isAdvisor: json['isAdvisor'] as bool? ?? false,
       linkToReserve: json['linkToReserve'] as String?,
+      noUniversity: json['noUniversity'] as bool? ?? false,
+      univerStartDate: json['univerStartDate'] as String?,
+      univerEndDate: json['univerEndDate'] as String?,
+      otherSchools: (json['otherSchools'] as List?)
+          ?.map((e) => OtherSchoolModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      workPlaces: (json['workPlaces'] as List?)
+          ?.map((e) => WorkPlaceModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      successHist: (json['successHist'] as List?)
+          ?.map((e) => SuccessHistoryModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      additionalEducations: (json['additionalEducations'] as List?)
+          ?.map((e) => AdditionalEducationModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      positionsInJaidem: (json['positionsInJaidem'] as List?)
+          ?.map((e) => e as String)
+          .toList(),
     );
   }
 
@@ -157,6 +195,14 @@ class PersonModel {
     String? birthday,
     bool? isAdvisor,
     String? linkToReserve,
+    bool? noUniversity,
+    String? univerStartDate,
+    String? univerEndDate,
+    List<OtherSchoolModel>? otherSchools,
+    List<WorkPlaceModel>? workPlaces,
+    List<SuccessHistoryModel>? successHist,
+    List<AdditionalEducationModel>? additionalEducations,
+    List<String>? positionsInJaidem,
   }) {
     return PersonModel(
       id: id ?? this.id,
@@ -191,6 +237,14 @@ class PersonModel {
       birthday: birthday ?? this.birthday,
       isAdvisor: isAdvisor ?? this.isAdvisor,
       linkToReserve: linkToReserve ?? this.linkToReserve,
+      noUniversity: noUniversity ?? this.noUniversity,
+      univerStartDate: univerStartDate ?? this.univerStartDate,
+      univerEndDate: univerEndDate ?? this.univerEndDate,
+      otherSchools: otherSchools ?? this.otherSchools,
+      workPlaces: workPlaces ?? this.workPlaces,
+      successHist: successHist ?? this.successHist,
+      additionalEducations: additionalEducations ?? this.additionalEducations,
+      positionsInJaidem: positionsInJaidem ?? this.positionsInJaidem,
     );
   }
 

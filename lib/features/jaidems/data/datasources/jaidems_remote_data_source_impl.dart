@@ -17,6 +17,7 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
     String? flow,
     String? generation,
     String? university,
+    String? faculty,
     String? speciality,
     String? ageMin,
     String? ageMax,
@@ -33,6 +34,7 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
       if (flow != null) queryParameters['flow'] = flow;
       if (generation != null) queryParameters['generation'] = generation;
       if (university != null) queryParameters['univer'] = university;
+      if (faculty != null) queryParameters['faculty'] = faculty;
       if (speciality != null) queryParameters['spec'] = speciality;
       if (ageMin != null) queryParameters['age_min'] = ageMin;
       if (ageMax != null) queryParameters['age_max'] = ageMax;

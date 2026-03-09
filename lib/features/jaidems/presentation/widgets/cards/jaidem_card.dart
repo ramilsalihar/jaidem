@@ -5,6 +5,7 @@ import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/data/models/jaidem/person_model.dart';
 import 'package:jaidem/core/data/services/contact_service.dart';
 import 'package:jaidem/core/routes/app_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource.dart';
@@ -197,16 +198,40 @@ class JaidemCard extends StatelessWidget {
   }
 
   Widget _buildNameSection() {
-    return Text(
-      person.fullname ?? 'Белгисиз',
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-        color: Colors.black87,
-        height: 1.2,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      children: [
+        Flexible(
+          child: Text(
+            person.fullname ?? 'Белгисиз',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+              height: 1.2,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (person.flow.name.isNotEmpty) ...[
+          const SizedBox(width: 4),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              person.flow.name,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -289,6 +314,12 @@ class JaidemCard extends StatelessWidget {
       children: [
         // Write message button
         _buildWriteButton(),
+        if (person.isAdvisor &&
+            person.linkToReserve != null &&
+            person.linkToReserve!.isNotEmpty) ...[
+          const SizedBox(width: 12),
+          _buildReserveButton(),
+        ],
         const SizedBox(width: 12),
         // WhatsApp button
         _buildSocialButton(
@@ -363,6 +394,33 @@ class JaidemCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildReserveButton() {
+    return GestureDetector(
+      onTap: () async {
+        HapticFeedback.lightImpact();
+        final url = Uri.tryParse(person.linkToReserve!);
+        if (url != null) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: Colors.green.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.calendar_month_rounded,
+            size: 16,
+            color: Colors.green,
+          ),
+        ),
+      ),
     );
   }
 
