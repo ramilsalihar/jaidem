@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:jaidem/core/data/services/push_notification_service.dart';
 import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -11,7 +12,7 @@ class GoalReminderService {
   GoalReminderService._internal();
 
   final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
+      PushNotificationService.localNotifications;
 
   bool _tzInitialized = false;
 
@@ -93,7 +94,7 @@ class GoalReminderService {
         'Максатыңызды текшерүүнү унутпаңыз!',
         scheduledDate,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: matchComponents,

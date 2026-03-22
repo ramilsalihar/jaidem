@@ -19,6 +19,9 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +30,15 @@ class _ChatListPageState extends State<ChatListPage> {
     if (currentUserId.isNotEmpty) {
       context.read<ChatCubit>().getChats(currentUserId);
     }
+    _searchController.addListener(() {
+      setState(() => _searchQuery = _searchController.text.toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,7 +67,10 @@ class _ChatListPageState extends State<ChatListPage> {
                 ),
                 child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
               ),
-              onPressed: () => context.router.pop(),
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                context.router.pop();
+              },
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
@@ -134,9 +149,61 @@ class _ChatListPageState extends State<ChatListPage> {
             ),
           ),
 
+          // Search Bar
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(fontSize: 15),
+                  decoration: InputDecoration(
+                    hintText: 'Чаттарды издөө...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 15,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search_rounded,
+                      color: Colors.grey.shade400,
+                    ),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: Colors.grey.shade400,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              _searchController.clear();
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // Chat List Content
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 100),
             sliver: BlocBuilder<ChatCubit, ChatState>(
               builder: (context, state) {
                 if (state.isChatListLoading) {
@@ -182,10 +249,48 @@ class _ChatListPageState extends State<ChatListPage> {
                   );
                 }
 
+                // Filter chats by search query
+                final filteredChats = _searchQuery.isEmpty
+                    ? state.chats
+                    : state.chats.where((chat) {
+                        final otherUser = chat.users.firstWhere(
+                          (u) => u.id != currentUserId,
+                          orElse: () => chat.users.first,
+                        );
+                        return otherUser.name.toLowerCase().contains(_searchQuery) ||
+                            chat.lastMessage.toLowerCase().contains(_searchQuery);
+                      }).toList();
+
+                if (filteredChats.isEmpty) {
+                  return SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 56,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Эч нерсе табылган жок',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final chat = state.chats[index];
+                      final chat = filteredChats[index];
 
                       // Find the other user
                       final otherUser = chat.users.firstWhere(
@@ -198,6 +303,7 @@ class _ChatListPageState extends State<ChatListPage> {
                         name: otherUser.name,
                         date: _formatDate(chat.lastMessageAt),
                         messagePreview: chat.lastMessage,
+                        unreadCount: chat.unreadCount,
                         onTap: () {
                           HapticFeedback.lightImpact();
                           final chatType = otherUser.role == 'mentor'
@@ -206,24 +312,19 @@ class _ChatListPageState extends State<ChatListPage> {
                                   ? 'admin'
                                   : 'users';
 
-                          if (chatType == 'users') {
-                            context.router.push(
-                              ChatRoute(
-                                chatType: chatType,
-                                userId: otherUser.id,
-                                userName: otherUser.name,
-                                userAvatar: otherUser.photoUrl,
-                              ),
-                            );
-                          } else {
-                            context.router.push(
-                              ChatRoute(chatType: chatType),
-                            );
-                          }
+                          context.router.push(
+                            ChatRoute(
+                              chatType: chatType,
+                              chatId: chat.id,
+                              userId: otherUser.id,
+                              userName: otherUser.name,
+                              userAvatar: otherUser.photoUrl,
+                            ),
+                          );
                         },
                       );
                     },
-                    childCount: state.chats.length,
+                    childCount: filteredChats.length,
                   ),
                 );
               },
@@ -401,7 +502,7 @@ class _ChatListPageState extends State<ChatListPage> {
     final difference = now.difference(date);
 
     if (difference.inDays == 0) {
-      return "${date.hour}:${date.minute.toString().padLeft(2, '0')}";
+      return "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
     } else if (difference.inDays == 1) {
       return 'Кечээ';
     } else if (difference.inDays < 7) {

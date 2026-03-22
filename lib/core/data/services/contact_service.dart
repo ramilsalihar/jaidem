@@ -20,9 +20,10 @@ class ContactService {
     }
   }
 
-  /// Open Instagram profile using username
-  Future<void> openInstagram(String username) async {
-    final url = Uri.parse("https://instagram.com/$username");
+  /// Open Instagram profile using URL or username
+  Future<void> openInstagram(String input) async {
+    final isUrl = input.startsWith('http://') || input.startsWith('https://');
+    final url = Uri.parse(isUrl ? input : "https://instagram.com/$input");
 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception("Could not open Instagram profile");

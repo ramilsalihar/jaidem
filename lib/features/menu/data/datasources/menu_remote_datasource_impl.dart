@@ -1,3 +1,4 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -267,38 +268,53 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     return ChatModel.fromFirestore(snap);
   }
 
+  Stream<List<ChatModel>> _chatStreamWithType(
+    String chatType, String userId,
+  ) {
+    return firestore
+        .collection(AppConstants.chatsCollection)
+        .doc(chatType)
+        .collection('chats')
+        .where('participants', arrayContains: userId)
+        .snapshots()
+        .asyncMap((snap) async {
+      final chats = <ChatModel>[];
+      for (final doc in snap.docs) {
+        var chat = ChatModel.fromFirestore(doc).copyWith(chatType: chatType);
+
+        // Count unread messages (not sent by current user, not in readBy)
+        try {
+          final messagesSnap = await doc.reference
+              .collection('messages')
+              .where('senderId', isNotEqualTo: userId)
+              .get();
+          final unread = messagesSnap.docs.where((msgDoc) {
+            final readBy = List<String>.from(msgDoc.data()['readBy'] ?? []);
+            return !readBy.contains(userId);
+          }).length;
+          chat = chat.copyWith(unreadCount: unread);
+        } catch (_) {}
+
+        chats.add(chat);
+      }
+      return chats;
+    });
+  }
+
   @override
   Stream<List<ChatModel>> getChats(String userId) {
-    // Create a reference to the base chats collection
-    final chatsRef = firestore.collection(AppConstants.chatsCollection);
+    final mentorsStream = _chatStreamWithType('mentors', userId);
+    final adminStream = _chatStreamWithType('admin', userId);
+    final usersStream = _chatStreamWithType('users', userId);
 
-    // Create a stream of chat updates by listening to each subcollection
-    return Stream.periodic(const Duration(seconds: 1)).asyncMap((_) async {
-      final results = await Future.wait([
-        chatsRef
-            .doc('mentors')
-            .collection('chats')
-            .where('participants', arrayContains: userId)
-            .get(),
-        chatsRef
-            .doc('admin')
-            .collection('chats')
-            .where('participants', arrayContains: userId)
-            .get(),
-        chatsRef
-            .doc('users')
-            .collection('chats')
-            .where('participants', arrayContains: userId)
-            .get(),
-      ]);
-
-      final allChats = [
-        ...results[0].docs.map((doc) => ChatModel.fromFirestore(doc)),
-        ...results[1].docs.map((doc) => ChatModel.fromFirestore(doc)),
-        ...results[2].docs.map((doc) => ChatModel.fromFirestore(doc)),
+    // Combine all three streams into one sorted list
+    return CombineLatestStream.list([mentorsStream, adminStream, usersStream])
+        .map((lists) {
+      final allChats = <ChatModel>[
+        ...lists[0],
+        ...lists[1],
+        ...lists[2],
       ];
-
-      // Sort by lastMessageAt
       allChats.sort((a, b) => b.lastMessageAt.compareTo(a.lastMessageAt));
       return allChats;
     });
@@ -329,7 +345,9 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
     final msgRef = firestore
         .collection(AppConstants.chatsCollection)
         .doc(chatType)
-        .collection(chatId)
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
         .doc(messageId);
 
     await msgRef.update({
@@ -353,17 +371,64 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
 
     await chatRef.set(message.toFirestore());
 
-    // update chat metadata
-    await firestore
+    // Update chat metadata
+    final chatDocRef = firestore
         .collection(AppConstants.chatsCollection)
         .doc(chatType)
         .collection('chats')
-        .doc(chatId)
-        .update({
+        .doc(chatId);
+
+    await chatDocRef.update({
       'lastMessage': message.text,
       'lastMessageAt': message.createdAt,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+
+    // Update sender's name/avatar in chat users array
+    await _updateSenderInChat(chatDocRef, message.senderId);
+  }
+
+  /// Updates the sender's name and avatar in the chat's users array
+  /// so that the chat list always shows the latest user info.
+  Future<void> _updateSenderInChat(
+    DocumentReference chatDocRef,
+    String senderId,
+  ) async {
+    try {
+      final currentName =
+          sharedPreferences.getString(AppConstants.userFullname) ?? '';
+      final currentAvatar =
+          sharedPreferences.getString(AppConstants.userAvatar) ?? '';
+
+      if (currentName.isEmpty) return;
+
+      final chatSnap = await chatDocRef.get();
+      if (!chatSnap.exists) return;
+
+      final data = chatSnap.data() as Map<String, dynamic>?;
+      if (data == null) return;
+
+      final users = List<Map<String, dynamic>>.from(data['users'] ?? []);
+      bool updated = false;
+
+      for (int i = 0; i < users.length; i++) {
+        if (users[i]['id'] == senderId) {
+          if (users[i]['name'] != currentName ||
+              users[i]['photoUrl'] != currentAvatar) {
+            users[i]['name'] = currentName;
+            users[i]['photoUrl'] = currentAvatar;
+            updated = true;
+          }
+          break;
+        }
+      }
+
+      if (updated) {
+        await chatDocRef.update({'users': users});
+      }
+    } catch (_) {
+      // Non-critical — don't block message sending
+    }
   }
 
   @override

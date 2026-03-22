@@ -6,6 +6,7 @@ import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_filters.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
@@ -132,30 +133,38 @@ class _JaidemsPageState extends State<JaidemsPage>
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey.shade50,
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            _buildSliverAppBar(innerBoxIsScrolled),
-          ];
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollStartNotification) {
+            FocusScope.of(context).unfocus();
+          }
+          return false;
         },
-        body: BlocBuilder<JaidemsCubit, JaidemsState>(
-          builder: (context, state) {
-            if (state is JaidemsLoading && !_isLoadingMore) {
-              return _buildLoadingState();
-            } else if (state is JaidemsError) {
-              return _buildErrorState(state.message);
-            } else if (state is JaidemsLoaded) {
-              final jaidemList = state.response.results;
-
-              if (jaidemList.isEmpty) {
-                return _buildEmptyState();
-              }
-
-              return _buildJaidemsList(jaidemList);
-            }
-            return const SizedBox();
+        child: NestedScrollView(
+          controller: _scrollController,
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              _buildSliverAppBar(innerBoxIsScrolled),
+            ];
           },
+          body: BlocBuilder<JaidemsCubit, JaidemsState>(
+            builder: (context, state) {
+              if (state is JaidemsLoading && !_isLoadingMore) {
+                return _buildLoadingState();
+              } else if (state is JaidemsError) {
+                return _buildErrorState(state.message);
+              } else if (state is JaidemsLoaded) {
+                final jaidemList = state.response.results;
+
+                if (jaidemList.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return _buildJaidemsList(jaidemList);
+              }
+              return const SizedBox();
+            },
+          ),
         ),
       ),
       drawer: const AppDrawer(),
@@ -173,6 +182,7 @@ class _JaidemsPageState extends State<JaidemsPage>
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
+          FocusScope.of(context).unfocus();
           _scaffoldKey.currentState?.openDrawer();
         },
         child: Container(
@@ -498,14 +508,12 @@ class _JaidemsPageState extends State<JaidemsPage>
         _fetchJaidems();
       },
       color: AppColors.primary,
-      child: GridView.builder(
+      child: MasonryGridView.count(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.58,
-        ),
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
         itemCount: filtered.length + (_isLoadingMore ? 2 : 0),
         itemBuilder: (context, index) {
           if (index >= filtered.length) {

@@ -7,6 +7,7 @@ class ChatOverViewCard extends StatelessWidget {
   final String date;
   final String messagePreview;
   final VoidCallback? onTap;
+  final int unreadCount;
 
   const ChatOverViewCard({
     super.key,
@@ -15,6 +16,7 @@ class ChatOverViewCard extends StatelessWidget {
     required this.date,
     required this.messagePreview,
     this.onTap,
+    this.unreadCount = 0,
   });
 
   @override
@@ -106,8 +108,8 @@ class ChatOverViewCard extends StatelessWidget {
                               name,
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade800,
+                                fontWeight: unreadCount > 0 ? FontWeight.w700 : FontWeight.w600,
+                                color: unreadCount > 0 ? Colors.grey.shade900 : Colors.grey.shade800,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -139,7 +141,8 @@ class ChatOverViewCard extends StatelessWidget {
                         messagePreview,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade500,
+                          fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
+                          color: unreadCount > 0 ? Colors.grey.shade700 : Colors.grey.shade500,
                           height: 1.3,
                         ),
                         maxLines: 2,
@@ -151,19 +154,41 @@ class ChatOverViewCard extends StatelessWidget {
 
                 const SizedBox(width: 8),
 
-                // Arrow indicator
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(10),
+                // Unread badge or arrow
+                if (unreadCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primary.shade300,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      unreadCount > 99 ? '99+' : unreadCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: Colors.grey.shade400,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    size: 14,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
               ],
             ),
           ),

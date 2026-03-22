@@ -98,6 +98,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
+                  FocusScope.of(context).unfocus();
                   _scaffoldKey.currentState?.openDrawer();
                 },
                 child: Container(

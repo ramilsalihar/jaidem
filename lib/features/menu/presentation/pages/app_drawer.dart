@@ -8,6 +8,7 @@ import 'package:jaidem/core/localization/locale_cubit.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/presentation/dialogs/terms_dialog.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/buttons/menu_button.dart';
 
@@ -70,14 +71,41 @@ class AppDrawer extends StatelessWidget {
                         context.router.push(TrainingsRoute());
                       },
                     ),
-                    MenuButton(
-                      title: context.tr('chat_list'),
-                      iconData: Icons.chat_bubble_outline_rounded,
-                      iconBackgroundColor: Colors.green.shade100,
-                      iconColor: Colors.green.shade600,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.router.push(ChatListRoute());
+                    BlocBuilder<ChatCubit, ChatState>(
+                      builder: (context, chatState) {
+                        final totalUnread = chatState.chats.fold<int>(
+                          0, (sum, chat) => sum + chat.unreadCount,
+                        );
+                        return MenuButton(
+                          title: context.tr('chat_list'),
+                          iconData: Icons.chat_bubble_outline_rounded,
+                          iconBackgroundColor: Colors.green.shade100,
+                          iconColor: Colors.green.shade600,
+                          trailing: totalUnread > 0
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    totalUnread > 99 ? '99+' : totalUnread.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                          onTap: () {
+                            Navigator.pop(context);
+                            context.router.push(ChatListRoute());
+                          },
+                        );
                       },
                     ),
                     MenuButton(

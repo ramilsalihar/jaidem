@@ -17,7 +17,7 @@ class PushNotificationService {
   PushNotificationService._internal();
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications =
+  static final FlutterLocalNotificationsPlugin localNotifications =
       FlutterLocalNotificationsPlugin();
 
   FirebaseFirestore get _firestore => sl<FirebaseFirestore>();
@@ -31,6 +31,28 @@ class PushNotificationService {
     await _setupMessageHandlers();
     await _saveTokenToFirestore();
     _listenToTokenRefresh();
+    await clearBadge();
+  }
+
+  /// Clears the iOS app icon badge count
+  Future<void> clearBadge() async {
+    if (Platform.isIOS) {
+      // Show a silent notification with badge 0 to clear the badge, then cancel it
+      await localNotifications.show(
+        0,
+        null,
+        null,
+        const NotificationDetails(
+          iOS: DarwinNotificationDetails(
+            presentAlert: false,
+            presentBadge: true,
+            presentSound: false,
+            badgeNumber: 0,
+          ),
+        ),
+      );
+      await localNotifications.cancel(0);
+    }
   }
 
   Future<void> _requestPermission() async {
@@ -41,6 +63,19 @@ class PushNotificationService {
     );
     log('FCM permission: ${settings.authorizationStatus}',
         name: 'PushNotification');
+
+    // Request Android-specific permissions
+    if (Platform.isAndroid) {
+      final androidPlugin = localNotifications
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      if (androidPlugin != null) {
+        // Request POST_NOTIFICATIONS permission (Android 13+)
+        await androidPlugin.requestNotificationsPermission();
+        // Request exact alarm permission (Android 12+)
+        await androidPlugin.requestExactAlarmsPermission();
+      }
+    }
   }
 
   Future<void> _initLocalNotifications() async {
@@ -51,7 +86,7 @@ class PushNotificationService {
       importance: Importance.high,
     );
 
-    await _localNotifications
+    await localNotifications
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(androidChannel);
@@ -64,7 +99,7 @@ class PushNotificationService {
       requestSoundPermission: false,
     );
 
-    await _localNotifications.initialize(
+    await localNotifications.initialize(
       const InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
@@ -91,7 +126,7 @@ class PushNotificationService {
     final notification = message.notification;
     if (notification == null) return;
 
-    _localNotifications.show(
+    localNotifications.show(
       notification.hashCode,
       notification.title,
       notification.body,
@@ -114,6 +149,7 @@ class PushNotificationService {
   }
 
   void _handleNotificationTap(RemoteMessage message) {
+    clearBadge();
     _navigateFromPayload(message.data);
   }
 
@@ -143,7 +179,13 @@ class PushNotificationService {
         break;
       case 'chat':
         final chatType = data['chatType'] as String? ?? 'users';
-        router.push(ChatRoute(chatType: chatType));
+        final senderId = data['senderId'] as String?;
+        final senderName = data['senderName'] as String?;
+        router.push(ChatRoute(
+          chatType: chatType,
+          userId: senderId,
+          userName: senderName,
+        ));
         break;
       case 'notification':
       default:

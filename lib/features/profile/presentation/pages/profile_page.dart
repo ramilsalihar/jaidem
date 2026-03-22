@@ -368,7 +368,7 @@ class _ProfilePageState extends State<ProfilePage>
                       Text(workLine, style: textStyle, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
                     if (uniLine != null) ...[
                       if (workLine != null) const SizedBox(height: 2),
-                      Text(uniLine, style: textStyle, textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      Text(uniLine, style: textStyle, textAlign: TextAlign.center),
                     ],
                   ],
                 );

@@ -8,6 +8,7 @@ class ChatState extends Equatable {
   final bool isMessagesLoading;
   final bool isChatUsersLoading;
   final String? error;
+  final String? currentChatId;
 
   const ChatState({
     this.chats = const [],
@@ -17,6 +18,7 @@ class ChatState extends Equatable {
     this.isMessagesLoading = false,
     this.isChatUsersLoading = false,
     this.error,
+    this.currentChatId,
   });
 
   ChatState copyWith({
@@ -27,6 +29,7 @@ class ChatState extends Equatable {
     bool? isMessagesLoading,
     bool? isChatUsersLoading,
     String? error,
+    String? currentChatId,
     bool clearError = false,
   }) {
     return ChatState(
@@ -37,6 +40,7 @@ class ChatState extends Equatable {
       isMessagesLoading: isMessagesLoading ?? this.isMessagesLoading,
       isChatUsersLoading: isChatUsersLoading ?? this.isChatUsersLoading,
       error: clearError ? null : error ?? this.error,
+      currentChatId: currentChatId ?? this.currentChatId,
     );
   }
 
@@ -49,5 +53,6 @@ class ChatState extends Equatable {
         isMessagesLoading,
         isChatUsersLoading,
         error,
+        currentChatId,
       ];
 }

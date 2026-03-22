@@ -285,6 +285,7 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
   ChatRoute({
     Key? key,
     required String chatType,
+    String? chatId,
     String? userId,
     String? userName,
     String? userAvatar,
@@ -294,6 +295,7 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
           args: ChatRouteArgs(
             key: key,
             chatType: chatType,
+            chatId: chatId,
             userId: userId,
             userName: userName,
             userAvatar: userAvatar,
@@ -310,6 +312,7 @@ class ChatRoute extends PageRouteInfo<ChatRouteArgs> {
       return ChatPage(
         key: args.key,
         chatType: args.chatType,
+        chatId: args.chatId,
         userId: args.userId,
         userName: args.userName,
         userAvatar: args.userAvatar,
@@ -322,6 +325,7 @@ class ChatRouteArgs {
   const ChatRouteArgs({
     this.key,
     required this.chatType,
+    this.chatId,
     this.userId,
     this.userName,
     this.userAvatar,
@@ -331,6 +335,8 @@ class ChatRouteArgs {
 
   final String chatType;
 
+  final String? chatId;
+
   final String? userId;
 
   final String? userName;
@@ -339,7 +345,7 @@ class ChatRouteArgs {
 
   @override
   String toString() {
-    return 'ChatRouteArgs{key: $key, chatType: $chatType, userId: $userId, userName: $userName, userAvatar: $userAvatar}';
+    return 'ChatRouteArgs{key: $key, chatType: $chatType, chatId: $chatId, userId: $userId, userName: $userName, userAvatar: $userAvatar}';
   }
 
   @override
@@ -348,6 +354,7 @@ class ChatRouteArgs {
     if (other is! ChatRouteArgs) return false;
     return key == other.key &&
         chatType == other.chatType &&
+        chatId == other.chatId &&
         userId == other.userId &&
         userName == other.userName &&
         userAvatar == other.userAvatar;
@@ -357,6 +364,7 @@ class ChatRouteArgs {
   int get hashCode =>
       key.hashCode ^
       chatType.hashCode ^
+      chatId.hashCode ^
       userId.hashCode ^
       userName.hashCode ^
       userAvatar.hashCode;

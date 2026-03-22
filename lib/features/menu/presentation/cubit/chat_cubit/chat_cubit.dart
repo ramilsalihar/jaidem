@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jaidem/features/menu/data/models/message_model.dart';
@@ -41,10 +42,15 @@ class ChatCubit extends Cubit<ChatState> {
     required this.sendMessageToAdminUseCase,
   }) : super(const ChatState());
 
+  StreamSubscription? _chatsSubscription;
+  StreamSubscription? _messagesSubscription;
+  StreamSubscription? _usersSubscription;
+
   /// 🔹 Get list of chats for current user
   void getChats(String userId) {
+    _chatsSubscription?.cancel();
     emit(state.copyWith(isChatListLoading: true, clearError: true));
-    getChatsUseCase(userId).listen((either) {
+    _chatsSubscription = getChatsUseCase(userId).listen((either) {
       either.fold(
         (failure) => emit(state.copyWith(
           isChatListLoading: false,
@@ -60,8 +66,11 @@ class ChatCubit extends Cubit<ChatState> {
 
   /// 🔹 Get messages inside a chat
   void getMessages(String chatId, String chatType) {
-    emit(state.copyWith(isMessagesLoading: true, clearError: true));
-    getMessagesUseCase(chatId, chatType).listen((either) {
+    _messagesSubscription?.cancel();
+    emit(state.copyWith(isMessagesLoading: true, currentChatId: chatId, clearError: true));
+    _messagesSubscription = getMessagesUseCase(chatId, chatType).listen((either) {
+      // Ignore if user already switched to a different chat
+      if (state.currentChatId != chatId) return;
       either.fold(
         (failure) => emit(state.copyWith(
           isMessagesLoading: false,
@@ -83,8 +92,9 @@ class ChatCubit extends Cubit<ChatState> {
 
   /// 🔹 Get list of users to chat with
   void getUsers() {
+    _usersSubscription?.cancel();
     emit(state.copyWith(isChatUsersLoading: true, clearError: true));
-    getUsersUseCase().listen((either) {
+    _usersSubscription = getUsersUseCase().listen((either) {
       either.fold(
         (failure) => emit(state.copyWith(
           isChatUsersLoading: false,
@@ -162,5 +172,13 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _chatsSubscription?.cancel();
+    _messagesSubscription?.cancel();
+    _usersSubscription?.cancel();
+    return super.close();
   }
 }

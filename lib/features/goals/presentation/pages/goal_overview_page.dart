@@ -30,6 +30,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _statisticsMode = 'month';
+  bool _hasChanges = false;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
     );
 
     if (result != null && mounted) {
+      _hasChanges = true;
       context.read<IndicatorsCubit>().createGoalIndicator(result);
     }
   }
@@ -149,8 +151,18 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
               indicators: indicators,
             );
           }
+          if (state is IndicatorUpdated || state is IndicatorCreated) {
+            _hasChanges = true;
+          }
         },
-        child: Scaffold(
+        child: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              Navigator.of(context).pop(_hasChanges ? true : null);
+            }
+          },
+          child: Scaffold(
           backgroundColor: Colors.grey.shade50,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -180,6 +192,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
             ),
           ),
         ),
+        ),
       ),
     );
   }
@@ -194,7 +207,7 @@ class _GoalOverviewPageState extends State<GoalOverviewPage>
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(_hasChanges ? true : null);
         },
         child: Container(
           margin: const EdgeInsets.all(8),

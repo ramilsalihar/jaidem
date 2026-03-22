@@ -111,6 +111,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
+          FocusScope.of(context).unfocus();
           _scaffoldKey.currentState?.openDrawer();
         },
         child: Container(
@@ -503,13 +504,16 @@ class _ModernGoalCard extends StatelessWidget {
     final daysRemaining = _getDaysRemaining(goal.deadline);
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         HapticFeedback.lightImpact();
-        Navigator.of(context).push(
+        final result = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (context) => GoalOverviewPage(goal: goal),
           ),
         );
+        if (result == true && context.mounted) {
+          context.read<GoalsCubit>().fetchGoals(refresh: true);
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),

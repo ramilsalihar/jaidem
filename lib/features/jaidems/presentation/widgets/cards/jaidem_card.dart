@@ -46,28 +46,24 @@ class JaidemCard extends StatelessWidget {
             _buildProfileImage(),
 
             // Content Section
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Name and Flow Badge
-                    _buildNameSection(),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name and Flow Badge
+                  _buildNameSection(),
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    // Details
-                    Expanded(
-                      child: _buildDetailsSection(context),
-                    ),
+                  // Details
+                  _buildDetailsSection(context),
 
-                    const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                    // Action Buttons
-                    _buildActionButtons(),
-                  ],
-                ),
+                  // Action Buttons
+                  _buildActionButtons(),
+                ],
               ),
             ),
           ],
@@ -254,7 +250,6 @@ class JaidemCard extends StatelessWidget {
       items.add(_buildDetailItem(
         Icons.school_outlined,
         univerName,
-        maxLines: 2,
       ));
     }
 
@@ -276,14 +271,14 @@ class JaidemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailItem(IconData icon, String text, {int maxLines = 1}) {
+  Widget _buildDetailItem(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: Row(
-        crossAxisAlignment: maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(top: maxLines > 1 ? 2 : 0),
+            padding: const EdgeInsets.only(top: 2),
             child: Icon(
               icon,
               size: 12,
@@ -299,8 +294,6 @@ class JaidemCard extends StatelessWidget {
                 color: Colors.grey.shade600,
                 height: 1.2,
               ),
-              maxLines: maxLines,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
@@ -320,28 +313,26 @@ class JaidemCard extends StatelessWidget {
           const SizedBox(width: 12),
           _buildReserveButton(),
         ],
-        const SizedBox(width: 12),
-        // WhatsApp button
-        _buildSocialButton(
-          'assets/icons/whatsapp.png',
-          () {
-            final whatsapp = person.socialMedias?['whatsapp'];
-            if (whatsapp != null && whatsapp.isNotEmpty) {
-              ContactService().openWhatsapp(whatsapp);
-            }
-          },
-        ),
-        const SizedBox(width: 12),
-        // Instagram button
-        _buildSocialButton(
-          'assets/icons/insta.png',
-          () {
-            final instagram = person.socialMedias?['instagram'];
-            if (instagram != null && instagram.isNotEmpty) {
-              ContactService().openInstagram(instagram);
-            }
-          },
-        ),
+        if (person.socialMedias?['whatsapp']?.isNotEmpty ?? false) ...[
+          const SizedBox(width: 12),
+          // WhatsApp button
+          _buildSocialButton(
+            'assets/icons/whatsapp.png',
+            () {
+              ContactService().openWhatsapp(person.socialMedias!['whatsapp']!);
+            },
+          ),
+        ],
+        if (person.socialMedias?['instagram']?.isNotEmpty ?? false) ...[
+          const SizedBox(width: 12),
+          // Instagram button
+          _buildSocialButton(
+            'assets/icons/insta.png',
+            () {
+              ContactService().openInstagram(person.socialMedias!['instagram']!);
+            },
+          ),
+        ],
       ],
     );
   }

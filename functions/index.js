@@ -1,9 +1,12 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
-const { initializeApp } = require("firebase-admin/app");
+const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 
-initializeApp();
+const serviceAccount = require("./serviceAccountKey.json");
+const app = initializeApp({
+  credential: cert(serviceAccount),
+});
 
 /**
  * Trigger: New chat message
@@ -68,6 +71,8 @@ exports.onNewChatMessage = onDocumentCreated(
 
     const messaging = getMessaging();
 
+    console.log("Attempting to send FCM to token:", receiverToken.substring(0, 20) + "...");
+
     try {
       await messaging.send({
         token: receiverToken,
@@ -82,10 +87,30 @@ exports.onNewChatMessage = onDocumentCreated(
           senderId: senderId,
           senderName: senderName,
         },
+        android: {
+          priority: "high",
+          notification: {
+            sound: "default",
+            channelId: "jaidem_default",
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: "default",
+              badge: 1,
+            },
+          },
+        },
       });
       console.log(`Chat notification sent to ${receiverId} from ${senderId}`);
     } catch (error) {
-      console.log(`Error sending chat notification: ${error.message}`);
+      console.error("Error sending chat notification:", JSON.stringify({
+        message: error.message,
+        code: error.code,
+        stack: error.stack,
+        details: error.errorInfo || error.details || null,
+      }));
 
       // Clean up invalid token
       if (
@@ -148,6 +173,21 @@ exports.onNewNotification = onDocumentCreated(
         data: {
           type: "notification",
           notificationId: event.params.notificationId,
+        },
+        android: {
+          priority: "high",
+          notification: {
+            sound: "default",
+            channelId: "jaidem_default",
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: "default",
+              badge: 1,
+            },
+          },
         },
       });
 
@@ -237,6 +277,21 @@ exports.onNewTraining = onDocumentCreated(
         },
         data: {
           type: "training",
+        },
+        android: {
+          priority: "high",
+          notification: {
+            sound: "default",
+            channelId: "jaidem_default",
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: "default",
+              badge: 1,
+            },
+          },
         },
       });
 

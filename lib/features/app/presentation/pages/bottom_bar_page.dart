@@ -8,6 +8,8 @@ import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/pages/events_page.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
+import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
+import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
@@ -35,6 +37,20 @@ class _BottomBarPageState extends State<BottomBarPage> {
       if (mounted) context.read<ForumCubit>().fetchAllForums();
     });
     _pageController = PageController(initialPage: _selectedIndex);
+
+    // Reschedule goal reminders on app startup (after login)
+    _rescheduleGoalReminders();
+  }
+
+  Future<void> _rescheduleGoalReminders() async {
+    try {
+      final goalsCubit = context.read<GoalsCubit>();
+      await goalsCubit.fetchGoals();
+      final goals = goalsCubit.state.goals;
+      if (goals.isNotEmpty) {
+        await GoalReminderService().rescheduleAll(goals);
+      }
+    } catch (_) {}
   }
 
   @override
@@ -45,6 +61,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
 
   void _onItemTapped(int index) {
     HapticFeedback.lightImpact();
+    FocusScope.of(context).unfocus();
     setState(() {
       _selectedIndex = index;
     });

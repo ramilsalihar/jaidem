@@ -8,6 +8,10 @@ import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/helpers/content_filter.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
+import 'package:jaidem/features/jaidems/presentation/pages/jaidem_detail_page.dart';
+import 'package:jaidem/features/menu/data/datasources/menu_remote_datasource.dart';
+import 'package:jaidem/features/menu/data/models/message_model.dart';
 import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/cards/message_card.dart';
 import 'package:jaidem/features/menu/presentation/widgets/fields/chat_message_field.dart';
@@ -16,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @RoutePage()
 class ChatPage extends StatefulWidget {
   final String chatType;
+  final String? chatId;
   final String? userId;
   final String? userName;
   final String? userAvatar;
@@ -23,6 +28,7 @@ class ChatPage extends StatefulWidget {
   const ChatPage({
     super.key,
     required this.chatType,
+    this.chatId,
     this.userId,
     this.userName,
     this.userAvatar,
@@ -46,6 +52,13 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _initializeChat() async {
     final chatCubit = context.read<ChatCubit>();
+
+    // If chatId was passed directly (e.g. from chat list), use it
+    if (widget.chatId != null) {
+      chatId = widget.chatId;
+      chatCubit.getMessages(chatId!, widget.chatType);
+      return;
+    }
 
     try {
       switch (widget.chatType.toLowerCase()) {
@@ -142,6 +155,20 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  void _markUnreadMessages(List<MessageModel> messages) {
+    if (chatId == null) return;
+    final currentUserId =
+        sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
+    if (currentUserId.isEmpty) return;
+
+    final datasource = sl<MenuRemoteDatasource>();
+    for (final msg in messages) {
+      if (msg.senderId != currentUserId && !msg.readBy.contains(currentUserId)) {
+        datasource.markMessageAsRead(chatId!, msg.id, currentUserId, widget.chatType);
+      }
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -154,6 +181,20 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  Future<void> _openJaidemProfile() async {
+    final userId = int.tryParse(widget.userId ?? '');
+    if (userId == null) return;
+
+    final person = await context.read<JaidemsCubit>().getJaidemById(userId);
+    if (person != null && mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => JaidemDetailPage(person: person),
+        ),
+      );
+    }
+  }
+
   String _getContactName() {
     switch (widget.chatType.toLowerCase()) {
       case 'users':
@@ -164,6 +205,17 @@ class _ChatPageState extends State<ChatPage> {
         return 'Администратор';
       default:
         return 'Чат';
+    }
+  }
+
+  String _getChatTypeLabel() {
+    switch (widget.chatType.toLowerCase()) {
+      case 'mentors':
+        return 'Насаатчы';
+      case 'admin':
+        return 'Администратор';
+      default:
+        return 'Жеке чат';
     }
   }
 
@@ -233,98 +285,89 @@ class _ChatPageState extends State<ChatPage> {
 
                     const SizedBox(width: 8),
 
-                    // Contact avatar
-                    Container(
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            contactColor,
-                            contactColor.withValues(alpha: 0.6),
-                          ],
-                        ),
-                      ),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        padding: const EdgeInsets.all(2),
-                        child: widget.userAvatar != null && widget.userAvatar!.isNotEmpty
-                            ? CircleAvatar(
-                                radius: 20,
-                                backgroundImage: NetworkImage(widget.userAvatar!),
-                                backgroundColor: contactColor.withValues(alpha: 0.1),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      contactColor.withValues(alpha: 0.1),
-                                      contactColor.withValues(alpha: 0.05),
-                                    ],
-                                  ),
-                                ),
-                                child: Icon(
-                                  _getContactIcon(),
-                                  color: contactColor,
-                                  size: 22,
-                                ),
-                              ),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Contact info
+                    // Contact avatar + info (tappable for users)
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _getContactName(),
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey.shade800,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.green,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.green.withValues(alpha: 0.4),
-                                      blurRadius: 4,
-                                    ),
+                      child: GestureDetector(
+                        onTap: widget.chatType == 'users' && widget.userId != null
+                            ? () => _openJaidemProfile()
+                            : null,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    contactColor,
+                                    contactColor.withValues(alpha: 0.6),
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Онлайн',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade500,
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
                                 ),
+                                padding: const EdgeInsets.all(2),
+                                child: widget.userAvatar != null && widget.userAvatar!.isNotEmpty
+                                    ? CircleAvatar(
+                                        radius: 20,
+                                        backgroundImage: NetworkImage(widget.userAvatar!),
+                                        backgroundColor: contactColor.withValues(alpha: 0.1),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              contactColor.withValues(alpha: 0.1),
+                                              contactColor.withValues(alpha: 0.05),
+                                            ],
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          _getContactIcon(),
+                                          color: contactColor,
+                                          size: 22,
+                                        ),
+                                      ),
                               ),
-                            ],
-                          ),
-                        ],
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _getContactName(),
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.grey.shade800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _getChatTypeLabel(),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -337,11 +380,17 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: BlocConsumer<ChatCubit, ChatState>(
               listener: (context, state) {
-                if (state.messages.isNotEmpty) {
+                if (state.currentChatId == chatId && state.messages.isNotEmpty) {
                   _scrollToBottom();
+                  _markUnreadMessages(state.messages);
                 }
               },
               builder: (context, state) {
+                // Only show messages belonging to this chat
+                if (state.currentChatId != chatId) {
+                  return const SizedBox.shrink();
+                }
+
                 if (state.isMessagesLoading) {
                   return Center(
                     child: Column(
@@ -441,16 +490,27 @@ class _ChatPageState extends State<ChatPage> {
                   );
                 }
 
+                final currentUserId =
+                    sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
                 return ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   itemCount: state.messages.length,
                   itemBuilder: (context, index) {
-                    final currentUserId =
-                        sl<SharedPreferences>().getString(AppConstants.userId) ?? '';
-                    return MessageCard(
-                      message: state.messages[index],
-                      currentUserId: currentUserId,
+                    final message = state.messages[index];
+                    final showDateHeader = index == 0 ||
+                        !_isSameDay(
+                          state.messages[index - 1].createdAt,
+                          message.createdAt,
+                        );
+                    return Column(
+                      children: [
+                        if (showDateHeader) _buildDateHeader(message.createdAt),
+                        MessageCard(
+                          message: message,
+                          currentUserId: currentUserId,
+                        ),
+                      ],
                     );
                   },
                 );
@@ -464,6 +524,46 @@ class _ChatPageState extends State<ChatPage> {
             onMessageSent: (_) => _sendMessage(),
           ),
         ],
+      ),
+    );
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Widget _buildDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+
+    String label;
+    if (_isSameDay(date, now)) {
+      label = 'Бүгүн';
+    } else if (_isSameDay(date, yesterday)) {
+      label = 'Кечээ';
+    } else {
+      label =
+          '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -41,23 +41,31 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey.shade50,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            _buildSliverAppBar(innerBoxIsScrolled),
-          ];
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          if (notification is ScrollStartNotification) {
+            FocusScope.of(context).unfocus();
+          }
+          return false;
         },
-        body: BlocBuilder<ForumCubit, ForumState>(
-          builder: (context, state) {
-            if (state.isLoading) {
-              return _buildLoadingState();
-            } else if (state.error != null) {
-              return _buildErrorState(state.error!);
-            } else if (state.forums.isEmpty) {
-              return _buildEmptyState();
-            }
-            return _buildForumList(state);
+        child: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              _buildSliverAppBar(innerBoxIsScrolled),
+            ];
           },
+          body: BlocBuilder<ForumCubit, ForumState>(
+            builder: (context, state) {
+              if (state.isLoading) {
+                return _buildLoadingState();
+              } else if (state.error != null) {
+                return _buildErrorState(state.error!);
+              } else if (state.forums.isEmpty) {
+                return _buildEmptyState();
+              }
+              return _buildForumList(state);
+            },
+          ),
         ),
       ),
       drawer: const AppDrawer(),
@@ -75,6 +83,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
+          FocusScope.of(context).unfocus();
           _scaffoldKey.currentState?.openDrawer();
         },
         child: Container(
@@ -328,6 +337,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
       },
       color: AppColors.primary,
       child: ListView.builder(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.only(top: 16, bottom: 100),
         itemCount: state.forums.length,
         itemBuilder: (context, index) {

@@ -436,35 +436,40 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                    ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundColor: AppColors.primary.shade100,
-                  backgroundImage: _person.avatar != null
-                      ? NetworkImage(_person.avatar!)
-                      : null,
-                  child: _person.avatar == null
-                      ? Text(
-                          (_person.fullname?.isNotEmpty ?? false)
-                              ? _person.fullname![0].toUpperCase()
-                              : 'U',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        )
-                      : null,
+              GestureDetector(
+                onTap: _person.avatar != null
+                    ? () => _showFullImage(context, _person.avatar!)
+                    : null,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 4),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: AppColors.primary.shade100,
+                    backgroundImage: _person.avatar != null
+                        ? NetworkImage(_person.avatar!)
+                        : null,
+                    child: _person.avatar == null
+                        ? Text(
+                            (_person.fullname?.isNotEmpty ?? false)
+                                ? _person.fullname![0].toUpperCase()
+                                : 'U',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : null,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -530,8 +535,6 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                                 Text(
                                   uniLine,
                                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ],
@@ -541,17 +544,8 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                     ),
                     const SizedBox(height: 8),
                     // Tags
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      children: [
-                        if (_person.flow.name.isNotEmpty)
-                          _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
-                        if (_person.generation != null &&
-                            _person.generation!.isNotEmpty)
-                          _buildSmallTag(_person.generation!),
-                      ],
-                    ),
+                    if (_person.flow.name.isNotEmpty)
+                      _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
                   ],
                 ),
               ),
@@ -959,6 +953,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                 final parts = <String>[
                   if (w.position.isNotEmpty) w.position,
                   if (w.startDate != null || w.endDate != null) _formatDateRange(w.startDate, w.endDate),
+                  if (w.description.isNotEmpty) w.description,
                 ];
                 return MapEntry(w.name, parts.isNotEmpty ? parts.join(' · ') : null);
               }).toList(),
@@ -1169,6 +1164,47 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const SizedBox(),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(ctx),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 22),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

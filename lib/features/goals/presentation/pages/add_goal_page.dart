@@ -37,6 +37,7 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
   String? _selectedFrequency;
   int _createdIndicatorsCount = 0;
   int _totalIndicatorsToCreate = 0;
+  GoalModel? _submittedGoal;
 
   bool get _isEditMode => widget.goal != null;
 
@@ -194,6 +195,8 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
     _totalIndicatorsToCreate = _indicators.length;
     _createdIndicatorsCount = 0;
 
+    _submittedGoal = goalModel;
+
     if (_isEditMode) {
       blocContext.read<GoalsCubit>().updateGoal(goalModel);
     } else {
@@ -217,13 +220,13 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
         listeners: [
           BlocListener<GoalsCubit, GoalsState>(
             listener: (context, state) {
-              if (state is GoalCreated || state is GoalUpdated) {
+              if (state is GoalCreated) {
                 // Schedule reminder notification
                 final createdGoal = state.goals.first;
                 GoalReminderService().scheduleGoalReminder(createdGoal);
 
-                if (_indicators.isNotEmpty && !_isEditMode) {
-                  final goalId = state.goals.first.id;
+                if (_indicators.isNotEmpty) {
+                  final goalId = createdGoal.id;
                   for (final indicator in _indicators) {
                     final updatedIndicator = indicator.copyWith(goal: goalId);
                     context
@@ -233,16 +236,28 @@ class _AddGoalPageState extends State<AddGoalPage> with Show, TimePickerMixin {
                 } else {
                   showMessage(
                     context,
-                    message: _isEditMode
-                        ? context.tr('goal_updated_success')
-                        : context.tr('goal_created_success'),
+                    message: context.tr('goal_created_success'),
                     backgroundColor: Colors.green,
                     textColor: Colors.white,
                   );
-                  // Navigate back to goals page
                   if (context.mounted) {
                     context.router.maybePop(true);
                   }
+                }
+              } else if (state is GoalUpdated) {
+                // Re-schedule reminder with the submitted goal data
+                GoalReminderService().scheduleGoalReminder(
+                  _submittedGoal ?? widget.goal!,
+                );
+
+                showMessage(
+                  context,
+                  message: context.tr('goal_updated_success'),
+                  backgroundColor: Colors.green,
+                  textColor: Colors.white,
+                );
+                if (context.mounted) {
+                  context.router.maybePop(true);
                 }
               } else if (state is GoalCreationError) {
                 showErrorMessage(context, message: state.message);
