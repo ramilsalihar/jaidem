@@ -102,12 +102,20 @@ class TrainingFlow {
   final String name;
   final String description;
   final int year;
+  final int generation;
+  final int orderNumber;
+  final String dateCreated;
+  final String? afterSurveyOpenDate;
 
   TrainingFlow({
     required this.id,
     required this.name,
     required this.description,
     required this.year,
+    required this.generation,
+    required this.orderNumber,
+    required this.dateCreated,
+    this.afterSurveyOpenDate,
   });
 
   factory TrainingFlow.fromJson(Map<String, dynamic> json) {
@@ -116,6 +124,10 @@ class TrainingFlow {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       year: json['year'] ?? 0,
+      generation: json['generation'] ?? 0,
+      orderNumber: json['orderNumber'] ?? 0,
+      dateCreated: json['dateCreated'] ?? '',
+      afterSurveyOpenDate: json['after_survey_open_date'],
     );
   }
 }
@@ -147,21 +159,23 @@ class TrainingModel {
   final int id;
   final String name;
   final String dateCreated;
-  final TrainingFlow? flow;
+  final List<TrainingFlow> flows;
   final List<TrainingAttendance> attendances;
   final int presentCount;
   final int absentCount;
   final int respectfulCount;
+  final bool isArchive;
 
   TrainingModel({
     required this.id,
     required this.name,
     required this.dateCreated,
-    this.flow,
+    required this.flows,
     required this.attendances,
     required this.presentCount,
     required this.absentCount,
     required this.respectfulCount,
+    required this.isArchive,
   });
 
   factory TrainingModel.fromJson(Map<String, dynamic> json) {
@@ -169,7 +183,10 @@ class TrainingModel {
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
       dateCreated: json['date_created'] ?? '',
-      flow: json['flow'] != null ? TrainingFlow.fromJson(json['flow']) : null,
+      flows: (json['flow'] as List<dynamic>?)
+              ?.map((e) => TrainingFlow.fromJson(e))
+              .toList() ??
+          [],
       attendances: (json['attendances'] as List<dynamic>?)
               ?.map((e) => TrainingAttendance.fromJson(e))
               .toList() ??
@@ -177,6 +194,7 @@ class TrainingModel {
       presentCount: json['present_count'] ?? 0,
       absentCount: json['absent_count'] ?? 0,
       respectfulCount: json['respectful_count'] ?? 0,
+      isArchive: json['isArchive'] ?? false,
     );
   }
 

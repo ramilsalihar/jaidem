@@ -162,10 +162,16 @@ class _ChatPageState extends State<ChatPage> {
     if (currentUserId.isEmpty) return;
 
     final datasource = sl<MenuRemoteDatasource>();
+    bool hasUnread = false;
     for (final msg in messages) {
       if (msg.senderId != currentUserId && !msg.readBy.contains(currentUserId)) {
         datasource.markMessageAsRead(chatId!, msg.id, currentUserId, widget.chatType);
+        hasUnread = true;
       }
+    }
+
+    if (hasUnread) {
+      datasource.resetUnreadCount(chatId!, widget.chatType, currentUserId);
     }
   }
 

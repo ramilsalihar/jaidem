@@ -50,6 +50,12 @@ class PersonModel {
   final List<SuccessHistoryModel>? successHist;
   final List<AdditionalEducationModel>? additionalEducations;
   final List<String>? positionsInJaidem;
+  final String? inWhatIcanHelp;
+  final String? whatINeed;
+  final String? openTo;
+  final String? vkladToJaidem;
+  final String? telegram;
+  final List<String>? tags;
 
   const PersonModel({
     required this.id,
@@ -92,6 +98,12 @@ class PersonModel {
     this.successHist,
     this.additionalEducations,
     this.positionsInJaidem,
+    this.inWhatIcanHelp,
+    this.whatINeed,
+    this.openTo,
+    this.vkladToJaidem,
+    this.telegram,
+    this.tags,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -159,6 +171,12 @@ class PersonModel {
       positionsInJaidem: (json['positionsInJaidem'] as List?)
           ?.map((e) => e as String)
           .toList(),
+      inWhatIcanHelp: json['inWhatIcanHelp'] as String?,
+      whatINeed: json['whatINeed'] as String?,
+      openTo: json['openTo'] as String?,
+      vkladToJaidem: json['vkladToJaidem'] as String?,
+      telegram: json['telegram'] as String?,
+      tags: (json['tags'] as List?)?.map((e) => e.toString()).toList(),
     );
   }
 
@@ -203,6 +221,12 @@ class PersonModel {
     List<SuccessHistoryModel>? successHist,
     List<AdditionalEducationModel>? additionalEducations,
     List<String>? positionsInJaidem,
+    String? inWhatIcanHelp,
+    String? whatINeed,
+    String? openTo,
+    String? vkladToJaidem,
+    String? telegram,
+    List<String>? tags,
   }) {
     return PersonModel(
       id: id ?? this.id,
@@ -245,6 +269,12 @@ class PersonModel {
       successHist: successHist ?? this.successHist,
       additionalEducations: additionalEducations ?? this.additionalEducations,
       positionsInJaidem: positionsInJaidem ?? this.positionsInJaidem,
+      inWhatIcanHelp: inWhatIcanHelp ?? this.inWhatIcanHelp,
+      whatINeed: whatINeed ?? this.whatINeed,
+      openTo: openTo ?? this.openTo,
+      vkladToJaidem: vkladToJaidem ?? this.vkladToJaidem,
+      telegram: telegram ?? this.telegram,
+      tags: tags ?? this.tags,
     );
   }
 

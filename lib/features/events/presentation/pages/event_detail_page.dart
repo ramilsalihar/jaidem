@@ -1,11 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/extensions/date_extension.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/events/data/models/event_attendance_model.dart';
 import 'package:jaidem/features/events/data/services/event_firebase_service.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
+import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/video/event_video_player.dart';
 import 'package:jaidem/features/events/presentation/widgets/reviews/event_reviews_section.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -36,6 +39,7 @@ class _EventDetailPageState extends State<EventDetailPage> {
   void initState() {
     super.initState();
     _loadLikeData();
+    context.read<EventsCubit>().fetchEventAttendances(widget.event.id);
   }
 
   Future<void> _loadLikeData() async {
@@ -108,6 +112,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
                 // Contact Card
                 _buildContactCard(),
+
+                // Participants Section
+                _buildParticipantsSection(),
 
                 // Reviews Section - only show for past events
                 if (!_isEventInFuture) ...[
@@ -668,6 +675,241 @@ class _EventDetailPageState extends State<EventDetailPage> {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildParticipantsSection() {
+    return BlocBuilder<EventsCubit, EventsState>(
+      buildWhen: (prev, curr) =>
+          prev.eventAttendancesStatus != curr.eventAttendancesStatus ||
+          prev.eventAttendances != curr.eventAttendances,
+      builder: (context, state) {
+        if (state.eventAttendancesStatus == EventAttendancesStatus.loading) {
+          return Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primary,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        }
+
+        if (state.eventAttendancesStatus != EventAttendancesStatus.loaded ||
+            state.eventAttendances == null) {
+          return const SizedBox.shrink();
+        }
+
+        final data = state.eventAttendances!;
+        final willGo = data.results
+            .where((a) => a.status == 'will go')
+            .toList();
+        final willNotGo = data.results
+            .where((a) => a.status == 'will not go')
+            .toList();
+        final maybe = data.results
+            .where((a) => a.status == 'maybe')
+            .toList();
+
+        return Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.people_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    context.tr('participants'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Counts summary
+              Row(
+                children: [
+                  _buildCountChip(
+                    '${data.willGoCount}',
+                    context.tr('will_go'),
+                    AppColors.green,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildCountChip(
+                    '${data.willNotGoCount}',
+                    context.tr('will_not_go'),
+                    AppColors.red,
+                  ),
+                  const SizedBox(width: 8),
+                  _buildCountChip(
+                    '${data.maybeCount}',
+                    context.tr('maybe'),
+                    AppColors.orange,
+                  ),
+                ],
+              ),
+
+              // Will go list
+              if (willGo.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _buildAttendanceGroup(
+                  context.tr('will_go'),
+                  willGo,
+                  AppColors.green,
+                ),
+              ],
+
+              // Maybe list
+              if (maybe.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildAttendanceGroup(
+                  context.tr('maybe'),
+                  maybe,
+                  AppColors.orange,
+                ),
+              ],
+
+              // Will not go list
+              if (willNotGo.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                _buildAttendanceGroup(
+                  context.tr('will_not_go'),
+                  willNotGo,
+                  AppColors.red,
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCountChip(String count, String label, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Text(
+              count,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAttendanceGroup(
+    String title,
+    List<EventAttendanceItem> items,
+    Color color,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$title (${items.length})',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: color.withValues(alpha: 0.1),
+                    backgroundImage: item.student.avatar.isNotEmpty
+                        ? NetworkImage(item.student.avatar)
+                        : null,
+                    child: item.student.avatar.isEmpty
+                        ? Icon(Icons.person_rounded,
+                            size: 16, color: color)
+                        : null,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      item.student.fullname,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+      ],
     );
   }
 

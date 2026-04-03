@@ -35,6 +35,12 @@ extension PersonModelMapper on PersonModel {
     data['block'] = block;
     if (birthday != null) data['birthday'] = birthday;
     data['noUniversity'] = noUniversity;
+    if (inWhatIcanHelp != null) data['inWhatIcanHelp'] = inWhatIcanHelp;
+    if (whatINeed != null) data['whatINeed'] = whatINeed;
+    if (openTo != null) data['openTo'] = openTo;
+    if (vkladToJaidem != null) data['vkladToJaidem'] = vkladToJaidem;
+    if (telegram != null) data['telegram'] = telegram;
+    if (tags != null) data['tags'] = tags;
 
     return data;
   }

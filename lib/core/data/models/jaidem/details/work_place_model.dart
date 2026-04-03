@@ -24,8 +24,8 @@ class WorkPlaceModel {
       position: json['position'] as String? ?? '',
       description: json['description'] as String? ?? '',
       photo: json['photo'] as String? ?? '',
-      startDate: json['dateStart'] as String?,
-      endDate: json['dateEnd'] as String?,
+      startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
     );
   }
 
@@ -35,8 +35,8 @@ class WorkPlaceModel {
       'position': position,
       'description': description,
       'photo': photo,
-      if (startDate != null) 'dateStart': startDate,
-      if (endDate != null) 'dateEnd': endDate,
+      if (startDate != null) 'startDate': startDate,
+      if (endDate != null) 'endDate': endDate,
     };
   }
 

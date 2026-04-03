@@ -751,7 +751,7 @@ class _ProfileInfoTab extends StatelessWidget {
                 user.otherSchools!.map((s) {
                   final parts = <String>[
                     if (s.description.isNotEmpty) s.description,
-                    if (s.startDate != null || s.endDate != null) _formatDateRange(s.startDate, s.endDate),
+                    if (s.startDate != null || s.endDate != null) _formatDateRange(context, s.startDate, s.endDate),
                   ];
                   return MapEntry(s.name, parts.isNotEmpty ? parts.join(' · ') : null);
                 }).toList(),
@@ -766,7 +766,7 @@ class _ProfileInfoTab extends StatelessWidget {
                 user.additionalEducations!.map((e) {
                   final parts = <String>[
                     if (e.description.isNotEmpty) e.description,
-                    if (e.dateStart != null || e.dateEnd != null) _formatDateRange(e.dateStart, e.dateEnd),
+                    if (e.dateStart != null || e.dateEnd != null) _formatDateRange(context, e.dateStart, e.dateEnd),
                   ];
                   return MapEntry(e.title, parts.isNotEmpty ? parts.join(' · ') : null);
                 }).toList(),
@@ -781,7 +781,7 @@ class _ProfileInfoTab extends StatelessWidget {
                 user.workPlaces!.map((w) {
                   final parts = <String>[
                     if (w.position.isNotEmpty) w.position,
-                    if (w.startDate != null || w.endDate != null) _formatDateRange(w.startDate, w.endDate),
+                    if (w.startDate != null || w.endDate != null) _formatDateRange(context, w.startDate, w.endDate),
                   ];
                   return MapEntry(w.name, parts.isNotEmpty ? parts.join(' · ') : null);
                 }).toList(),
@@ -795,6 +795,20 @@ class _ProfileInfoTab extends StatelessWidget {
                 Icons.emoji_events_outlined,
                 user.successHist!.map((s) => MapEntry(s.name, s.description.isNotEmpty ? s.description : null)).toList(),
               ),
+
+            // New fields
+            if (user.inWhatIcanHelp != null && user.inWhatIcanHelp!.isNotEmpty)
+              _buildInfoCard(context, context.tr('in_what_i_can_help'), Icons.volunteer_activism_outlined, user.inWhatIcanHelp!),
+            if (user.whatINeed != null && user.whatINeed!.isNotEmpty)
+              _buildInfoCard(context, context.tr('what_i_need'), Icons.front_hand_outlined, user.whatINeed!),
+            if (user.openTo != null && user.openTo!.isNotEmpty)
+              _buildInfoCard(context, context.tr('open_to'), Icons.door_front_door_outlined, user.openTo!),
+            if (user.vkladToJaidem != null && user.vkladToJaidem!.isNotEmpty)
+              _buildInfoCard(context, context.tr('vklad_to_jaidem'), Icons.handshake_outlined, user.vkladToJaidem!),
+
+            // Tags
+            if (user.tags != null && user.tags!.isNotEmpty)
+              _buildTagsSection(context, user.tags!),
 
             const SizedBox(height: 16),
 
@@ -857,18 +871,108 @@ class _ProfileInfoTab extends StatelessWidget {
     );
   }
 
-  String _formatDateRange(String? startDate, String? endDate) {
+  String _formatDateRange(BuildContext ctx, String? startDate, String? endDate) {
     String fmt(String d) {
       final dt = DateTime.tryParse(d);
       if (dt == null) return d;
-      return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+      return '${dt.month.toString().padLeft(2, '0')}.${dt.year}';
     }
+    final currently = ctx.tr('currently');
     final s = startDate != null ? fmt(startDate) : null;
-    final e = endDate != null ? fmt(endDate) : null;
-    if (s != null && e != null) return '$s — $e';
-    if (s != null) return '$s — ...';
-    if (e != null) return '... — $e';
-    return '';
+    final e = endDate != null ? fmt(endDate) : currently;
+    if (s != null) return '$s — $e';
+    return '— $e';
+  }
+
+  Widget _buildInfoCard(BuildContext context, String title, IconData icon, String content) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade800,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection(BuildContext context, List<String> tags) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.tag_rounded, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('tags'),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: tags.map((tag) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildAboutSection(BuildContext context) {
@@ -945,6 +1049,9 @@ class _ProfileInfoTab extends StatelessWidget {
     }
     if (instagram != null && instagram.isNotEmpty) {
       items.add(_InfoItem(Icons.camera_alt_outlined, 'Instagram', instagram));
+    }
+    if (user.telegram != null && user.telegram!.isNotEmpty) {
+      items.add(_InfoItem(Icons.send_rounded, 'Telegram', user.telegram!));
     }
 
     if (items.isEmpty) return const SizedBox();

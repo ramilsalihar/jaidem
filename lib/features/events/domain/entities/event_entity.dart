@@ -5,7 +5,7 @@ class EventEntity {
   final int id;
   final String? createdBy;
   final List<String> participants;
-  final FlowModel flow;
+  final List<FlowModel> flows;
   final String title;
   final String description;
   final String conditions;
@@ -24,7 +24,7 @@ class EventEntity {
     required this.id,
     this.createdBy,
     required this.participants,
-    required this.flow,
+    required this.flows,
     required this.title,
     required this.description,
     required this.conditions,
@@ -44,7 +44,7 @@ class EventEntity {
     int? id,
     String? createdBy,
     List<String>? participants,
-    FlowModel? flow,
+    List<FlowModel>? flows,
     String? title,
     String? description,
     String? conditions,
@@ -63,7 +63,7 @@ class EventEntity {
       id: id ?? this.id,
       createdBy: createdBy ?? this.createdBy,
       participants: participants ?? this.participants,
-      flow: flow ?? this.flow,
+      flows: flows ?? this.flows,
       title: title ?? this.title,
       description: description ?? this.description,
       conditions: conditions ?? this.conditions,

@@ -6,31 +6,33 @@ import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 class EventMapper {
   // ----------- JSON <-> Model -----------
 
+  static int _toInt(dynamic value, [int fallback = 0]) =>
+      value is int ? value : int.tryParse(value.toString()) ?? fallback;
+
   static EventModel fromJson(Map<String, dynamic> json) {
+    final flowList = json['flow'] as List<dynamic>? ?? [];
     return EventModel(
-      id: json['id'],
-      createdBy: json['created_by'],
-      participants: (json['participants'] as List<dynamic>)
-          .map((e) => e.toString())
+      id: _toInt(json['id']),
+      createdBy: json['created_by']?.toString(),
+      participants: (json['participants'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          [],
+      flows: flowList
+          .map((f) => FlowModel.fromJson(f as Map<String, dynamic>))
           .toList(),
-      flow: FlowModel(
-        id: json['flow']['id'],
-        name: json['flow']['name'],
-        description: json['flow']['description'],
-        year: json['flow']['year'],
-      ),
-      title: json['title'],
-      description: json['description'],
-      conditions: json['conditions'],
-      date: json['date'],
-      location: json['location'],
-      phone: json['phone'],
-      email: json['email'],
-      generation: json['generation'],
-      image: json['image'],
-      video: json['video'],
-      isRequired: json['is_required'],
-      like: json['like'],
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      conditions: json['conditions']?.toString() ?? '',
+      date: json['date']?.toString() ?? '',
+      location: json['location']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      generation: json['generation']?.toString() ?? '',
+      image: json['image']?.toString() ?? '',
+      video: json['video']?.toString() ?? '',
+      isRequired: json['is_required'] == true,
+      like: _toInt(json['like']),
       attendance: json['attendance'] != null
           ? AttendanceModel.fromJson(json['attendance'])
           : null,
@@ -42,12 +44,12 @@ class EventMapper {
       'id': model.id,
       'created_by': model.createdBy,
       'participants': model.participants,
-      'flow': {
-        'id': model.flow.id,
-        'name': model.flow.name,
-        'description': model.flow.description,
-        'year': model.flow.year,
-      },
+      'flow': model.flows.map((f) => {
+        'id': f.id,
+        'name': f.name,
+        'description': f.description,
+        'year': f.year,
+      }).toList(),
       'title': model.title,
       'description': model.description,
       'conditions': model.conditions,
@@ -70,12 +72,7 @@ class EventMapper {
       id: model.id,
       createdBy: model.createdBy,
       participants: model.participants,
-      flow: FlowModel(
-        id: model.flow.id,
-        name: model.flow.name,
-        description: model.flow.description,
-        year: model.flow.year,
-      ),
+      flows: model.flows,
       title: model.title,
       description: model.description,
       conditions: model.conditions,
@@ -97,12 +94,7 @@ class EventMapper {
       id: entity.id,
       createdBy: entity.createdBy,
       participants: entity.participants,
-      flow: FlowModel(
-        id: entity.flow.id,
-        name: entity.flow.name,
-        description: entity.flow.description,
-        year: entity.flow.year,
-      ),
+      flows: entity.flows,
       title: entity.title,
       description: entity.description,
       conditions: entity.conditions,

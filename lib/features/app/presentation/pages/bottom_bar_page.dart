@@ -10,9 +10,10 @@ import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
 import 'package:jaidem/features/forum/presentation/pages/forum_page.dart';
 import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
-import 'package:jaidem/features/goals/presentation/pages/goals_page.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class BottomBarPage extends StatefulWidget {
@@ -32,7 +33,8 @@ class _BottomBarPageState extends State<BottomBarPage> {
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
-    context.read<EventsCubit>().fetchEvents();
+    final flowId = sl<SharedPreferences>().getInt('user_flow_id');
+    context.read<EventsCubit>().fetchEvents(flowId: flowId);
     Future.microtask(() {
       if (mounted) context.read<ForumCubit>().fetchAllForums();
     });
@@ -86,9 +88,8 @@ class _BottomBarPageState extends State<BottomBarPage> {
         children: const [
           ForumPage(),
           JaidemsPage(),
-          GoalsPage(),
           EventsPage(),
-          ProfilePage()
+          ProfilePage(),
         ],
       ),
       bottomNavigationBar: _buildModernBottomNav(),
@@ -127,15 +128,14 @@ class _BottomBarPageState extends State<BottomBarPage> {
                 activeIcon: Icons.people_rounded,
                 label: context.tr('nav_jaidem'),
               ),
-              _buildCenterButton(),
               _buildNavItem(
-                index: 3,
+                index: 2,
                 icon: Icons.event_outlined,
                 activeIcon: Icons.event_rounded,
                 label: context.tr('nav_events'),
               ),
               _buildNavItem(
-                index: 4,
+                index: 3,
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
                 label: context.tr('nav_profile'),
@@ -200,43 +200,4 @@ class _BottomBarPageState extends State<BottomBarPage> {
     );
   }
 
-  Widget _buildCenterButton() {
-    final isSelected = _selectedIndex == 2;
-
-    return GestureDetector(
-      onTap: () => _onItemTapped(2),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        width: 50,
-        height: 50,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isSelected
-                ? [AppColors.primary, AppColors.primary.shade700]
-                : [AppColors.primary.shade300, AppColors.primary.shade500],
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: isSelected ? 0.4 : 0.25),
-              blurRadius: isSelected ? 12 : 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 200),
-          scale: isSelected ? 1.05 : 1.0,
-          child: const Icon(
-            Icons.flag_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -143,6 +143,7 @@ class AppLocalizations {
     'events_load_error': 'Иш-чараларды жүктөөдө ката кетти',
 
     // Attendance
+    'participants': 'Катышуучулар',
     'will_go': 'Барам',
     'will_not_go': 'Барбайм',
     'maybe': 'Ойлоном',
@@ -205,6 +206,7 @@ class AppLocalizations {
     'deadline_and_frequency': 'Мөөнөт жана жыштык',
     'start_date': 'Баштоо күнү',
     'end_date': 'Аяктоо күнү',
+    'currently': 'Учурда',
     'select_date': 'Күндү тандаңыз',
     'enter_manually': 'Кол менен киргизүү',
     'enter_date_hint': 'КК-АА-ЖЖЖЖ',
@@ -233,6 +235,13 @@ class AppLocalizations {
     'edit_profile': 'Профилди түзөтүү',
     'about_me': 'Мен жөнүндө',
     'skills': 'Көндүмдөр',
+    'in_what_i_can_help': 'Мен эмне менен жардам бере алам',
+    'what_i_need': 'Мага эмне керек',
+    'open_to': 'Мен ачыкмын',
+    'vklad_to_jaidem': 'Jaidem\'ге салымым',
+    'telegram': 'Telegram',
+    'tags': 'Тегдер',
+    'add_tag': 'Тег кошуу',
     'interests': 'Кызыкчылыктар',
     'course_year': 'Курс',
     'village': 'Айыл/Шаар',
@@ -247,7 +256,7 @@ class AppLocalizations {
 
     // Forum
     'forum': 'Форум',
-    'feed': 'Лента',
+    'feed': 'Мүмкүнчүлүктөр',
     'posts': 'Посттор',
     'profile_tab': 'Профил',
     'comments': 'Комментарийлер',
@@ -619,6 +628,7 @@ class AppLocalizations {
     'events_load_error': 'Ошибка загрузки мероприятий',
 
     // Attendance
+    'participants': 'Участники',
     'will_go': 'Пойду',
     'will_not_go': 'Не пойду',
     'maybe': 'Думаю',
@@ -681,6 +691,7 @@ class AppLocalizations {
     'deadline_and_frequency': 'Срок и периодичность',
     'start_date': 'Дата начала',
     'end_date': 'Дата окончания',
+    'currently': 'В настоящее время',
     'select_date': 'Выберите дату',
     'enter_manually': 'Ввести вручную',
     'enter_date_hint': 'ДД-ММ-ГГГГ',
@@ -709,6 +720,13 @@ class AppLocalizations {
     'edit_profile': 'Редактировать профиль',
     'about_me': 'Обо мне',
     'skills': 'Навыки',
+    'in_what_i_can_help': 'Чем я могу помочь',
+    'what_i_need': 'Что мне нужно',
+    'open_to': 'Я открыт(а) к',
+    'vklad_to_jaidem': 'Мой вклад в Jaidem',
+    'telegram': 'Telegram',
+    'tags': 'Теги',
+    'add_tag': 'Добавить тег',
     'interests': 'Интересы',
     'course_year': 'Курс',
     'village': 'Город/село',
@@ -723,7 +741,7 @@ class AppLocalizations {
 
     // Forum
     'forum': 'Форум',
-    'feed': 'Лента',
+    'feed': 'Мүмкүнчүлүктөр',
     'posts': 'Посты',
     'profile_tab': 'Профиль',
     'comments': 'Комментарии',
@@ -1095,6 +1113,7 @@ class AppLocalizations {
     'events_load_error': 'Failed to load events',
 
     // Attendance
+    'participants': 'Participants',
     'will_go': 'Will go',
     'will_not_go': 'Won\'t go',
     'maybe': 'Maybe',
@@ -1157,6 +1176,7 @@ class AppLocalizations {
     'deadline_and_frequency': 'Deadline and Frequency',
     'start_date': 'Start Date',
     'end_date': 'End Date',
+    'currently': 'Currently',
     'select_date': 'Select date',
     'enter_manually': 'Enter manually',
     'enter_date_hint': 'DD-MM-YYYY',
@@ -1185,6 +1205,13 @@ class AppLocalizations {
     'edit_profile': 'Edit profile',
     'about_me': 'About me',
     'skills': 'Skills',
+    'in_what_i_can_help': 'What I can help with',
+    'what_i_need': 'What I need',
+    'open_to': 'Open to',
+    'vklad_to_jaidem': 'My contribution to Jaidem',
+    'telegram': 'Telegram',
+    'tags': 'Tags',
+    'add_tag': 'Add tag',
     'interests': 'Interests',
     'course_year': 'Course',
     'village': 'City/village',

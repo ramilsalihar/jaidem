@@ -159,7 +159,7 @@ class PushNotificationService {
     // Handle goal reminder notifications (payload: "goal_<id>")
     if (response.payload!.startsWith('goal_')) {
       final router = sl<AppRouter>();
-      router.replaceAll([BottomBarRoute(initialIndex: 2)]);
+      router.push(GoalsRoute());
       return;
     }
 

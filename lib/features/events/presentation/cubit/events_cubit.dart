@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/features/events/data/models/attendance_model.dart';
+import 'package:jaidem/features/events/data/models/event_attendance_model.dart';
 import 'package:jaidem/features/events/domain/entities/event_entity.dart';
 import 'package:jaidem/features/events/domain/repositories/event_repository.dart';
 import 'package:jaidem/features/events/domain/usecases/get_events_usecase.dart';
@@ -23,10 +24,12 @@ class EventsCubit extends Cubit<EventsState> {
   final UpdateAttendanceUsecase updateAttendanceUsecase;
   final EventRepository eventRepository;
   final String currentUserId;
+  int? _flowId;
 
-  Future<void> fetchEvents() async {
+  Future<void> fetchEvents({int? flowId}) async {
+    if (flowId != null) _flowId = flowId;
     emit(state.copyWith(eventsStatus: EventsStatus.loading));
-    final result = await getEventsUsecase();
+    final result = await getEventsUsecase(flowId: _flowId);
 
     result.fold(
       (failure) => emit(state.copyWith(
@@ -107,6 +110,26 @@ class EventsCubit extends Cubit<EventsState> {
         // Refresh events to get updated attendance status
         fetchEvents();
       },
+    );
+  }
+
+  Future<void> fetchEventAttendances(int eventId) async {
+    emit(state.copyWith(
+      eventAttendancesStatus: EventAttendancesStatus.loading,
+      clearAttendances: true,
+    ));
+
+    final result = await eventRepository.getEventAttendances(eventId);
+
+    result.fold(
+      (failure) => emit(state.copyWith(
+        eventAttendancesStatus: EventAttendancesStatus.error,
+        errorMessage: failure,
+      )),
+      (response) => emit(state.copyWith(
+        eventAttendancesStatus: EventAttendancesStatus.loaded,
+        eventAttendances: response,
+      )),
     );
   }
 

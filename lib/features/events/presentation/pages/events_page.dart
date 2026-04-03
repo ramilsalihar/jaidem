@@ -7,6 +7,8 @@ import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/layout/event_pagination.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
+import 'package:jaidem/core/data/injection.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -18,8 +20,10 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> with NotificationMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  int? get _flowId => sl<SharedPreferences>().getInt('user_flow_id');
+
   Future<void> _onRefresh() async {
-    await context.read<EventsCubit>().fetchEvents();
+    await context.read<EventsCubit>().fetchEvents(flowId: _flowId);
   }
 
   @override
@@ -219,7 +223,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
           GestureDetector(
             onTap: () {
               HapticFeedback.mediumImpact();
-              context.read<EventsCubit>().fetchEvents();
+              context.read<EventsCubit>().fetchEvents(flowId: _flowId);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

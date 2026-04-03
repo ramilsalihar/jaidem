@@ -320,19 +320,21 @@ class _TrainingDetailContentState extends State<_TrainingDetailContent> {
                   const SizedBox(height: 16),
 
                   // Flow Info
-                  if (widget.training.flow != null) ...[
-                    _buildSectionCard(
-                      title: context.tr('training_flow_info'),
-                      icon: Icons.stream_rounded,
-                      child: Column(
-                        children: [
-                          _buildInfoRow(context.tr('training_name'), widget.training.flow!.name),
-                          _buildInfoRow(context.tr('training_description'), widget.training.flow!.description),
-                          _buildInfoRow(context.tr('training_year'), widget.training.flow!.year.toString()),
-                        ],
+                  if (widget.training.flows.isNotEmpty) ...[
+                    ...widget.training.flows.map((flow) => Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: _buildSectionCard(
+                        title: context.tr('training_flow_info'),
+                        icon: Icons.stream_rounded,
+                        child: Column(
+                          children: [
+                            _buildInfoRow(context.tr('training_name'), flow.name),
+                            _buildInfoRow(context.tr('training_description'), flow.description),
+                            _buildInfoRow(context.tr('training_year'), flow.year.toString()),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
+                    )),
                   ],
 
                   // Attendance Stats

@@ -7,7 +7,7 @@ class GetEventsUsecase {
 
   const GetEventsUsecase(this.repository);
 
-  Future<Either<String, List<EventEntity>>> call() {
-    return repository.getEvents();
+  Future<Either<String, List<EventEntity>>> call({int? flowId}) {
+    return repository.getEvents(flowId: flowId);
   }
 }

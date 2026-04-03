@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +8,6 @@ import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/jaidems/presentation/helpers/jaidem_filters.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:jaidem/features/jaidems/presentation/widgets/cards/jaidem_card.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
@@ -30,6 +31,7 @@ class _JaidemsPageState extends State<JaidemsPage>
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+  Timer? _debounce;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -45,6 +47,7 @@ class _JaidemsPageState extends State<JaidemsPage>
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -296,8 +299,11 @@ class _JaidemsPageState extends State<JaidemsPage>
         ),
         onChanged: (query) {
           setState(() {});
-          searchQuery = query.isEmpty ? null : query;
-          _fetchJaidems();
+          _debounce?.cancel();
+          _debounce = Timer(const Duration(milliseconds: 500), () {
+            searchQuery = query.isEmpty ? null : query;
+            _fetchJaidems();
+          });
         },
         onSubmitted: (query) {
           searchQuery = query.isEmpty ? null : query;
@@ -508,15 +514,13 @@ class _JaidemsPageState extends State<JaidemsPage>
         _fetchJaidems();
       },
       color: AppColors.primary,
-      child: MasonryGridView.count(
+      child: ListView.builder(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: const EdgeInsets.all(16),
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        itemCount: filtered.length + (_isLoadingMore ? 2 : 0),
-        itemBuilder: (context, index) {
-          if (index >= filtered.length) {
+        itemCount: (filtered.length / 2).ceil() + (_isLoadingMore ? 1 : 0),
+        itemBuilder: (context, rowIndex) {
+          // Loading indicator row
+          if (rowIndex >= (filtered.length / 2).ceil()) {
             return const Center(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -524,7 +528,26 @@ class _JaidemsPageState extends State<JaidemsPage>
               ),
             );
           }
-          return JaidemCard(person: filtered[index]);
+
+          final leftIndex = rowIndex * 2;
+          final rightIndex = leftIndex + 1;
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: JaidemCard(person: filtered[leftIndex])),
+                  const SizedBox(width: 12),
+                  if (rightIndex < filtered.length)
+                    Expanded(child: JaidemCard(person: filtered[rightIndex]))
+                  else
+                    const Expanded(child: SizedBox()),
+                ],
+              ),
+            ),
+          );
         },
       ),
     );

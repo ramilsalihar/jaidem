@@ -922,7 +922,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               _person.otherSchools!.map((s) {
                 final parts = <String>[
                   if (s.description.isNotEmpty) s.description,
-                  if (s.startDate != null || s.endDate != null) _formatDateRange(s.startDate, s.endDate),
+                  if (s.startDate != null || s.endDate != null) _formatDateRange(context, s.startDate, s.endDate),
                 ];
                 return MapEntry(s.name, parts.isNotEmpty ? parts.join(' · ') : null);
               }).toList(),
@@ -937,7 +937,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               _person.additionalEducations!.map((e) {
                 final parts = <String>[
                   if (e.description.isNotEmpty) e.description,
-                  if (e.dateStart != null || e.dateEnd != null) _formatDateRange(e.dateStart, e.dateEnd),
+                  if (e.dateStart != null || e.dateEnd != null) _formatDateRange(context, e.dateStart, e.dateEnd),
                 ];
                 return MapEntry(e.title, parts.isNotEmpty ? parts.join(' · ') : null);
               }).toList(),
@@ -952,7 +952,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               _person.workPlaces!.map((w) {
                 final parts = <String>[
                   if (w.position.isNotEmpty) w.position,
-                  if (w.startDate != null || w.endDate != null) _formatDateRange(w.startDate, w.endDate),
+                  if (w.startDate != null || w.endDate != null) _formatDateRange(context, w.startDate, w.endDate),
                   if (w.description.isNotEmpty) w.description,
                 ];
                 return MapEntry(w.name, parts.isNotEmpty ? parts.join(' · ') : null);
@@ -967,6 +967,36 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               Icons.emoji_events_outlined,
               _person.successHist!.map((s) => MapEntry(s.name, s.description.isNotEmpty ? s.description : null)).toList(),
             ),
+
+          // New fields — accent cards
+          if (_person.inWhatIcanHelp != null && _person.inWhatIcanHelp!.isNotEmpty)
+            _buildAccentCard(
+              context,
+              title: context.tr('in_what_i_can_help'),
+              icon: Icons.volunteer_activism_rounded,
+              content: _person.inWhatIcanHelp!,
+              color: Colors.green,
+            ),
+          if (_person.whatINeed != null && _person.whatINeed!.isNotEmpty)
+            _buildAccentCard(
+              context,
+              title: context.tr('what_i_need'),
+              icon: Icons.front_hand_rounded,
+              content: _person.whatINeed!,
+              color: Colors.orange,
+            ),
+          if (_person.vkladToJaidem != null && _person.vkladToJaidem!.isNotEmpty)
+            _buildAccentCard(
+              context,
+              title: context.tr('vklad_to_jaidem'),
+              icon: Icons.handshake_rounded,
+              content: _person.vkladToJaidem!,
+              color: AppColors.primary,
+            ),
+          if (_person.openTo != null && _person.openTo!.isNotEmpty)
+            _buildInfoCard(context, context.tr('open_to'), Icons.door_front_door_outlined, _person.openTo!),
+          if (_person.tags != null && _person.tags!.isNotEmpty)
+            _buildTagsSection(context, _person.tags!),
 
           // Booking link for advisors
           if (_person.isAdvisor &&
@@ -1097,6 +1127,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     }
     if (_person.skills != null && _person.skills!.isNotEmpty) {
       items.add(_InfoItem(Icons.psychology_outlined, context.tr('skills'), _person.skills!));
+    }
+    if (_person.telegram != null && _person.telegram!.isNotEmpty) {
+      items.add(_InfoItem(Icons.send_rounded, 'Telegram', _person.telegram!));
     }
 
     if (items.isEmpty) return const SizedBox();
@@ -1270,18 +1303,180 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     );
   }
 
-  String _formatDateRange(String? startDate, String? endDate) {
+  String _formatDateRange(BuildContext ctx, String? startDate, String? endDate) {
     String fmt(String d) {
       final dt = DateTime.tryParse(d);
       if (dt == null) return d;
-      return '${dt.day.toString().padLeft(2, '0')}.${dt.month.toString().padLeft(2, '0')}.${dt.year}';
+      return '${dt.month.toString().padLeft(2, '0')}.${dt.year}';
     }
+    final currently = ctx.tr('currently');
     final s = startDate != null ? fmt(startDate) : null;
-    final e = endDate != null ? fmt(endDate) : null;
-    if (s != null && e != null) return '$s — $e';
-    if (s != null) return '$s — ...';
-    if (e != null) return '... — $e';
-    return '';
+    final e = endDate != null ? fmt(endDate) : currently;
+    if (s != null) return '$s — $e';
+    return '— $e';
+  }
+
+  Widget _buildAccentCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required String content,
+    required Color color,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withValues(alpha: 0.1),
+                  color.withValues(alpha: 0.03),
+                ],
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 16, color: color),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+            child: Text(
+              content,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade800,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(BuildContext context, String title, IconData icon, String content) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade800,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection(BuildContext context, List<String> tags) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.tag_rounded, size: 18, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Text(
+                context.tr('tags'),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: tags.map((tag) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            )).toList(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildListSection(

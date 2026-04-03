@@ -6,6 +6,7 @@ import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/features/events/data/datasources/event_remote_data_source.dart';
 import 'package:jaidem/features/events/data/mappers/event_mapper.dart';
 import 'package:jaidem/features/events/data/models/attendance_model.dart';
+import 'package:jaidem/features/events/data/models/event_attendance_model.dart';
 import 'package:jaidem/features/events/data/models/event_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,9 +20,12 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
   });
 
   @override
-  Future<Either<String, List<EventModel>>> getEvents() async {
+  Future<Either<String, List<EventModel>>> getEvents({int? flowId}) async {
     try {
       final Map<String, dynamic> queryParams = {};
+      if (flowId != null) {
+        queryParams['flow'] = flowId;
+      }
 
       final response = await dio.get(
         ApiConst.event,
@@ -70,6 +74,60 @@ class EventRemoteDataSourceImpl implements EventRemoteDataSource {
       } else {
         return const Right(null);
       }
+    } catch (e) {
+      return Left('Error: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, EventAttendancesResponse>> getEventAttendances(
+      int eventId) async {
+    try {
+      final List<EventAttendanceItem> allResults = [];
+      int? willGoCount;
+      int? willNotGoCount;
+      int? maybeCount;
+      int? totalCount;
+
+      String? nextUrl;
+      int page = 1;
+
+      do {
+        final response = await dio.get(
+          ApiConst.attendance,
+          queryParameters: {
+            'event': eventId,
+            'page': page,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = response.data as Map<String, dynamic>;
+          willGoCount ??= data['will_go_count'] as int? ?? 0;
+          willNotGoCount ??= data['will_not_go_count'] as int? ?? 0;
+          maybeCount ??= data['maybe_count'] as int? ?? 0;
+          totalCount ??= data['total_count'] as int? ?? 0;
+
+          final results = data['results'] as List<dynamic>? ?? [];
+          allResults.addAll(results
+              .map((e) =>
+                  EventAttendanceItem.fromJson(e as Map<String, dynamic>))
+              .toList());
+
+          nextUrl = data['next']?.toString();
+          page++;
+        } else {
+          break;
+        }
+      } while (nextUrl != null);
+
+      return Right(EventAttendancesResponse(
+        willGoCount: willGoCount ?? 0,
+        willNotGoCount: willNotGoCount ?? 0,
+        maybeCount: maybeCount ?? 0,
+        totalCount: totalCount ?? 0,
+        results: allResults,
+      ));
     } catch (e) {
       return Left('Error: $e');
     }

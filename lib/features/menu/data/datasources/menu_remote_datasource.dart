@@ -40,6 +40,13 @@ abstract class MenuRemoteDatasource {
   Future<void> sendMessageToMentor(String messageText);
   Future<void> sendMessageToAdmin(String messageText);
 
+  /// Reset unread count for a user in a chat
+  Future<void> resetUnreadCount(
+    String chatId,
+    String chatType,
+    String userId,
+  );
+
   /// Ensure user exists in Firebase with proper data
   Future<void> ensureUserExists({
     required String id,

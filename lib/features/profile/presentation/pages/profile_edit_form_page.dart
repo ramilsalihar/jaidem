@@ -39,6 +39,12 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
   late final TextEditingController phoneController;
   late final TextEditingController instagramController;
   late final TextEditingController whatsappController;
+  late final TextEditingController telegramController;
+  late final TextEditingController inWhatIcanHelpController;
+  late final TextEditingController whatINeedController;
+  late final TextEditingController openToController;
+  late final TextEditingController vkladToJaidemController;
+  List<String> _tags = [];
 
   String? _avatarUrl;
   File? _selectedImage;
@@ -82,6 +88,11 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     phoneController = TextEditingController();
     instagramController = TextEditingController();
     whatsappController = TextEditingController();
+    telegramController = TextEditingController();
+    inWhatIcanHelpController = TextEditingController();
+    whatINeedController = TextEditingController();
+    openToController = TextEditingController();
+    vkladToJaidemController = TextEditingController();
     _loadSpecialities();
     _loadStates();
     _loadOtherSchools();
@@ -278,6 +289,12 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     phoneController.text = user.phone ?? '';
     instagramController.text = user.socialMedias?['instagram'] ?? '';
     whatsappController.text = user.socialMedias?['whatsapp'] ?? '';
+    telegramController.text = user.telegram ?? '';
+    inWhatIcanHelpController.text = user.inWhatIcanHelp ?? '';
+    whatINeedController.text = user.whatINeed ?? '';
+    openToController.text = user.openTo ?? '';
+    vkladToJaidemController.text = user.vkladToJaidem ?? '';
+    _tags = List<String>.from(user.tags ?? []);
     _avatarUrl = user.avatar;
     _selectedUniversity = user.univer;
     _selectedSpeciality = user.spec;
@@ -308,6 +325,11 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     phoneController.dispose();
     instagramController.dispose();
     whatsappController.dispose();
+    telegramController.dispose();
+    inWhatIcanHelpController.dispose();
+    whatINeedController.dispose();
+    openToController.dispose();
+    vkladToJaidemController.dispose();
     super.dispose();
   }
 
@@ -422,6 +444,12 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
         noUniversity: _noUniversity,
         univerStartDate: formatDate(_univerStartDate) ?? user.univerStartDate,
         univerEndDate: formatDate(_univerEndDate) ?? user.univerEndDate,
+        telegram: telegramController.text,
+        inWhatIcanHelp: inWhatIcanHelpController.text,
+        whatINeed: whatINeedController.text,
+        openTo: openToController.text,
+        vkladToJaidem: vkladToJaidemController.text,
+        tags: _tags,
       );
 
       await context.read<ProfileCubit>().updateUser(updatedUser);
@@ -692,6 +720,48 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
                   hint: context.tr('instagram_hint'),
                   icon: Icons.camera_alt_outlined,
                 ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: telegramController,
+                  hint: context.tr('telegram'),
+                  icon: Icons.send_rounded,
+                ),
+
+                const SizedBox(height: 24),
+                _buildSectionTitle(context.tr('in_what_i_can_help'), Icons.volunteer_activism_outlined),
+                const SizedBox(height: 8),
+                _buildTextField(
+                  controller: inWhatIcanHelpController,
+                  hint: context.tr('in_what_i_can_help'),
+                  icon: Icons.volunteer_activism_outlined,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: whatINeedController,
+                  hint: context.tr('what_i_need'),
+                  icon: Icons.front_hand_outlined,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: openToController,
+                  hint: context.tr('open_to'),
+                  icon: Icons.door_front_door_outlined,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                _buildTextField(
+                  controller: vkladToJaidemController,
+                  hint: context.tr('vklad_to_jaidem'),
+                  icon: Icons.handshake_outlined,
+                  maxLines: 3,
+                ),
+
+                const SizedBox(height: 24),
+                _buildSectionTitle(context.tr('tags'), Icons.tag_rounded),
+                const SizedBox(height: 8),
+                _buildTagsEditor(),
 
                 const SizedBox(height: 32),
 
@@ -887,6 +957,104 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTagsEditor() {
+    final tagController = TextEditingController();
+    return StatefulBuilder(
+      builder: (context, setLocalState) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _tags.map((tag) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      tag,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        setLocalState(() => _tags.remove(tag));
+                        setState(() {});
+                      },
+                      child: Icon(Icons.close_rounded, size: 16, color: AppColors.primary),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+          if (_tags.isNotEmpty) const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: tagController,
+                  decoration: InputDecoration(
+                    hintText: context.tr('add_tag'),
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                  onSubmitted: (value) {
+                    final trimmed = value.trim();
+                    if (trimmed.isNotEmpty && !_tags.contains(trimmed)) {
+                      setLocalState(() => _tags.add(trimmed));
+                      setState(() {});
+                      tagController.clear();
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  final trimmed = tagController.text.trim();
+                  if (trimmed.isNotEmpty && !_tags.contains(trimmed)) {
+                    setLocalState(() => _tags.add(trimmed));
+                    setState(() {});
+                    tagController.clear();
+                  }
+                },
+                child: Container(
+                  width: 44, height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1492,6 +1660,26 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     );
   }
 
+  Widget _buildCurrentlyLabel(BuildContext ctx) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        ctx.tr('currently'),
+        style: TextStyle(
+          fontSize: 13,
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   Widget _buildDialogDatePicker({
     required BuildContext ctx,
     required String label,
@@ -1545,6 +1733,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     final descController = TextEditingController(text: school?.description ?? '');
     DateTime? startDate = school?.startDate != null ? DateTime.tryParse(school!.startDate!) : null;
     DateTime? endDate = school?.endDate != null ? DateTime.tryParse(school!.endDate!) : null;
+    bool isCurrent = school != null && school.endDate == null && school.startDate != null;
 
     final result = await showDialog<bool>(
       context: context,
@@ -1610,15 +1799,42 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildDialogDatePicker(
-                      ctx: ctx,
-                      label: context.tr('end_date'),
-                      date: endDate,
-                      onPicked: (d) => setDialogState(() => endDate = d),
-                      onClear: () => setDialogState(() => endDate = null),
-                    ),
+                    child: isCurrent
+                        ? _buildCurrentlyLabel(context)
+                        : _buildDialogDatePicker(
+                            ctx: ctx,
+                            label: context.tr('end_date'),
+                            date: endDate,
+                            onPicked: (d) => setDialogState(() => endDate = d),
+                            onClear: () => setDialogState(() => endDate = null),
+                          ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => setDialogState(() {
+                  isCurrent = !isCurrent;
+                  if (isCurrent) endDate = null;
+                }),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24, height: 24,
+                      child: Checkbox(
+                        value: isCurrent,
+                        onChanged: (v) => setDialogState(() {
+                          isCurrent = v ?? false;
+                          if (isCurrent) endDate = null;
+                        }),
+                        activeColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(context.tr('currently'), style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1650,7 +1866,8 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
           'name': nameController.text.trim(),
           'description': descController.text.trim(),
           if (fmtDate(startDate) != null) 'dateStart': fmtDate(startDate),
-          if (fmtDate(endDate) != null) 'dateEnd': fmtDate(endDate),
+          if (!isCurrent && fmtDate(endDate) != null) 'dateEnd': fmtDate(endDate),
+          if (isCurrent) 'dateEnd': null,
         };
         if (school != null) {
           await DioNetwork.appAPI.patch(
@@ -1701,6 +1918,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     final descController = TextEditingController(text: workPlace?.description ?? '');
     DateTime? startDate = workPlace?.startDate != null ? DateTime.tryParse(workPlace!.startDate!) : null;
     DateTime? endDate = workPlace?.endDate != null ? DateTime.tryParse(workPlace!.endDate!) : null;
+    bool isCurrent = workPlace != null && workPlace.endDate == null && workPlace.startDate != null;
 
     final result = await showDialog<bool>(
       context: context,
@@ -1785,15 +2003,42 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildDialogDatePicker(
-                      ctx: ctx,
-                      label: context.tr('end_date'),
-                      date: endDate,
-                      onPicked: (d) => setDialogState(() => endDate = d),
-                      onClear: () => setDialogState(() => endDate = null),
-                    ),
+                    child: isCurrent
+                        ? _buildCurrentlyLabel(context)
+                        : _buildDialogDatePicker(
+                            ctx: ctx,
+                            label: context.tr('end_date'),
+                            date: endDate,
+                            onPicked: (d) => setDialogState(() => endDate = d),
+                            onClear: () => setDialogState(() => endDate = null),
+                          ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => setDialogState(() {
+                  isCurrent = !isCurrent;
+                  if (isCurrent) endDate = null;
+                }),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24, height: 24,
+                      child: Checkbox(
+                        value: isCurrent,
+                        onChanged: (v) => setDialogState(() {
+                          isCurrent = v ?? false;
+                          if (isCurrent) endDate = null;
+                        }),
+                        activeColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(context.tr('currently'), style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1825,8 +2070,9 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
           'name': nameController.text.trim(),
           'position': positionController.text.trim(),
           'description': descController.text.trim(),
-          if (fmtDate(startDate) != null) 'dateStart': fmtDate(startDate),
-          if (fmtDate(endDate) != null) 'dateEnd': fmtDate(endDate),
+          if (fmtDate(startDate) != null) 'startDate': fmtDate(startDate),
+          if (!isCurrent && fmtDate(endDate) != null) 'endDate': fmtDate(endDate),
+          if (isCurrent) 'endDate': null,
         };
         if (workPlace != null) {
           await DioNetwork.appAPI.patch(
@@ -2033,6 +2279,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
     final descController = TextEditingController(text: education?.description ?? '');
     DateTime? startDate = education?.dateStart != null ? DateTime.tryParse(education!.dateStart!) : null;
     DateTime? endDate = education?.dateEnd != null ? DateTime.tryParse(education!.dateEnd!) : null;
+    bool isCurrent = education != null && education.dateEnd == null && education.dateStart != null;
 
     final result = await showDialog<bool>(
       context: context,
@@ -2098,15 +2345,42 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildDialogDatePicker(
-                      ctx: ctx,
-                      label: context.tr('end_date'),
-                      date: endDate,
-                      onPicked: (d) => setDialogState(() => endDate = d),
-                      onClear: () => setDialogState(() => endDate = null),
-                    ),
+                    child: isCurrent
+                        ? _buildCurrentlyLabel(context)
+                        : _buildDialogDatePicker(
+                            ctx: ctx,
+                            label: context.tr('end_date'),
+                            date: endDate,
+                            onPicked: (d) => setDialogState(() => endDate = d),
+                            onClear: () => setDialogState(() => endDate = null),
+                          ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => setDialogState(() {
+                  isCurrent = !isCurrent;
+                  if (isCurrent) endDate = null;
+                }),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 24, height: 24,
+                      child: Checkbox(
+                        value: isCurrent,
+                        onChanged: (v) => setDialogState(() {
+                          isCurrent = v ?? false;
+                          if (isCurrent) endDate = null;
+                        }),
+                        activeColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(context.tr('currently'), style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
               ),
             ],
           ),
@@ -2138,7 +2412,8 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
           'title': titleController.text.trim(),
           'description': descController.text.trim(),
           if (fmtDate(startDate) != null) 'dateStart': fmtDate(startDate),
-          if (fmtDate(endDate) != null) 'dateEnd': fmtDate(endDate),
+          if (!isCurrent && fmtDate(endDate) != null) 'dateEnd': fmtDate(endDate),
+          if (isCurrent) 'dateEnd': null,
         };
         if (education != null) {
           await DioNetwork.appAPI.patch(

@@ -9,7 +9,6 @@ import 'package:jaidem/features/goals/data/models/goal_model.dart';
 import 'package:jaidem/features/goals/data/services/goal_reminder_service.dart';
 import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart';
 import 'package:jaidem/features/goals/presentation/pages/goal_overview_page.dart';
-import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 
 @RoutePage()
@@ -48,7 +47,6 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey.shade50,
-      drawer: const AppDrawer(),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -111,8 +109,7 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
-          FocusScope.of(context).unfocus();
-          _scaffoldKey.currentState?.openDrawer();
+          context.router.maybePop();
         },
         child: Container(
           margin: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
@@ -121,9 +118,9 @@ class _GoalsPageState extends State<GoalsPage> with NotificationMixin {
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(
-            Icons.menu_rounded,
+            Icons.arrow_back_ios_new_rounded,
             color: Colors.white,
-            size: 22,
+            size: 20,
           ),
         ),
       ),

@@ -277,27 +277,16 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
         .collection('chats')
         .where('participants', arrayContains: userId)
         .snapshots()
-        .asyncMap((snap) async {
-      final chats = <ChatModel>[];
-      for (final doc in snap.docs) {
-        var chat = ChatModel.fromFirestore(doc).copyWith(chatType: chatType);
+        .map((snap) {
+      return snap.docs.map((doc) {
+        final data = doc.data();
+        final unreadCounts =
+            Map<String, dynamic>.from(data['unreadCounts'] ?? {});
+        final unread = (unreadCounts[userId] as num?)?.toInt() ?? 0;
 
-        // Count unread messages (not sent by current user, not in readBy)
-        try {
-          final messagesSnap = await doc.reference
-              .collection('messages')
-              .where('senderId', isNotEqualTo: userId)
-              .get();
-          final unread = messagesSnap.docs.where((msgDoc) {
-            final readBy = List<String>.from(msgDoc.data()['readBy'] ?? []);
-            return !readBy.contains(userId);
-          }).length;
-          chat = chat.copyWith(unreadCount: unread);
-        } catch (_) {}
-
-        chats.add(chat);
-      }
-      return chats;
+        return ChatModel.fromFirestore(doc)
+            .copyWith(chatType: chatType, unreadCount: unread);
+      }).toList();
     });
   }
 
@@ -356,6 +345,23 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
   }
 
   @override
+  Future<void> resetUnreadCount(
+    String chatId,
+    String chatType,
+    String userId,
+  ) async {
+    final chatDocRef = firestore
+        .collection(AppConstants.chatsCollection)
+        .doc(chatType)
+        .collection('chats')
+        .doc(chatId);
+
+    await chatDocRef.update({
+      'unreadCounts.$userId': 0,
+    });
+  }
+
+  @override
   Future<void> sendMessage(
     String chatId,
     String chatType,
@@ -382,6 +388,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       'lastMessage': message.text,
       'lastMessageAt': message.createdAt,
       'updatedAt': FieldValue.serverTimestamp(),
+      'unreadCounts.${message.receiverId}': FieldValue.increment(1),
     });
 
     // Update sender's name/avatar in chat users array

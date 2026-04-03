@@ -133,8 +133,9 @@ class DioNetwork {
           } else {
             return await _addToQueue(error.requestOptions, handler);
           }
+        } else {
+          return handler.next(error);
         }
-        return handler.next(error);
       },
     );
   }

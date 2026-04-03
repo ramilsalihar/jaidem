@@ -53,9 +53,17 @@ class JaidemsCubit extends Cubit<JaidemsState> {
         (failure) => emit(JaidemsError(message: failure.toString())),
         (response) {
           if (next != null) {
-            allResults.addAll(response.results);
+            final existingIds = allResults.map((e) => e.id).toSet();
+            final newItems = response.results
+                .where((e) => !existingIds.contains(e.id))
+                .toList();
+            allResults.addAll(newItems);
           } else if (previous != null) {
-            allResults.insertAll(0, response.results);
+            final existingIds = allResults.map((e) => e.id).toSet();
+            final newItems = response.results
+                .where((e) => !existingIds.contains(e.id))
+                .toList();
+            allResults.insertAll(0, newItems);
           } else {
             allResults = response.results;
           }

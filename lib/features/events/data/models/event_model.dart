@@ -5,7 +5,7 @@ class EventModel {
   final int id;
   final String? createdBy;
   final List<String> participants;
-  final FlowModel flow;
+  final List<FlowModel> flows;
   final String title;
   final String description;
   final String conditions;
@@ -24,7 +24,7 @@ class EventModel {
     required this.id,
     this.createdBy,
     required this.participants,
-    required this.flow,
+    required this.flows,
     required this.title,
     required this.description,
     required this.conditions,

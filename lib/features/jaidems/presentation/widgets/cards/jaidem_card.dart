@@ -46,24 +46,26 @@ class JaidemCard extends StatelessWidget {
             _buildProfileImage(),
 
             // Content Section
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and Flow Badge
-                  _buildNameSection(),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name and Flow Badge
+                    _buildNameSection(),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  // Details
-                  _buildDetailsSection(context),
+                    // Details
+                    Expanded(child: _buildDetailsSection(context)),
 
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 8),
 
-                  // Action Buttons
-                  _buildActionButtons(),
-                ],
+                    // Action Buttons
+                    _buildActionButtons(),
+                  ],
+                ),
               ),
             ),
           ],

@@ -27,10 +27,35 @@ class JaidemsRemoteDataSourceImpl implements JaidemsRemoteDataSource {
     bool? isAdvisor,
   }) async {
     try {
+      // If next/previous URL is provided, use it directly (it already contains all query params)
+      if (next != null) {
+        final response = await dio.get(next);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = ResponseModel.fromJson(
+            response.data,
+            PersonModel.fromJson,
+          );
+          return Right(data);
+        } else {
+          return Left('Failed to load users');
+        }
+      }
+
+      if (previous != null) {
+        final response = await dio.get(previous);
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = ResponseModel.fromJson(
+            response.data,
+            PersonModel.fromJson,
+          );
+          return Right(data);
+        } else {
+          return Left('Failed to load users');
+        }
+      }
+
       final queryParameters = <String, dynamic>{};
 
-      if (next != null) queryParameters['next'] = next;
-      if (previous != null) queryParameters['previous'] = previous;
       if (flow != null) queryParameters['flow'] = flow;
       if (generation != null) queryParameters['generation'] = generation;
       if (university != null) queryParameters['univer'] = university;
