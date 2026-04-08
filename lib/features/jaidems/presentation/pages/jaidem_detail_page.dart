@@ -471,8 +471,6 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                       height: 1.2,
                     ),
                     textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   if (workLine != null) ...[
                     const SizedBox(height: 6),
@@ -484,8 +482,6 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                         height: 1.3,
                       ),
                       textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                   if (uniLine != null) ...[
@@ -498,8 +494,6 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                         height: 1.3,
                       ),
                       textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                   if (_person.flow.name.isNotEmpty) ...[

@@ -113,43 +113,6 @@ class _BottomBarPageState extends State<BottomBarPage> {
         ],
       ),
       bottomNavigationBar: _buildModernBottomNav(),
-      floatingActionButton: _buildCenterFab(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  Widget _buildCenterFab() {
-    return Container(
-      width: 56,
-      height: 56,
-      margin: const EdgeInsets.only(top: 8),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.primary, AppColors.primary.shade700],
-        ),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: _openCreatePost,
-          child: const Icon(
-            Icons.add_rounded,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-      ),
     );
   }
 
@@ -185,7 +148,12 @@ class _BottomBarPageState extends State<BottomBarPage> {
                 activeIcon: Icons.people_rounded,
                 label: context.tr('nav_jaidem'),
               ),
-              const SizedBox(width: 56),
+              _buildActionNavItem(
+                icon: Icons.campaign_outlined,
+                activeIcon: Icons.campaign_rounded,
+                label: 'Жарыя',
+                onTap: _openCreatePost,
+              ),
               _buildNavItem(
                 index: 2,
                 icon: Icons.event_outlined,
@@ -258,4 +226,42 @@ class _BottomBarPageState extends State<BottomBarPage> {
     );
   }
 
+  Widget _buildActionNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 56,
+        height: 50,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 22,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

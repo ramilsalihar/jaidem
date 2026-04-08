@@ -110,6 +110,10 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
+    // Clear immediately so user can keep typing while message is sent
+    _messageController.clear();
+    HapticFeedback.lightImpact();
+
     final chatCubit = context.read<ChatCubit>();
 
     try {
@@ -135,9 +139,6 @@ class _ChatPageState extends State<ChatPage> {
           }
           break;
       }
-
-      _messageController.clear();
-      HapticFeedback.lightImpact();
     } catch (e) {
       debugPrint('Error sending message: $e');
       if (mounted) {

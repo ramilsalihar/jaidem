@@ -26,6 +26,7 @@ class _ForumCardState extends State<ForumCard>
   bool _isLiked = false;
   int _likesCount = 0;
   int _commentsCount = 0;
+  bool _imageFailed = false;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
 
@@ -379,7 +380,7 @@ class _ForumCardState extends State<ForumCard>
                       // Content text
                       if (content.isNotEmpty) _buildContent(displayContent, isLongContent),
                       // Image
-                      if (widget.forum.photo != null) _buildImage(),
+                      if (widget.forum.photo != null && !_imageFailed) _buildImage(),
                       const SizedBox(height: 12),
                       // Actions row
                       _buildActionsRow(),
@@ -617,17 +618,12 @@ class _ForumCardState extends State<ForumCard>
               );
             },
             errorBuilder: (_, __, ___) {
-              return Container(
-                height: 200,
-                color: Colors.grey.shade100,
-                child: Center(
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    color: Colors.grey.shade400,
-                    size: 40,
-                  ),
-                ),
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && !_imageFailed) {
+                  setState(() => _imageFailed = true);
+                }
+              });
+              return const SizedBox.shrink();
             },
           ),
         ),
