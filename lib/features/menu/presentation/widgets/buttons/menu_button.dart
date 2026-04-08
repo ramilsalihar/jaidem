@@ -67,8 +67,9 @@ class MenuButton extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: Colors.grey.shade800,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                softWrap: true,
+                maxLines: 2,
+                overflow: TextOverflow.visible,
               ),
             ),
             if (trailing != null) ...[

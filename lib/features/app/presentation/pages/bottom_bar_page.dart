@@ -13,6 +13,7 @@ import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart'
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
@@ -61,6 +62,25 @@ class _BottomBarPageState extends State<BottomBarPage> {
     super.dispose();
   }
 
+  void _openCreatePost() {
+    HapticFeedback.mediumImpact();
+    final userIdStr = sl<SharedPreferences>().getString(AppConstants.userId);
+    final userId = int.tryParse(userIdStr ?? '');
+    if (userId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CreateEditPostSheet(
+        userId: userId,
+        onSuccess: () {
+          context.read<ForumCubit>().fetchAllForums();
+        },
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
     HapticFeedback.lightImpact();
     FocusScope.of(context).unfocus();
@@ -93,6 +113,43 @@ class _BottomBarPageState extends State<BottomBarPage> {
         ],
       ),
       bottomNavigationBar: _buildModernBottomNav(),
+      floatingActionButton: _buildCenterFab(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildCenterFab() {
+    return Container(
+      width: 56,
+      height: 56,
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.primary, AppColors.primary.shade700],
+        ),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: _openCreatePost,
+          child: const Icon(
+            Icons.add_rounded,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+      ),
     );
   }
 
@@ -128,6 +185,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
                 activeIcon: Icons.people_rounded,
                 label: context.tr('nav_jaidem'),
               ),
+              const SizedBox(width: 56),
               _buildNavItem(
                 index: 2,
                 icon: Icons.event_outlined,

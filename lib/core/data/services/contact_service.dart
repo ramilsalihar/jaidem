@@ -29,4 +29,15 @@ class ContactService {
       throw Exception("Could not open Instagram profile");
     }
   }
+
+  /// Open Telegram profile using URL or username
+  Future<void> openTelegram(String input) async {
+    final isUrl = input.startsWith('http://') || input.startsWith('https://');
+    final username = input.startsWith('@') ? input.substring(1) : input;
+    final url = Uri.parse(isUrl ? input : "https://t.me/$username");
+
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception("Could not open Telegram profile");
+    }
+  }
 }

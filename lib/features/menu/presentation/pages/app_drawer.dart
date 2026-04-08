@@ -49,7 +49,7 @@ class _AppDrawerState extends State<AppDrawer> {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.78,
+      width: MediaQuery.of(context).size.width * 0.85,
       backgroundColor: Colors.white,
       elevation: 0,
       shape: const RoundedRectangleBorder(
@@ -66,16 +66,6 @@ class _AppDrawerState extends State<AppDrawer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildSectionLabel(context.tr('main_section')),
-                  MenuButton(
-                    title: context.tr('goals'),
-                    iconData: Icons.flag_rounded,
-                    iconBackgroundColor: Colors.deepOrange.shade50,
-                    iconColor: Colors.deepOrange.shade600,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.router.push(GoalsRoute());
-                    },
-                  ),
                   MenuButton(
                     title: context.tr('knowledge_base'),
                     iconData: Icons.folder_open_rounded,

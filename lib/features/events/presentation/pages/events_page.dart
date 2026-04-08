@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
 import 'package:jaidem/features/events/presentation/widgets/layout/event_pagination.dart';
@@ -153,6 +155,26 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              // Chat Button
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  context.router.push(ChatListRoute());
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -263,7 +285,7 @@ class _EventsPageState extends State<EventsPage> with NotificationMixin {
             ),
           ),
 
-        const SizedBox(height: 28),
+        const SizedBox(height: 12),
 
         // Optional Events Section
         if (state.optionalEvents.isNotEmpty)

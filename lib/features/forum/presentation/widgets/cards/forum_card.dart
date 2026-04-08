@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
@@ -11,7 +10,6 @@ import 'package:jaidem/features/forum/presentation/dialogs/comment_dialog.dart';
 import 'package:jaidem/features/jaidems/presentation/cubit/jaidems_cubit.dart';
 import 'package:jaidem/features/jaidems/presentation/pages/jaidem_detail_page.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ForumCard extends StatefulWidget {
   const ForumCard({super.key, required this.forum});
@@ -522,6 +520,20 @@ class _ForumCardState extends State<ForumCard>
     );
   }
 
+  String _stripHtml(String html) {
+    return html
+        .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+        .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n\n')
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .trim();
+  }
+
   Widget _buildContent(String displayContent, bool isLongContent) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -532,37 +544,13 @@ class _ForumCardState extends State<ForumCard>
               _handleLike();
             }
           },
-          child: Html(
-            data: displayContent,
-            style: {
-              "body": Style(
-                fontSize: FontSize(15),
-                color: Colors.black87,
-                lineHeight: LineHeight(1.35),
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-              ),
-              "p": Style(
-                margin: Margins.only(bottom: 8),
-              ),
-              "a": Style(
-                color: AppColors.primary,
-                textDecoration: TextDecoration.none,
-              ),
-              "b": Style(fontWeight: FontWeight.bold),
-              "strong": Style(fontWeight: FontWeight.bold),
-              "i": Style(fontStyle: FontStyle.italic),
-              "em": Style(fontStyle: FontStyle.italic),
-              "br": Style(margin: Margins.zero),
-            },
-            onLinkTap: (url, _, __) async {
-              if (url != null) {
-                final uri = Uri.parse(url);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              }
-            },
+          child: Text(
+            _stripHtml(displayContent),
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.black87,
+              height: 1.35,
+            ),
           ),
         ),
         if (isLongContent && !_expanded)

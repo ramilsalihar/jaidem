@@ -300,6 +300,15 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               _buildSliverAppBar(context),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 16),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _buildProfileCard(context),
+                ),
+              ),
             ];
           },
           body: Column(
@@ -323,9 +332,10 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
 
   Widget _buildSliverAppBar(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 340,
       pinned: true,
-      backgroundColor: AppColors.primary,
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      elevation: 0,
       leading: GestureDetector(
         onTap: () {
           HapticFeedback.lightImpact();
@@ -334,12 +344,12 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
         child: Container(
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.grey.shade100,
             shape: BoxShape.circle,
           ),
-          child: const Icon(
+          child: Icon(
             Icons.arrow_back_rounded,
-            color: Colors.white,
+            color: Colors.grey.shade700,
             size: 22,
           ),
         ),
@@ -354,212 +364,158 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
             margin: const EdgeInsets.all(8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.grey.shade100,
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.more_horiz,
-              color: Colors.white,
+              color: Colors.grey.shade700,
               size: 22,
             ),
           ),
         ),
       ],
-      flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          children: [
-            // Cover photo
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primary.shade700,
-                  ],
-                ),
-              ),
-              child: _person.avatar != null
-                  ? ShaderMask(
-                      shaderCallback: (rect) {
-                        return LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.3),
-                            Colors.black.withValues(alpha: 0.1),
-                          ],
-                        ).createShader(rect);
-                      },
-                      blendMode: BlendMode.darken,
-                      child: Image.network(
-                        _person.avatar!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const SizedBox(),
-                      ),
-                    )
-                  : null,
-            ),
-            // Profile info card
-            Positioned(
-              top: 130,
-              left: 16,
-              right: 16,
-              child: _buildProfileCard(context),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildProfileCard(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final hasWork = _person.workPlaces != null && _person.workPlaces!.isNotEmpty;
+    final noUni = _person.noUniversity;
+
+    String? uniLine;
+    if (!noUni) {
+      final specName = _person.spec?.getLocalizedName(locale) ?? _person.speciality;
+      final univerName = _person.univer?.getLocalizedName(locale) ?? _person.university;
+      final parts = <String>[
+        if (specName != null && specName.isNotEmpty) specName,
+        if (univerName != null && univerName.isNotEmpty) univerName,
+      ];
+      if (parts.isNotEmpty) uniLine = parts.join(' | ');
+    }
+
+    String? workLine;
+    if (hasWork) {
+      final latest = _person.workPlaces!.last;
+      final parts = <String>[
+        if (latest.position.isNotEmpty) latest.position,
+        if (latest.name.isNotEmpty) latest.name,
+      ];
+      if (parts.isNotEmpty) workLine = parts.join(' | ');
+    }
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 20,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar
-              GestureDetector(
-                onTap: _person.avatar != null
-                    ? () => _showFullImage(context, _person.avatar!)
-                    : null,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 4),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.primary.shade100,
-                    backgroundImage: _person.avatar != null
-                        ? NetworkImage(_person.avatar!)
-                        : null,
-                    child: _person.avatar == null
-                        ? Text(
-                            (_person.fullname?.isNotEmpty ?? false)
-                                ? _person.fullname![0].toUpperCase()
-                                : 'U',
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Name and headline
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _person.fullname ?? context.tr('unknown'),
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
-                      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: _person.avatar != null
+                  ? () => _showFullImage(context, _person.avatar!)
+                  : null,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
-                    // Headline: work place and/or university info
-                    Builder(
-                      builder: (context) {
-                        final locale = Localizations.localeOf(context).languageCode;
-                        final hasWork = _person.workPlaces != null && _person.workPlaces!.isNotEmpty;
-                        final noUni = _person.noUniversity;
-
-                        // Build university line: spec | university
-                        String? uniLine;
-                        if (!noUni) {
-                          final specName = _person.spec?.getLocalizedName(locale) ?? _person.speciality;
-                          final univerName = _person.univer?.getLocalizedName(locale) ?? _person.university;
-                          final parts = <String>[
-                            if (specName != null && specName.isNotEmpty) specName,
-                            if (univerName != null && univerName.isNotEmpty) univerName,
-                          ];
-                          if (parts.isNotEmpty) uniLine = parts.join(' | ');
-                        }
-
-                        // Build work line: position | name (latest)
-                        String? workLine;
-                        if (hasWork) {
-                          final latest = _person.workPlaces!.last;
-                          final parts = <String>[
-                            if (latest.position.isNotEmpty) latest.position,
-                            if (latest.name.isNotEmpty) latest.name,
-                          ];
-                          if (parts.isNotEmpty) workLine = parts.join(' | ');
-                        }
-
-                        if (workLine == null && uniLine == null) return const SizedBox.shrink();
-
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (workLine != null)
-                                Text(
-                                  workLine,
-                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              if (uniLine != null) ...[
-                                if (workLine != null) const SizedBox(height: 2),
-                                Text(
-                                  uniLine,
-                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                                ),
-                              ],
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    // Tags
-                    if (_person.flow.name.isNotEmpty)
-                      _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
                   ],
                 ),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: AppColors.primary.shade100,
+                  backgroundImage: _person.avatar != null
+                      ? NetworkImage(_person.avatar!)
+                      : null,
+                  child: _person.avatar == null
+                      ? Text(
+                          (_person.fullname?.isNotEmpty ?? false)
+                              ? _person.fullname![0].toUpperCase()
+                              : 'U',
+                          style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : null,
+                ),
               ),
-            ],
-          ),
-          // Birthday congrats button
-          if (_isBirthday) ...[
-            const SizedBox(height: 12),
-            _buildBirthdayCongrats(context),
+            ),
+            const SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                  // Name
+                  Text(
+                    _person.fullname ?? context.tr('unknown'),
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                      height: 1.2,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (workLine != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      workLine,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade700,
+                        height: 1.3,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (uniLine != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      uniLine,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                        height: 1.3,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                  if (_person.flow.name.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
+                  ],
+                  if (_isBirthday) ...[
+                    const SizedBox(height: 12),
+                    _buildBirthdayCongrats(context),
+                  ],
+                  const SizedBox(height: 16),
+                  _buildQuickActions(context),
+                ],
+              ),
           ],
-          const SizedBox(height: 16),
-          // Quick actions
-          _buildQuickActions(context),
-        ],
+        ),
       ),
     );
   }
@@ -628,7 +584,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
       child: Text(
         text,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
           color: AppColors.primary,
         ),
@@ -639,6 +595,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   Widget _buildQuickActions(BuildContext context) {
     final hasWhatsApp = _person.socialMedias?['whatsapp']?.isNotEmpty ?? false;
     final hasInstagram = _person.socialMedias?['instagram']?.isNotEmpty ?? false;
+    final hasTelegram = _person.telegram?.isNotEmpty ?? false;
 
     return Row(
       children: [
@@ -705,6 +662,19 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               },
             ),
           ),
+        if (hasTelegram) const SizedBox(width: 8),
+        if (hasTelegram)
+          Expanded(
+            child: _buildActionButton(
+              icon: Icons.send_rounded,
+              label: 'Telegram',
+              color: const Color(0xFF0088CC),
+              onTap: () {
+                HapticFeedback.lightImpact();
+                ContactService().openTelegram(_person.telegram!);
+              },
+            ),
+          ),
       ],
     );
   }
@@ -719,7 +689,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 9),
         decoration: BoxDecoration(
           color: isPrimary ? color : color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
@@ -727,14 +697,18 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: isPrimary ? Colors.white : color, size: 18),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isPrimary ? Colors.white : color,
+            Icon(icon, color: isPrimary ? Colors.white : color, size: 16),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isPrimary ? Colors.white : color,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -906,6 +880,16 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
           if (_person.positionsInJaidem != null && _person.positionsInJaidem!.isNotEmpty)
             _buildPositionsSection(),
 
+          // Vklad to Jaidem
+          if (_person.vkladToJaidem != null && _person.vkladToJaidem!.isNotEmpty)
+            _buildAccentCard(
+              context,
+              title: context.tr('vklad_to_jaidem'),
+              icon: Icons.handshake_rounded,
+              content: _person.vkladToJaidem!,
+              color: AppColors.primary,
+            ),
+
           // About section
           if (_person.aboutMe != null && _person.aboutMe!.isNotEmpty)
             _buildAboutSection(context),
@@ -984,14 +968,6 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               icon: Icons.front_hand_rounded,
               content: _person.whatINeed!,
               color: Colors.orange,
-            ),
-          if (_person.vkladToJaidem != null && _person.vkladToJaidem!.isNotEmpty)
-            _buildAccentCard(
-              context,
-              title: context.tr('vklad_to_jaidem'),
-              icon: Icons.handshake_rounded,
-              content: _person.vkladToJaidem!,
-              color: AppColors.primary,
             ),
           if (_person.openTo != null && _person.openTo!.isNotEmpty)
             _buildInfoCard(context, context.tr('open_to'), Icons.door_front_door_outlined, _person.openTo!),

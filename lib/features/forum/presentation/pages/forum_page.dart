@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -114,7 +116,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             showNotificationPopup();
           },
           child: Container(
-            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+            margin: const EdgeInsets.only(right: 8, top: 8, bottom: 8),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
@@ -122,6 +124,25 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
             ),
             child: const Icon(
               Icons.notifications_outlined,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            context.router.push(ChatListRoute());
+          },
+          child: Container(
+            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.chat_bubble_outline_rounded,
               color: Colors.white,
               size: 22,
             ),

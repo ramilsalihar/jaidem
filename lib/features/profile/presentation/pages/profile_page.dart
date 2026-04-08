@@ -258,23 +258,46 @@ class _ProfilePageState extends State<ProfilePage>
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      showNotificationPopup();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          showNotificationPopup();
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.notifications_outlined,
-                        color: Colors.white,
-                        size: 22,
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          context.router.push(ChatListRoute());
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -1405,7 +1428,7 @@ class _UserPostsTabState extends State<_UserPostsTab> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _CreateEditPostSheet(
+      builder: (context) => CreateEditPostSheet(
         post: post,
         userId: widget.userId,
         onSuccess: () {
@@ -1612,22 +1635,23 @@ class _UserPostsTabState extends State<_UserPostsTab> {
 }
 
 // Create/Edit Post Sheet
-class _CreateEditPostSheet extends StatefulWidget {
+class CreateEditPostSheet extends StatefulWidget {
   final ForumModel? post;
   final int userId;
   final VoidCallback onSuccess;
 
-  const _CreateEditPostSheet({
+  const CreateEditPostSheet({
+    super.key,
     this.post,
     required this.userId,
     required this.onSuccess,
   });
 
   @override
-  State<_CreateEditPostSheet> createState() => _CreateEditPostSheetState();
+  State<CreateEditPostSheet> createState() => _CreateEditPostSheetState();
 }
 
-class _CreateEditPostSheetState extends State<_CreateEditPostSheet> {
+class _CreateEditPostSheetState extends State<CreateEditPostSheet> {
   final TextEditingController _contentController = TextEditingController();
   String? _photoUrl;
   File? _selectedImage;
