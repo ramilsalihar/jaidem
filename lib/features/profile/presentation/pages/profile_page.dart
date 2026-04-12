@@ -51,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _loadUserProfile();
   }
 
@@ -166,23 +166,9 @@ class _ProfilePageState extends State<ProfilePage>
                         ],
                       ),
                     ),
-                    SliverPersistentHeader(
-                      pinned: true,
-                      delegate: _ModernTabBarDelegate(
-                        child: _buildModernTabBar(context),
-                      ),
-                    ),
                   ];
                 },
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // Profile Info Tab
-                    _ProfileInfoTab(user: user),
-                    // Posts Tab
-                    _UserPostsTab(userId: user.id),
-                  ],
-                ),
+                body: _ProfileInfoTab(user: user),
               ),
               // Birthday celebration overlay
               if (_showBirthdayWidget)
@@ -1075,6 +1061,10 @@ class _ProfileInfoTab extends StatelessWidget {
     }
     if (user.telegram != null && user.telegram!.isNotEmpty) {
       items.add(_InfoItem(Icons.send_rounded, 'Telegram', user.telegram!));
+    }
+    if (user.category != null) {
+      final locale = Localizations.localeOf(context).languageCode;
+      items.add(_InfoItem(Icons.workspace_premium_outlined, context.tr('member_category'), user.category!.getLocalizedName(locale)));
     }
 
     if (items.isEmpty) return const SizedBox();

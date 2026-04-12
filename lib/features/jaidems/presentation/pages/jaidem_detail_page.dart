@@ -43,7 +43,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _isBirthday = isTodayBirthday(_person.birthday);
     _checkIfOwnProfile();
     _loadFullPerson();
@@ -311,20 +311,7 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
               ),
             ];
           },
-          body: Column(
-            children: [
-              _buildTabBar(context),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildAboutTab(context),
-                    _buildPostsTab(context),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          body: _buildAboutTab(context),
         ),
       ),
     );
@@ -496,9 +483,26 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
                       textAlign: TextAlign.center,
                     ),
                   ],
-                  if (_person.flow.name.isNotEmpty) ...[
+                  if (_person.flow.name.isNotEmpty || _person.category != null) ...[
                     const SizedBox(height: 10),
-                    _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        if (_person.flow.name.isNotEmpty)
+                          _buildSmallTag('${context.tr('flow')} ${_person.flow.name}'),
+                        if (_person.category != null)
+                          _buildSmallTag(
+                            _person.category!.getLocalizedName(
+                              Localizations.localeOf(context).languageCode,
+                            ),
+                            color: Colors.amber.shade700,
+                            bgColor: Colors.amber.shade50,
+                            icon: Icons.workspace_premium_rounded,
+                          ),
+                      ],
+                    ),
                   ],
                   if (_isBirthday) ...[
                     const SizedBox(height: 12),
@@ -568,20 +572,34 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     );
   }
 
-  Widget _buildSmallTag(String text) {
+  Widget _buildSmallTag(
+    String text, {
+    Color? color,
+    Color? bgColor,
+    IconData? icon,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.1),
+        color: bgColor ?? AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color ?? AppColors.primary),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: color ?? AppColors.primary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1100,6 +1118,9 @@ class _JaidemDetailPageState extends State<JaidemDetailPage>
     }
     if (_person.telegram != null && _person.telegram!.isNotEmpty) {
       items.add(_InfoItem(Icons.send_rounded, 'Telegram', _person.telegram!));
+    }
+    if (_person.category != null) {
+      items.add(_InfoItem(Icons.workspace_premium_outlined, context.tr('member_category'), _person.category!.getLocalizedName(locale)));
     }
 
     if (items.isEmpty) return const SizedBox();

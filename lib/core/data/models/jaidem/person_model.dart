@@ -1,4 +1,5 @@
 import 'package:jaidem/core/data/models/jaidem/details/additional_education_model.dart';
+import 'package:jaidem/core/data/models/jaidem/details/category_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/flow_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/other_school_model.dart';
 import 'package:jaidem/core/data/models/jaidem/details/region_model.dart';
@@ -56,6 +57,7 @@ class PersonModel {
   final String? vkladToJaidem;
   final String? telegram;
   final List<String>? tags;
+  final CategoryModel? category;
 
   const PersonModel({
     required this.id,
@@ -104,6 +106,7 @@ class PersonModel {
     this.vkladToJaidem,
     this.telegram,
     this.tags,
+    this.category,
   });
 
   factory PersonModel.fromJson(Map<String, dynamic> json) {
@@ -177,6 +180,9 @@ class PersonModel {
       vkladToJaidem: json['vkladToJaidem'] as String?,
       telegram: json['telegram'] as String?,
       tags: (json['tags'] as List?)?.map((e) => e.toString()).toList(),
+      category: json['category'] != null
+          ? CategoryModel.fromJson(json['category'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -227,6 +233,7 @@ class PersonModel {
     String? vkladToJaidem,
     String? telegram,
     List<String>? tags,
+    CategoryModel? category,
   }) {
     return PersonModel(
       id: id ?? this.id,
@@ -275,6 +282,7 @@ class PersonModel {
       vkladToJaidem: vkladToJaidem ?? this.vkladToJaidem,
       telegram: telegram ?? this.telegram,
       tags: tags ?? this.tags,
+      category: category ?? this.category,
     );
   }
 

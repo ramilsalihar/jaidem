@@ -13,7 +13,7 @@ import 'package:jaidem/features/goals/presentation/cubit/goals/goals_cubit.dart'
 import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
-import 'package:jaidem/core/utils/constants/app_constants.dart';
+import 'package:jaidem/features/projects/presentation/pages/projects_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
@@ -62,25 +62,6 @@ class _BottomBarPageState extends State<BottomBarPage> {
     super.dispose();
   }
 
-  void _openCreatePost() {
-    HapticFeedback.mediumImpact();
-    final userIdStr = sl<SharedPreferences>().getString(AppConstants.userId);
-    final userId = int.tryParse(userIdStr ?? '');
-    if (userId == null) return;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => CreateEditPostSheet(
-        userId: userId,
-        onSuccess: () {
-          context.read<ForumCubit>().fetchAllForums();
-        },
-      ),
-    );
-  }
-
   void _onItemTapped(int index) {
     HapticFeedback.lightImpact();
     FocusScope.of(context).unfocus();
@@ -106,9 +87,10 @@ class _BottomBarPageState extends State<BottomBarPage> {
           });
         },
         children: const [
-          ForumPage(),
           JaidemsPage(),
+          ForumPage(),
           EventsPage(),
+          ProjectsPage(),
           ProfilePage(),
         ],
       ),
@@ -136,35 +118,45 @@ class _BottomBarPageState extends State<BottomBarPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(
-                index: 0,
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home_rounded,
-                label: context.tr('nav_home'),
+              Expanded(
+                child: _buildNavItem(
+                  index: 0,
+                  icon: Icons.people_outline_rounded,
+                  activeIcon: Icons.people_rounded,
+                  label: context.tr('nav_jaidem'),
+                ),
               ),
-              _buildNavItem(
-                index: 1,
-                icon: Icons.people_outline_rounded,
-                activeIcon: Icons.people_rounded,
-                label: context.tr('nav_jaidem'),
+              Expanded(
+                child: _buildNavItem(
+                  index: 1,
+                  icon: Icons.forum_outlined,
+                  activeIcon: Icons.forum_rounded,
+                  label: 'Мүмкүнчүлүк',
+                ),
               ),
-              _buildActionNavItem(
-                icon: Icons.campaign_outlined,
-                activeIcon: Icons.campaign_rounded,
-                label: 'Жарыя',
-                onTap: _openCreatePost,
+              Expanded(
+                child: _buildNavItem(
+                  index: 2,
+                  icon: Icons.event_outlined,
+                  activeIcon: Icons.event_rounded,
+                  label: context.tr('nav_events'),
+                ),
               ),
-              _buildNavItem(
-                index: 2,
-                icon: Icons.event_outlined,
-                activeIcon: Icons.event_rounded,
-                label: context.tr('nav_events'),
+              Expanded(
+                child: _buildNavItem(
+                  index: 3,
+                  icon: Icons.rocket_launch_outlined,
+                  activeIcon: Icons.rocket_launch_rounded,
+                  label: context.tr('projects'),
+                ),
               ),
-              _buildNavItem(
-                index: 3,
-                icon: Icons.person_outline_rounded,
-                activeIcon: Icons.person_rounded,
-                label: context.tr('nav_profile'),
+              Expanded(
+                child: _buildNavItem(
+                  index: 4,
+                  icon: Icons.person_outline_rounded,
+                  activeIcon: Icons.person_rounded,
+                  label: context.tr('nav_profile'),
+                ),
               ),
             ],
           ),
@@ -185,7 +177,6 @@ class _BottomBarPageState extends State<BottomBarPage> {
       onTap: () => _onItemTapped(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 56,
         height: 50,
         child: Stack(
           alignment: Alignment.center,
@@ -226,42 +217,4 @@ class _BottomBarPageState extends State<BottomBarPage> {
     );
   }
 
-  Widget _buildActionNavItem({
-    required IconData icon,
-    required IconData activeIcon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: () {
-        HapticFeedback.lightImpact();
-        onTap();
-      },
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 56,
-        height: 50,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 22,
-              color: Colors.grey.shade500,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

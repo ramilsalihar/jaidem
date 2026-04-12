@@ -60,4 +60,8 @@ abstract class ApiConst {
   static const String workPlaces = '/user/work_place/';
   static const String successHistory = '/user/success_history/';
   static const String additionalEducation = '/user/additional_education/';
+
+  // Projects
+  static const String projects = '/core/project/';
+  static const String projectInterested = '/core/project_interested/';
 }

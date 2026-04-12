@@ -25,7 +25,6 @@ class _ForumCardState extends State<ForumCard>
   bool _expanded = false;
   bool _isLiked = false;
   int _likesCount = 0;
-  int _commentsCount = 0;
   bool _imageFailed = false;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
@@ -54,12 +53,10 @@ class _ForumCardState extends State<ForumCard>
   Future<void> _loadLikeInfo() async {
     final cubit = context.read<ForumCubit>();
     final likeInfo = await cubit.getLikeInfo(widget.forum.id);
-    final commentsCount = await cubit.getCommentsCount(widget.forum.id);
     if (mounted) {
       setState(() {
         _isLiked = likeInfo['isLiked'] as bool;
         _likesCount = likeInfo['count'] as int;
-        _commentsCount = commentsCount;
       });
     }
   }
@@ -381,9 +378,6 @@ class _ForumCardState extends State<ForumCard>
                       if (content.isNotEmpty) _buildContent(displayContent, isLongContent),
                       // Image
                       if (widget.forum.photo != null && !_imageFailed) _buildImage(),
-                      const SizedBox(height: 12),
-                      // Actions row
-                      _buildActionsRow(),
                     ],
                   ),
                 ),
@@ -505,6 +499,16 @@ class _ForumCardState extends State<ForumCard>
           ),
         ),
         const SizedBox(width: 8),
+        // Share
+        GestureDetector(
+          onTap: _handleShare,
+          child: Icon(
+            Icons.ios_share_outlined,
+            color: Colors.grey.shade500,
+            size: 16,
+          ),
+        ),
+        const SizedBox(width: 10),
         // More options
         GestureDetector(
           onTap: () {
@@ -649,84 +653,6 @@ class _ForumCardState extends State<ForumCard>
     );
   }
 
-  Widget _buildActionsRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        // Comment
-        _buildActionButton(
-          icon: Icons.chat_bubble_outline,
-          count: _commentsCount,
-          color: Colors.grey.shade600,
-          onTap: () {
-            HapticFeedback.lightImpact();
-            showCommentBottomSheet(forumId: widget.forum.id);
-          },
-        ),
-        // Like
-        _buildActionButton(
-          icon: _isLiked ? Icons.favorite : Icons.favorite_border,
-          count: _likesCount,
-          color: _isLiked ? Colors.pink : Colors.grey.shade600,
-          onTap: _handleLike,
-          animation: _likeScaleAnimation,
-        ),
-        // Share
-        _buildActionButton(
-          icon: Icons.ios_share_outlined,
-          count: null,
-          color: Colors.grey.shade600,
-          onTap: _handleShare,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required int? count,
-    required Color color,
-    required VoidCallback onTap,
-    Animation<double>? animation,
-  }) {
-    final iconWidget = Icon(icon, color: color, size: 20);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            animation != null
-                ? ScaleTransition(scale: animation, child: iconWidget)
-                : iconWidget,
-            if (count != null) ...[
-              const SizedBox(width: 6),
-              Text(
-                _formatCount(count),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: color,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatCount(int count) {
-    if (count >= 1000000) {
-      return '${(count / 1000000).toStringAsFixed(1)}M';
-    } else if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}K';
-    }
-    return count.toString();
-  }
 }
 
 class _FullScreenImageViewer extends StatelessWidget {

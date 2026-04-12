@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
+import 'package:jaidem/core/utils/constants/app_constants.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/forum/presentation/widgets/cards/forum_card.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
+import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/features/forum/presentation/cubit/forum_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ForumPage extends StatefulWidget {
   const ForumPage({super.key});
@@ -43,6 +47,7 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.grey.shade50,
+      floatingActionButton: _buildFab(),
       body: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           if (notification is ScrollStartNotification) {
@@ -217,6 +222,34 @@ class _ForumPageState extends State<ForumPage> with NotificationMixin {
           context.read<ForumCubit>().fetchAllForums(search: query);
         },
       ),
+    );
+  }
+
+  void _openCreatePost() {
+    HapticFeedback.mediumImpact();
+    final userIdStr = sl<SharedPreferences>().getString(AppConstants.userId);
+    final userId = int.tryParse(userIdStr ?? '');
+    if (userId == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CreateEditPostSheet(
+        userId: userId,
+        onSuccess: () {
+          context.read<ForumCubit>().fetchAllForums();
+        },
+      ),
+    );
+  }
+
+  Widget _buildFab() {
+    return FloatingActionButton(
+      onPressed: _openCreatePost,
+      backgroundColor: AppColors.primary,
+      elevation: 4,
+      child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
     );
   }
 

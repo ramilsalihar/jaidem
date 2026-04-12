@@ -12,6 +12,7 @@ import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/menu/presentation/widgets/buttons/menu_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends StatefulWidget {
   const AppDrawer({super.key});
@@ -131,14 +132,27 @@ class _AppDrawerState extends State<AppDrawer> {
                       context.router.push(ChatRoute(chatType: 'admin'));
                     },
                   ),
+                  // MenuButton(
+                  //   title: context.tr('chat_with_mentor'),
+                  //   iconData: Icons.people_outline_rounded,
+                  //   iconBackgroundColor: Colors.purple.shade50,
+                  //   iconColor: Colors.purple.shade600,
+                  //   onTap: () {
+                  //     Navigator.pop(context);
+                  //     context.router.push(AdvisorsRoute());
+                  //   },
+                  // ),
                   MenuButton(
-                    title: context.tr('chat_with_mentor'),
-                    iconData: Icons.people_outline_rounded,
-                    iconBackgroundColor: Colors.purple.shade50,
-                    iconColor: Colors.purple.shade600,
+                    title: 'Зал брондоо',
+                    iconData: Icons.meeting_room_rounded,
+                    iconBackgroundColor: Colors.deepPurple.shade50,
+                    iconColor: Colors.deepPurple.shade600,
                     onTap: () {
                       Navigator.pop(context);
-                      context.router.push(AdvisorsRoute());
+                      launchUrl(
+                        Uri.parse('https://tr1mn.github.io/Jaidem_booking/'),
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
                   ),
 
