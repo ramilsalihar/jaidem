@@ -15,6 +15,10 @@ List<StoryGroupModel> sortStoryGroups({
   final seen = <StoryGroupModel>[];
 
   for (final group in groups) {
+    // Группе без сторисов нечего показывать во вьювере — отбрасываем её здесь,
+    // чтобы она не дошла ни до ленты, ни до просмотрщика (иначе `.every` на пустом
+    // списке даст true и группа попадёт в «просмотренные», а открытие приведёт к RangeError).
+    if (group.stories.isEmpty) continue;
     if (currentUserId != null && group.author.id == currentUserId) {
       own.add(group);
     } else if (group.stories.every((s) => seenStoryIds.contains(s.id))) {

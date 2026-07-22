@@ -56,4 +56,37 @@ void main() {
 
     expect(result.map((g) => g.author.id).toList(), [1, 2, 3]);
   });
+
+  test('группа без сторисов отбрасывается целиком', () {
+    final groups = [
+      _group(1, [100]),
+      _group(2, []), // без сторисов — нечего показывать
+      _group(3, [300]),
+    ];
+
+    final result = sortStoryGroups(
+      groups: groups,
+      seenStoryIds: const {},
+      currentUserId: null,
+    );
+
+    expect(result.map((g) => g.author.id).toList(), [1, 3]);
+  });
+
+  test(
+      'пустая группа отбрасывается, даже если принадлежит текущему пользователю',
+      () {
+    final groups = [
+      _group(1, [100]),
+      _group(2, []), // свой, но без сторисов — тоже отбрасывается
+    ];
+
+    final result = sortStoryGroups(
+      groups: groups,
+      seenStoryIds: const {},
+      currentUserId: 2,
+    );
+
+    expect(result.map((g) => g.author.id).toList(), [1]);
+  });
 }

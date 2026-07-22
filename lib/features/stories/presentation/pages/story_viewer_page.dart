@@ -31,21 +31,46 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   late int _groupIndex;
   int _storyIndex = 0;
 
+  /// true, если группы вообще нет или у выбранной группы нет сторисов —
+  /// в этом случае показывать нечего и вьювер закрывается сразу после первого кадра.
+  bool _isEmpty = false;
+
   StoryGroupModel get _group => widget.groups[_groupIndex];
   StoryModel get _story => _group.stories[_storyIndex];
 
   @override
   void initState() {
     super.initState();
-    _groupIndex = widget.initialGroupIndex;
     _controller = AnimationController(vsync: this, duration: kStoryDuration)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) _next();
       });
+
+    if (widget.groups.isEmpty) {
+      _groupIndex = 0;
+      _isEmpty = true;
+    } else {
+      // Индекс из навигации может прийти за пределами списка — подстраховываемся.
+      var index = widget.initialGroupIndex;
+      if (index < 0) index = 0;
+      if (index > widget.groups.length - 1) index = widget.groups.length - 1;
+      _groupIndex = index;
+      _isEmpty = _group.stories.isEmpty;
+    }
+
+    if (_isEmpty) {
+      // Нельзя вызвать pop прямо в initState — планируем закрытие на следующий кадр.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.router.pop();
+      });
+      return;
+    }
+
     _start();
   }
 
   void _start() {
+    if (_isEmpty) return;
     context.read<StoriesCubit>().markSeen(_story.id);
     _controller
       ..reset()
@@ -123,6 +148,11 @@ class _StoryViewerPageState extends State<StoryViewerPage>
 
   @override
   Widget build(BuildContext context) {
+    if (_isEmpty) {
+      // Закрытие уже запланировано в initState — просто не даём build упасть.
+      return const Scaffold(backgroundColor: Colors.black);
+    }
+
     final isOwn = widget.currentUserId != null &&
         _group.author.id == widget.currentUserId;
 

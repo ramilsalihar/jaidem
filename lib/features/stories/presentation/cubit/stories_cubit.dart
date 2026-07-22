@@ -70,6 +70,10 @@ class StoriesCubit extends Cubit<StoriesState> {
   /// текущий порядок групп переиспользуется, чтобы избежать раздражающих скачков аватаров
   /// во время просмотра сторисов. Порядок обновится на следующем fetchFeed().
   Future<void> markSeen(int storyId) async {
+    // Уже отмечен — не пишем в SharedPreferences и не эмитим состояние заново
+    // (например, при пролистывании назад к уже просмотренному сторису).
+    if (seenStore.read().contains(storyId)) return;
+
     await seenStore.markSeen(storyId);
     final current = state;
     if (current is StoriesLoaded) {
