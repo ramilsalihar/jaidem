@@ -15,6 +15,7 @@ import 'package:jaidem/features/jaidems/presentation/pages/jaidems_page.dart';
 import 'package:jaidem/core/data/injection.dart';
 import 'package:jaidem/features/profile/presentation/pages/profile_page.dart';
 import 'package:jaidem/features/projects/presentation/pages/projects_page.dart';
+import 'package:jaidem/features/stories/presentation/cubit/stories_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
@@ -55,7 +56,19 @@ class _BottomBarPageState extends State<BottomBarPage>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       sl<ActivityService>().updateLastTimeInApp();
+      _refetchStories();
     }
+  }
+
+  /// Сторисы живут на сервере 24ч, а лента грузится один раз при старте
+  /// (`StoriesStrip.initState`). Если приложение долго висит в фоне, лента
+  /// протухает — обновляем её на каждый возврат в приложение. Обёрнуто в
+  /// try/catch: кубит сторисов не должен ронять весь возврат из фона, если
+  /// по какой-то причине недоступен через контекст.
+  void _refetchStories() {
+    try {
+      context.read<StoriesCubit>().fetchFeed();
+    } catch (_) {}
   }
 
   Future<void> _rescheduleGoalReminders() async {

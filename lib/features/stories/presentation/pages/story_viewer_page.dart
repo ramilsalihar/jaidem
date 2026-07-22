@@ -28,6 +28,7 @@ class StoryViewerPage extends StatefulWidget {
 class _StoryViewerPageState extends State<StoryViewerPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationStatusListener _statusListener;
   late int _groupIndex;
   int _storyIndex = 0;
 
@@ -35,16 +36,25 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   /// в этом случае показывать нечего и вьювер закрывается сразу после первого кадра.
   bool _isEmpty = false;
 
+  /// true с момента первого вызова [_close] и до конца жизни виджета.
+  ///
+  /// auto_route анимирует закрытие страницы (реверс-транзишен ~300мс), и всё
+  /// это время виджет остаётся mounted. Без этого флага статус-листенер
+  /// контроллера, сработавший в эти 300мс, мог бы отметить следующую сторис
+  /// как просмотренную (хотя она не показывалась) и вызвать повторный pop.
+  bool _isClosing = false;
+
   StoryGroupModel get _group => widget.groups[_groupIndex];
   StoryModel get _story => _group.stories[_storyIndex];
 
   @override
   void initState() {
     super.initState();
+    _statusListener = (status) {
+      if (status == AnimationStatus.completed) _next();
+    };
     _controller = AnimationController(vsync: this, duration: kStoryDuration)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) _next();
-      });
+      ..addStatusListener(_statusListener);
 
     if (widget.groups.isEmpty) {
       _groupIndex = 0;
@@ -61,7 +71,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     if (_isEmpty) {
       // Нельзя вызвать pop прямо в initState — планируем закрытие на следующий кадр.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) context.router.pop();
+        if (mounted) _close();
       });
       return;
     }
@@ -70,7 +80,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   }
 
   void _start() {
-    if (_isEmpty) return;
+    if (_isEmpty || _isClosing) return;
     context.read<StoriesCubit>().markSeen(_story.id);
     _controller
       ..reset()
@@ -78,6 +88,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   }
 
   void _next() {
+    if (_isClosing) return;
     if (_storyIndex < _group.stories.length - 1) {
       setState(() => _storyIndex++);
       _start();
@@ -88,11 +99,12 @@ class _StoryViewerPageState extends State<StoryViewerPage>
       });
       _start();
     } else {
-      context.router.pop();
+      _close();
     }
   }
 
   void _previous() {
+    if (_isClosing) return;
     if (_storyIndex > 0) {
       setState(() => _storyIndex--);
       _start();
@@ -103,6 +115,18 @@ class _StoryViewerPageState extends State<StoryViewerPage>
       });
       _start();
     }
+  }
+
+  /// Единственная точка закрытия вьювера — X, свайп вниз, конец последней
+  /// сторис последней группы и постдеятельность после удаления обязаны идти
+  /// через неё. Гарантирует, что контроллер останавливается и `pop()`
+  /// вызывается ровно один раз, независимо от того, какой путь закрытия
+  /// сработал первым.
+  void _close() {
+    if (_isClosing) return;
+    _isClosing = true;
+    _controller.stop();
+    context.router.pop();
   }
 
   Future<void> _confirmDelete() async {
@@ -126,7 +150,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     );
 
     if (confirmed != true) {
-      _controller.forward();
+      if (!_isClosing) _controller.forward();
       return;
     }
 
@@ -137,11 +161,12 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         content: Text(context.tr(ok ? 'stories_deleted' : 'error')),
       ),
     );
-    if (mounted) context.router.pop();
+    if (mounted) _close();
   }
 
   @override
   void dispose() {
+    _controller.removeStatusListener(_statusListener);
     _controller.dispose();
     super.dispose();
   }
@@ -170,7 +195,7 @@ class _StoryViewerPageState extends State<StoryViewerPage>
         onLongPressStart: (_) => _controller.stop(),
         onLongPressEnd: (_) => _controller.forward(),
         onVerticalDragEnd: (details) {
-          if ((details.primaryVelocity ?? 0) > 200) context.router.pop();
+          if ((details.primaryVelocity ?? 0) > 200) _close();
         },
         child: Stack(
           children: [
@@ -239,6 +264,8 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   }
 
   Widget _buildHeader(bool isOwn) {
+    final relativeTime = _formatRelativeTime(_story.createdAt, context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Row(
@@ -257,14 +284,30 @@ class _StoryViewerPageState extends State<StoryViewerPage>
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              _group.author.fullname ?? '',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _group.author.fullname ?? '',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (relativeTime.isNotEmpty) ...[
+                  const SizedBox(width: 6),
+                  Text(
+                    relativeTime,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           if (isOwn)
@@ -273,11 +316,41 @@ class _StoryViewerPageState extends State<StoryViewerPage>
               icon: const Icon(Icons.delete_outline, color: Colors.white),
             ),
           IconButton(
-            onPressed: () => context.router.pop(),
+            onPressed: _close,
             icon: const Icon(Icons.close_rounded, color: Colors.white),
           ),
         ],
       ),
     );
+  }
+
+  /// Относительное время («2 ч назад») для шапки вьювера — тот же формат,
+  /// что и в `ForumCard._formatDate`: локализованные суффиксы для минут/часов/
+  /// дней и «дд месяц» для более старых дат. Здесь дата уже распарсена
+  /// (см. `StoryModel.createdAt`), поэтому парсинг не дублируется.
+  /// На фолбэк-эпохе (1970 год, см. `StoryModel.fromJson`) не падает — просто
+  /// уходит в ветку «дд месяц».
+  String _formatRelativeTime(DateTime date, BuildContext context) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 1) return context.tr('just_now');
+    if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}${context.tr('minutes_short')}';
+    }
+    if (diff.inHours < 24) return '${diff.inHours}${context.tr('hours_short')}';
+    if (diff.inDays < 7) return '${diff.inDays}${context.tr('days_short')}';
+
+    final day = date.day.toString().padLeft(2, '0');
+    final month = _monthName(date.month);
+    return '$day $month';
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'янв', 'фев', 'мар', 'апр', 'май', 'июн',
+      'июл', 'авг', 'сен', 'окт', 'ноя', 'дек',
+    ];
+    return months[month - 1];
   }
 }

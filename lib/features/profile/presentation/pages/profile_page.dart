@@ -1707,7 +1707,7 @@ class _CreateEditPostSheetState extends State<CreateEditPostSheet> {
       });
 
       final response = await DioNetwork.appAPI.post(
-        'https://jaidem-back.ru/jaidem/api/category/image/',
+        ApiConst.imageUpload,
         data: formData,
       );
 
