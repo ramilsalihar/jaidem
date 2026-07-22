@@ -717,6 +717,81 @@ class SplashRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [StoryViewerPage]
+class StoryViewerRoute extends PageRouteInfo<StoryViewerRouteArgs> {
+  StoryViewerRoute({
+    Key? key,
+    required List<StoryGroupModel> groups,
+    required int initialGroupIndex,
+    required int? currentUserId,
+    List<PageRouteInfo>? children,
+  }) : super(
+          StoryViewerRoute.name,
+          args: StoryViewerRouteArgs(
+            key: key,
+            groups: groups,
+            initialGroupIndex: initialGroupIndex,
+            currentUserId: currentUserId,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'StoryViewerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<StoryViewerRouteArgs>();
+      return StoryViewerPage(
+        key: args.key,
+        groups: args.groups,
+        initialGroupIndex: args.initialGroupIndex,
+        currentUserId: args.currentUserId,
+      );
+    },
+  );
+}
+
+class StoryViewerRouteArgs {
+  const StoryViewerRouteArgs({
+    this.key,
+    required this.groups,
+    required this.initialGroupIndex,
+    required this.currentUserId,
+  });
+
+  final Key? key;
+
+  final List<StoryGroupModel> groups;
+
+  final int initialGroupIndex;
+
+  final int? currentUserId;
+
+  @override
+  String toString() {
+    return 'StoryViewerRouteArgs{key: $key, groups: $groups, initialGroupIndex: $initialGroupIndex, currentUserId: $currentUserId}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! StoryViewerRouteArgs) return false;
+    return key == other.key &&
+        const ListEquality().equals(groups, other.groups) &&
+        initialGroupIndex == other.initialGroupIndex &&
+        currentUserId == other.currentUserId;
+  }
+
+  @override
+  int get hashCode =>
+      key.hashCode ^
+      const ListEquality().hash(groups) ^
+      initialGroupIndex.hashCode ^
+      currentUserId.hashCode;
+}
+
+/// generated route for
 /// [TrainingDetailPage]
 class TrainingDetailRoute extends PageRouteInfo<TrainingDetailRouteArgs> {
   TrainingDetailRoute({

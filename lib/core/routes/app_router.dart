@@ -27,6 +27,7 @@ import 'package:jaidem/features/training/presentation/pages/trainings_page.dart'
 import 'package:jaidem/features/training/presentation/pages/training_detail_page.dart';
 import 'package:jaidem/features/forum/presentation/pages/forum_detail_page.dart';
 import 'package:jaidem/features/opros/presentation/pages/opros_survey_page.dart';
+import 'package:jaidem/features/stories/presentation/pages/story_viewer_page.dart';
 
 part 'package:jaidem/core/routes/app_router.gr.dart';
 
@@ -116,6 +117,13 @@ class AppRouter extends RootStackRouter {
         CustomRoute(
           page: JaidemDetailRoute.page,
           path: '/jaidem-detail',
+          transitionsBuilder: TransitionsBuilders.fadeIn,
+          duration: const Duration(milliseconds: 300),
+        ),
+
+        CustomRoute(
+          page: StoryViewerRoute.page,
+          path: '/stories',
           transitionsBuilder: TransitionsBuilders.fadeIn,
           duration: const Duration(milliseconds: 300),
         ),
