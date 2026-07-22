@@ -14,6 +14,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:jaidem/core/routes/app_router.dart';
 import 'package:jaidem/features/menu/presentation/pages/app_drawer.dart';
 import 'package:jaidem/features/notifications/presentation/pages/notification_mixin.dart';
+import 'package:jaidem/features/stories/presentation/cubit/stories_cubit.dart';
+import 'package:jaidem/features/stories/presentation/widgets/stories_strip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class JaidemsPage extends StatefulWidget {
@@ -111,6 +113,16 @@ class _JaidemsPageState extends State<JaidemsPage>
         );
   }
 
+  /// Повторяет загрузку и списка участников, и ленты сторисов. Используется
+  /// в явных пользовательских действиях "обновить" (pull-to-refresh и кнопка
+  /// "Повторить" в состоянии ошибки), а не при каждом фильтре/поиске — так
+  /// разовый сбой сети в StoriesCubit не остаётся замороженным навсегда, но
+  /// лента не дёргается на каждое нажатие клавиши в поиске.
+  void _retryAll() {
+    _fetchJaidems();
+    context.read<StoriesCubit>().fetchFeed();
+  }
+
   bool _hasActiveFilters() {
     return hasActiveFilters();
   }
@@ -150,6 +162,7 @@ class _JaidemsPageState extends State<JaidemsPage>
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               _buildSliverAppBar(innerBoxIsScrolled),
+              const SliverToBoxAdapter(child: StoriesStrip()),
             ];
           },
           body: BlocBuilder<JaidemsCubit, JaidemsState>(
@@ -459,7 +472,7 @@ class _JaidemsPageState extends State<JaidemsPage>
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: _fetchJaidems,
+              onPressed: _retryAll,
               icon: const Icon(Icons.refresh_rounded, size: 20),
               label: Text(context.tr('reload')),
               style: ElevatedButton.styleFrom(
@@ -532,7 +545,7 @@ class _JaidemsPageState extends State<JaidemsPage>
 
     return RefreshIndicator(
       onRefresh: () async {
-        _fetchJaidems();
+        _retryAll();
       },
       color: AppColors.primary,
       child: ListView.builder(
