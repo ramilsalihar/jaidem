@@ -40,4 +40,37 @@ void main() {
 
     expect(store.read(), {11, 12});
   });
+
+  test('данные persisted в SharedPreferences и читаются новым экземпляром store', () async {
+    final store1 = SeenStoriesStore(prefs);
+    await store1.markSeen(10);
+    await store1.markSeen(11);
+
+    // Создаём новый экземпляр store над той же SharedPreferences инстанцией
+    final store2 = SeenStoriesStore(prefs);
+    expect(store2.read(), {10, 11});
+  });
+
+  test('pruneTo persisted и читаются новым экземпляром store', () async {
+    final store1 = SeenStoriesStore(prefs);
+    await store1.markSeen(10);
+    await store1.markSeen(11);
+    await store1.markSeen(12);
+    await store1.pruneTo({11, 12});
+
+    // Создаём новый экземпляр store над той же SharedPreferences инстанцией
+    final store2 = SeenStoriesStore(prefs);
+    expect(store2.read(), {11, 12});
+  });
+
+  test('некорректные данные в хранилище игнорируются', () async {
+    // Напрямую устанавливаем в SharedPreferences некорректные данные
+    SharedPreferences.setMockInitialValues({
+      'seen_story_ids': ['10', 'not-a-number', '12', 'invalid', '14']
+    });
+    prefs = await SharedPreferences.getInstance();
+
+    final store = SeenStoriesStore(prefs);
+    expect(store.read(), {10, 12, 14});
+  });
 }
