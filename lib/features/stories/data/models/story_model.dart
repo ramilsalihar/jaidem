@@ -11,10 +11,13 @@ class StoryModel {
 
   factory StoryModel.fromJson(Map<String, dynamic> json) {
     return StoryModel(
+      // id is load-bearing; a story without one is unusable, so throw on missing/wrong type.
       id: json['id'] as int,
       photo: (json['photo'] as String?) ?? '',
-      createdAt:
-          DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          // Feed is sorted newest-first; defaulting to "now" would float a broken story to top
+          // and disguise a backend contract violation. Epoch sorts it to the bottom where it's visible as wrong.
+          DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 }
