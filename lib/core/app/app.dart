@@ -20,6 +20,7 @@ import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.da
 import 'package:jaidem/features/menu/presentation/cubit/menu_cubit/menu_cubit.dart';
 import 'package:jaidem/features/notifications/presentation/cubit/notifications_cubit.dart';
 import 'package:jaidem/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:jaidem/features/stories/presentation/cubit/stories_cubit.dart';
 
 final appRouter = sl<AppRouter>();
 
@@ -83,6 +84,9 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         ),
         BlocProvider<JaidemsCubit>(
           create: (context) => sl<JaidemsCubit>(),
+        ),
+        BlocProvider<StoriesCubit>(
+          create: (context) => sl<StoriesCubit>(),
         ),
         BlocProvider<ChatCubit>(
           create: (context) => sl<ChatCubit>(),

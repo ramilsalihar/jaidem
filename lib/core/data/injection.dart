@@ -16,6 +16,7 @@ import 'package:jaidem/features/jaidems/jaidem_injection.dart';
 import 'package:jaidem/features/menu/menu_injection.dart';
 import 'package:jaidem/features/notifications/notification_injection.dart';
 import 'package:jaidem/features/profile/profile_injection.dart';
+import 'package:jaidem/features/stories/stories_injection.dart';
 import 'package:jaidem/features/birthday/birthday_injection.dart';
 import 'package:jaidem/features/opros/opros_injection.dart';
 import 'package:jaidem/features/training/training_injection.dart';
@@ -49,6 +50,8 @@ Future<void> initInjections() async {
   eventInjection();
 
   jaidemInjection();
+
+  storiesInjection();
 
   initTrainingDependencies(sl);
 
