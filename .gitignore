@@ -1,3 +1,7 @@
+# Service account keys
+serviceAccountKey.json
+functions/serviceAccountKey.json
+
 # Miscellaneous
 *.class
 *.log
@@ -45,3 +49,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android signing credentials (also covered by android/.gitignore)
+key.properties
