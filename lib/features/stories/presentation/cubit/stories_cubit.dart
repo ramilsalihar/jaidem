@@ -66,6 +66,9 @@ class StoriesCubit extends Cubit<StoriesState> {
     return ok;
   }
 
+  /// Отмечает как просмотренный и обновляет seenStoryIds, но НЕ пересортировывает ленту:
+  /// текущий порядок групп переиспользуется, чтобы избежать раздражающих скачков аватаров
+  /// во время просмотра сторисов. Порядок обновится на следующем fetchFeed().
   Future<void> markSeen(int storyId) async {
     await seenStore.markSeen(storyId);
     final current = state;
