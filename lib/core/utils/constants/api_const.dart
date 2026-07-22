@@ -10,6 +10,12 @@ abstract class ApiConst {
   // Records the current user's last activity (app launch / resume)
   static const String updateLastTimeInApp = '/user/ping/';
 
+  // Stories
+  static const String stories = '/core/story/';
+
+  // Загрузка изображений (multipart). Используется сторисами и аватаром профиля.
+  static const String imageUpload = '/category/image/';
+
   // Forum
   static const String forum = '/core/forum_post/';
 

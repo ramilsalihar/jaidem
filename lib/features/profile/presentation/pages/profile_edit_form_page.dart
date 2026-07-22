@@ -368,7 +368,7 @@ class _ProfileEditFormPageState extends State<ProfileEditFormPage> with TimePick
       });
 
       final response = await dio.post(
-        'https://jaidem-back.ru/jaidem/api/category/image/',
+        ApiConst.imageUpload,
         data: formData,
       );
 

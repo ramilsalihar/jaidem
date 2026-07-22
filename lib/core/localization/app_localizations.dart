@@ -514,6 +514,15 @@ class AppLocalizations {
     'label_email': 'Email:',
     'specialty_profession': 'Адис/кесип: ',
     'university_label': 'Университет: ',
+
+    // Stories
+    'stories_your_story': 'Сенин сторисиң',
+    'stories_add': 'Сторис кошуу',
+    'stories_delete': 'Өчүрүү',
+    'stories_delete_confirm': 'Бул стористи өчүрөсүзбү?',
+    'stories_deleted': 'Сторис өчүрүлдү',
+    'stories_upload_failed': 'Сүрөт жүктөлгөн жок',
+    'stories_create_failed': 'Сторис түзүлгөн жок',
   };
 
   // Russian strings
@@ -1006,6 +1015,15 @@ class AppLocalizations {
     'label_email': 'Email:',
     'specialty_profession': 'Специальность: ',
     'university_label': 'Университет: ',
+
+    // Stories
+    'stories_your_story': 'Твоя история',
+    'stories_add': 'Добавить историю',
+    'stories_delete': 'Удалить',
+    'stories_delete_confirm': 'Удалить эту историю?',
+    'stories_deleted': 'История удалена',
+    'stories_upload_failed': 'Не удалось загрузить фото',
+    'stories_create_failed': 'Не удалось создать историю',
   };
 
   // English strings
@@ -1498,6 +1516,15 @@ class AppLocalizations {
     'label_email': 'Email:',
     'specialty_profession': 'Speciality: ',
     'university_label': 'University: ',
+
+    // Stories
+    'stories_your_story': 'Your story',
+    'stories_add': 'Add story',
+    'stories_delete': 'Delete',
+    'stories_delete_confirm': 'Delete this story?',
+    'stories_deleted': 'Story deleted',
+    'stories_upload_failed': 'Failed to upload photo',
+    'stories_create_failed': 'Failed to create story',
   };
 }
 
