@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jaidem/core/data/services/activity_service.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
 import 'package:jaidem/features/events/presentation/cubit/events_cubit.dart';
@@ -26,13 +27,15 @@ class BottomBarPage extends StatefulWidget {
   State<BottomBarPage> createState() => _BottomBarPageState();
 }
 
-class _BottomBarPageState extends State<BottomBarPage> {
+class _BottomBarPageState extends State<BottomBarPage>
+    with WidgetsBindingObserver {
   late int _selectedIndex;
   late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _selectedIndex = widget.initialIndex;
     final flowId = sl<SharedPreferences>().getInt('user_flow_id');
     context.read<EventsCubit>().fetchEvents(flowId: flowId);
@@ -41,8 +44,18 @@ class _BottomBarPageState extends State<BottomBarPage> {
     });
     _pageController = PageController(initialPage: _selectedIndex);
 
+    // Record activity on app launch, and again on every resume below.
+    sl<ActivityService>().updateLastTimeInApp();
+
     // Reschedule goal reminders on app startup (after login)
     _rescheduleGoalReminders();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      sl<ActivityService>().updateLastTimeInApp();
+    }
   }
 
   Future<void> _rescheduleGoalReminders() async {
@@ -58,6 +71,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
   }
@@ -131,7 +145,7 @@ class _BottomBarPageState extends State<BottomBarPage> {
                   index: 1,
                   icon: Icons.forum_outlined,
                   activeIcon: Icons.forum_rounded,
-                  label: 'Мүмкүнчүлүк',
+                  label: context.tr('nav_news'),
                 ),
               ),
               Expanded(

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:jaidem/core/data/services/activity_service.dart';
 import 'package:jaidem/core/network/dio_network.dart';
 import 'package:jaidem/core/network/network_info.dart';
 import 'package:jaidem/core/routes/app_router.dart';
@@ -81,6 +82,10 @@ Future<void> setupServices() async {
   );
 
   await dioInjection();
+
+  sl.registerLazySingleton<ActivityService>(
+    () => ActivityService(dio: sl<Dio>()),
+  );
 }
 
 Future<void> dioInjection() async {

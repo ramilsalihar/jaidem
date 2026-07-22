@@ -7,6 +7,9 @@ abstract class ApiConst {
   // Profile
   static const String profile = '/user/jaidemchiler/';
 
+  // Records the current user's last activity (app launch / resume)
+  static const String updateLastTimeInApp = '/user/ping/';
+
   // Forum
   static const String forum = '/core/forum_post/';
 

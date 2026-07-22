@@ -499,6 +499,19 @@ class _ForumCardState extends State<ForumCard>
           ),
         ),
         const SizedBox(width: 8),
+        // Comment
+        GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            showCommentBottomSheet(forumId: widget.forum.id);
+          },
+          child: Icon(
+            Icons.chat_bubble_outline_rounded,
+            color: Colors.grey.shade500,
+            size: 16,
+          ),
+        ),
+        const SizedBox(width: 10),
         // Share
         GestureDetector(
           onTap: _handleShare,

@@ -181,9 +181,9 @@ class AppLocalizations {
     'add_task': 'Тапшырма кошуу',
     'add_indicator': 'Индикатор кошуу',
     'no_goals': 'Максаттар жок',
-    'projects': 'Проекттер',
-    'no_projects': 'Проекттер жок',
-    'interested': 'кызыкчылык',
+    'projects': 'Коммитеттер',
+    'no_projects': 'Коммитеттер жок',
+    'interested': 'кызыккан',
     'i_am_interested': 'Мен кызыгам',
     'not_interested': 'Кызыкпайм',
     'start_adding_goal': 'Биринчи максатыңызды кошуп баштаңыз!',
@@ -226,10 +226,10 @@ class AppLocalizations {
     'select_time': 'Убакытты тандаңыз',
     'goal_name_required': 'Максаттын аты талап кылынат.',
     'name_min_length': 'Аталыш кеминде 3 символдон турушу керек',
-    'deadline_required': 'Максаттуу дата милдеттүү түрдө көрсөтүлөт',
+    'deadline_required': 'Максаттын мөөнөтү милдеттүү түрдө көрсөтүлүшү керек',
     'deadline_past_error': 'Максаттын аткарылуу күнү өткөн чакта болушу мүмкүн эмес.',
     'frequency_required': 'Жыштыгы милдеттүү',
-    'reminder_time_required': 'Эскертүү убактысы милдеттүү түрдө көрсөтүлүшү керек',
+    'reminder_time_required': 'Эскертме убактысы милдеттүү түрдө көрсөтүлүшү керек',
     'goal_updated_success': 'Максат ийгиликтүү жаңыртылды!',
     'goal_created_success': 'Максат ийгиликтүү түзүлдү!',
     'goal_and_indicators_created': 'Максат жана индикаторлор ийгиликтүү түзүлдү!',
@@ -302,13 +302,14 @@ class AppLocalizations {
     'signing_out': 'Чыгууда...',
     'sign_out': 'Аккаунттан чыгуу',
     'sign_out_confirm': 'Чыгууну каалайсызбы?',
-    'sign_out_description': 'Аккаунтуңуздан чыгуудан кийин кайра кирүү керек болот',
+    'sign_out_description': 'Аккаунтуңуздан чыккандан кийин кайра кирүү керек болот',
     'yes_sign_out': 'Ооба, чыгуу',
     'sign_out_failed': 'Чыгуу ишке ашпады',
 
     // Bottom Navigation
     'nav_home': 'Башкы',
     'nav_jaidem': 'Жайдем',
+    'nav_news': 'Жаңылыктар',
     'nav_events': 'Иш-чара',
     'nav_profile': 'Профиль',
 
@@ -415,7 +416,7 @@ class AppLocalizations {
 
     // Change Password
     'set_new_password': 'Жаңы сырсөз орнотуңуз',
-    'password_requirements': 'Сырсөз 8 белгиден кем болбошу керек жана тамгалар менен цифраларды камтышы керек.',
+    'password_requirements': 'Сырсөз 8 белгиден кем болбошу керек жана тамгалар менен сандарды камтышы керек.',
     'current_password': 'Учурдагы сырсөз',
     'enter_current_password': 'Учурдагы сырсөзүңүздү киргизиңиз',
     'new_password': 'Жаңы сырсөз',
@@ -485,7 +486,7 @@ class AppLocalizations {
     'school_name': 'Окуу жайдын аты',
     'work_place_name': 'Иш жайдын аты',
     'position': 'Кызматы',
-    'delete_confirm': 'Чын эле өчүрүүнү каалайсызбы?',
+    'delete_confirm': 'Чын эле өчүргүңүз келеби?',
     'description': 'Сүрөттөмө',
 
     // Jaidem popup
@@ -506,7 +507,7 @@ class AppLocalizations {
     'label_age': 'Жашы:',
     'label_course_year': 'Окуу жылы:',
     'label_specialty': 'Адистик:',
-    'label_region': 'Регион:',
+    'label_region': 'Аймак:',
     'label_village_city': 'Айыл/шаар:',
     'label_interests_skills': 'Кызыкчылыктары/көндүмдөрү:',
     'label_phone': 'Телефон:',
@@ -575,9 +576,9 @@ class AppLocalizations {
     'about': 'О приложении',
 
     // Jaidems
-    'jaidems': 'Джайдемчилер',
-    'search_jaidems': 'Поиск джайдемчилер...',
-    'jaidems_not_found': 'Джайдемчилер не найдены',
+    'jaidems': 'Джайдемовцы',
+    'search_jaidems': 'Поиск джайдемовцев...',
+    'jaidems_not_found': 'Джайдемовцы не найдены',
     'change_search_criteria': 'Попробуйте изменить критерии поиска',
     'advisors_not_found': 'Наставники не найдены',
     'advisors_not_found_description': 'На данный момент наставники отсутствуют',
@@ -672,8 +673,8 @@ class AppLocalizations {
     'add_task': 'Добавить задачу',
     'add_indicator': 'Добавить индикатор',
     'no_goals': 'Нет целей',
-    'projects': 'Проекты',
-    'no_projects': 'Нет проектов',
+    'projects': 'Комитеты',
+    'no_projects': 'Нет комитетов',
     'interested': 'интересуются',
     'i_am_interested': 'Мне интересно',
     'not_interested': 'Не интересно',
@@ -800,6 +801,7 @@ class AppLocalizations {
     // Bottom Navigation
     'nav_home': 'Главная',
     'nav_jaidem': 'Жайдем',
+    'nav_news': 'Новости',
     'nav_events': 'События',
     'nav_profile': 'Профиль',
 
@@ -1163,8 +1165,8 @@ class AppLocalizations {
     'add_task': 'Add task',
     'add_indicator': 'Add indicator',
     'no_goals': 'No goals',
-    'projects': 'Projects',
-    'no_projects': 'No projects',
+    'projects': 'Committees',
+    'no_projects': 'No committees',
     'interested': 'interested',
     'i_am_interested': 'I\'m interested',
     'not_interested': 'Not interested',
@@ -1291,6 +1293,7 @@ class AppLocalizations {
     // Bottom Navigation
     'nav_home': 'Home',
     'nav_jaidem': 'Jaidem',
+    'nav_news': 'News',
     'nav_events': 'Events',
     'nav_profile': 'Profile',
 
@@ -1480,20 +1483,20 @@ class AppLocalizations {
     'skills_label': 'Skills',
     'phone_label': 'Phone',
     'about_me_hint': 'Write about yourself...',
-    'specialty': 'Specialty',
+    'specialty': 'Speciality',
     'no_universities_found': 'No universities found',
     'year_suffix': ' year',
 
     // Person details
     'label_age': 'Age:',
     'label_course_year': 'Course year:',
-    'label_specialty': 'Specialty:',
+    'label_specialty': 'Speciality:',
     'label_region': 'Region:',
     'label_village_city': 'Village/City:',
     'label_interests_skills': 'Interests/skills:',
     'label_phone': 'Phone:',
     'label_email': 'Email:',
-    'specialty_profession': 'Specialty: ',
+    'specialty_profession': 'Speciality: ',
     'university_label': 'University: ',
   };
 }
