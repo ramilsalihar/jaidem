@@ -5,8 +5,9 @@ class SendMessageToUserUseCase {
 
   SendMessageToUserUseCase(this.repository);
 
-  Future<void> call(String userId, String messageText) async {
-    final result = await repository.sendMessageToUser(userId, messageText);
+  Future<void> call(String userId, String messageText, {String? photoUrl}) async {
+    final result =
+        await repository.sendMessageToUser(userId, messageText, photoUrl: photoUrl);
     result.fold(
       (error) => throw Exception(error),
       (_) => null,

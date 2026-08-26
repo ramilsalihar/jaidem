@@ -632,7 +632,8 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
   }
 
   @override
-  Future<void> sendMessageToUser(String userId, String messageText) async {
+  Future<void> sendMessageToUser(String userId, String messageText,
+      {String? photoUrl}) async {
     final currentUserId = _getCurrentUserId();
     if (currentUserId.isEmpty) return;
 
@@ -659,6 +660,7 @@ class MenuRemoteDatasourceImpl implements MenuRemoteDatasource {
       senderId: currentUserId,
       receiverId: userId,
       text: messageText,
+      photoUrl: photoUrl,
       createdAt: DateTime.now(),
       readBy: [currentUserId],
     );

@@ -523,6 +523,9 @@ class AppLocalizations {
     'stories_deleted': 'Сторис өчүрүлдү',
     'stories_upload_failed': 'Сүрөт жүктөлгөн жок',
     'stories_create_failed': 'Сторис түзүлгөн жок',
+    'stories_reply_hint': 'Билдирүү жазыңыз...',
+    'stories_reply_sent': 'Жөнөтүлдү',
+    'stories_reply_failed': 'Жөнөтүлгөн жок',
   };
 
   // Russian strings
@@ -1024,6 +1027,9 @@ class AppLocalizations {
     'stories_deleted': 'История удалена',
     'stories_upload_failed': 'Не удалось загрузить фото',
     'stories_create_failed': 'Не удалось создать историю',
+    'stories_reply_hint': 'Написать сообщение...',
+    'stories_reply_sent': 'Отправлено',
+    'stories_reply_failed': 'Не удалось отправить',
   };
 
   // English strings
@@ -1525,6 +1531,9 @@ class AppLocalizations {
     'stories_deleted': 'Story deleted',
     'stories_upload_failed': 'Failed to upload photo',
     'stories_create_failed': 'Failed to create story',
+    'stories_reply_hint': 'Send message...',
+    'stories_reply_sent': 'Sent',
+    'stories_reply_failed': 'Failed to send',
   };
 }
 

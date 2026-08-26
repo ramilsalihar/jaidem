@@ -96,14 +96,45 @@ class MessageCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    message.text,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: isMe ? Colors.white : Colors.grey.shade800,
-                      height: 1.4,
+                  if (message.photoUrl != null && message.photoUrl!.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        message.photoUrl!,
+                        width: 150,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) =>
+                            progress == null
+                                ? child
+                                : Container(
+                                    width: 150,
+                                    height: 200,
+                                    alignment: Alignment.center,
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    child: const SizedBox(
+                                      width: 22,
+                                      height: 22,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    ),
+                                  ),
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
                     ),
-                  ),
+                  if (message.text.isNotEmpty) ...[
+                    if (message.photoUrl != null &&
+                        message.photoUrl!.isNotEmpty)
+                      const SizedBox(height: 8),
+                    Text(
+                      message.text,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isMe ? Colors.white : Colors.grey.shade800,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 4),
                   Row(
                     mainAxisSize: MainAxisSize.min,

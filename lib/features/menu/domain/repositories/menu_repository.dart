@@ -38,7 +38,8 @@ abstract class MenuRepository {
   Future<Either<String, ChatModel?>> getChatWithUser(String userId);
   Future<Either<String, ChatModel?>> getChatWithMentor();
   Future<Either<String, ChatModel?>> getChatWithAdmin();
-  Future<Either<String, void>> sendMessageToUser(String userId, String messageText);
+  Future<Either<String, void>> sendMessageToUser(String userId, String messageText,
+      {String? photoUrl});
   Future<Either<String, void>> sendMessageToMentor(String messageText);
   Future<Either<String, void>> sendMessageToAdmin(String messageText);
 }

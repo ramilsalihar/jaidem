@@ -145,10 +145,11 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   /// 🔹 Send message to a specific user (creates chat if doesn't exist)
-  Future<void> sendMessageToUser(String userId, String messageText) async {
+  Future<void> sendMessageToUser(String userId, String messageText,
+      {String? photoUrl}) async {
     try {
       emit(state.copyWith(clearError: true));
-      await sendMessageToUserUseCase(userId, messageText);
+      await sendMessageToUserUseCase(userId, messageText, photoUrl: photoUrl);
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     }

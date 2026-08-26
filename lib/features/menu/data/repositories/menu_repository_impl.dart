@@ -139,9 +139,10 @@ class MenuRepositoryImpl implements MenuRepository {
   }
 
   @override
-  Future<Either<String, void>> sendMessageToUser(String userId, String messageText) async {
+  Future<Either<String, void>> sendMessageToUser(String userId, String messageText,
+      {String? photoUrl}) async {
     try {
-      await remoteDatasource.sendMessageToUser(userId, messageText);
+      await remoteDatasource.sendMessageToUser(userId, messageText, photoUrl: photoUrl);
       return const Right(null);
     } on FirebaseException catch (e) {
       return Left(e.message ?? 'Firebase error while sending message to user');

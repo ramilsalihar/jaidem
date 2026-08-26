@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jaidem/core/localization/app_localizations.dart';
 import 'package:jaidem/core/utils/style/app_colors.dart';
+import 'package:jaidem/features/menu/presentation/cubit/chat_cubit/chat_cubit.dart';
 import 'package:jaidem/features/stories/data/models/story_model.dart';
 import 'package:jaidem/features/stories/presentation/cubit/stories_cubit.dart';
 
@@ -47,6 +48,9 @@ class _StoryViewerPageState extends State<StoryViewerPage>
   StoryGroupModel get _group => widget.groups[_groupIndex];
   StoryModel get _story => _group.stories[_storyIndex];
 
+  final TextEditingController _replyController = TextEditingController();
+  final FocusNode _replyFocus = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +59,10 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     };
     _controller = AnimationController(vsync: this, duration: kStoryDuration)
       ..addStatusListener(_statusListener);
+
+    // Пока пользователь печатает ответ — держим сторис на паузе, как при
+    // долгом нажатии. Расфокус (отправка/закрытие клавиатуры) снимает паузу.
+    _replyFocus.addListener(_onReplyFocusChange);
 
     if (widget.groups.isEmpty) {
       _groupIndex = 0;
@@ -164,10 +172,50 @@ class _StoryViewerPageState extends State<StoryViewerPage>
     if (mounted) _close();
   }
 
+  void _onReplyFocusChange() {
+    if (_isEmpty || _isClosing) return;
+    if (_replyFocus.hasFocus) {
+      _controller.stop();
+    } else {
+      _controller.forward();
+    }
+  }
+
+  /// Ответ на сторис уходит автору в личный чат (chats/users/...) отдельным
+  /// сообщением с миниатюрой сториса (photoUrl) — как в инстаграме. Best-effort:
+  /// ошибка отправки не роняет вьювер, только тост.
+  Future<void> _sendReply() async {
+    final text = _replyController.text.trim();
+    if (text.isEmpty) return;
+
+    final authorId = _group.author.id;
+    final photo = _story.photo;
+    final cubit = context.read<ChatCubit>();
+
+    _replyController.clear();
+    _replyFocus.unfocus();
+
+    await cubit.sendMessageToUser(authorId.toString(), text, photoUrl: photo);
+    if (!mounted) return;
+
+    final failed = cubit.state.error != null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.tr(failed ? 'stories_reply_failed' : 'stories_reply_sent'),
+        ),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _controller.removeStatusListener(_statusListener);
     _controller.dispose();
+    _replyFocus.removeListener(_onReplyFocusChange);
+    _replyFocus.dispose();
+    _replyController.dispose();
     super.dispose();
   }
 
@@ -217,6 +265,13 @@ class _StoryViewerPageState extends State<StoryViewerPage>
                 ],
               ),
             ),
+            if (!isOwn)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: _buildReplyBar(),
+              ),
           ],
         ),
       ),
@@ -320,6 +375,71 @@ class _StoryViewerPageState extends State<StoryViewerPage>
             icon: const Icon(Icons.close_rounded, color: Colors.white),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildReplyBar() {
+    return GestureDetector(
+      // Поглощаем тапы/вертикальные жесты в зоне ответа, чтобы они не долетали
+      // до внешнего GestureDetector (переключение сторис и свайп-вниз-закрытие).
+      onTap: () {},
+      onVerticalDragUpdate: (_) {},
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 12,
+          right: 8,
+          top: 10,
+          bottom: 10 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.55),
+              Colors.transparent,
+            ],
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _replyController,
+                focusNode: _replyFocus,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _sendReply(),
+                minLines: 1,
+                maxLines: 4,
+                style: const TextStyle(color: Colors.white),
+                cursorColor: Colors.white,
+                decoration: InputDecoration(
+                  isDense: true,
+                  hintText: context.tr('stories_reply_hint'),
+                  hintStyle: const TextStyle(color: Colors.white70),
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.14),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: Colors.white38),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: const BorderSide(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: _sendReply,
+              icon: const Icon(Icons.send_rounded, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }

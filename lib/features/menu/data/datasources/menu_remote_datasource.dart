@@ -36,7 +36,7 @@ abstract class MenuRemoteDatasource {
   Future<ChatModel?> getChatWithUser(String userId);
   Future<ChatModel?> getChatWithMentor();
   Future<ChatModel?> getChatWithAdmin();
-  Future<void> sendMessageToUser(String userId, String messageText);
+  Future<void> sendMessageToUser(String userId, String messageText, {String? photoUrl});
   Future<void> sendMessageToMentor(String messageText);
   Future<void> sendMessageToAdmin(String messageText);
 
